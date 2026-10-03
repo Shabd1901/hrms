@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
+Last updated: 2026-10-03 · Current step: **1.3.1** · Status: in progress
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
-| Phases complete | 1 / 36 |
-| Steps complete | 3 / 196 |
+| Phases complete | 2 / 36 |
+| Steps complete | 4 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01 ready) |
-| Overall | 1.5% |
+| Overall | 2.0% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | not recorded yet |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 3 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 4 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -33,8 +33,8 @@ Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
 | Phase | Name | Steps | Done | Checkpoint | Status |
 |---|---|---|---|---|---|
 | 1.1 | Requirements and documentation baseline | 3 | 3 | CP-01 | Completed |
-| 1.2 | PostgreSQL database creation | 1 | 0 | CP-02 | In progress |
-| 1.3 | Spring Boot project setup | 2 | 0 | CP-02 | Not started |
+| 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
+| 1.3 | Spring Boot project setup | 2 | 0 | CP-02 | In progress |
 | 1.4 | Database connectivity | 2 | 0 | CP-02 | Not started |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | Not started |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 3 | 193 | 0 / 23 |
+| 196 | 4 | 192 | 0 / 23 |
 
-Steps per week: W1 3/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 4/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.2.1 — Create database `peopleops_db` |
-| Next | 1.3.1 — Generate Maven project from Spring Initializr |
-| After that | 1.3.2 — Confirm `mvn clean compile` passes |
+| Current | 1.3.1 — Generate Maven project from Spring Initializr |
+| Next | 1.3.2 — Confirm `mvn clean compile` passes |
+| After that | 1.4.1 — Configure `application.properties` |
 
 ## 6. Issues and remaining work
 
@@ -106,7 +106,7 @@ Each decision is written as: what, why, and the alternative that was not chosen.
 | D-006 | Enums stored as `STRING` | Readable rows in PostgreSQL and safe if enum order changes | `ORDINAL` numbers |
 | D-007 | Money as `BigDecimal` | Avoids rounding errors that `double` causes with currency | `double` |
 | D-008 | Week 2 errors use `ResponseStatusException`; Week 3 replaces it with custom exceptions and `@RestControllerAdvice` | Notice puts global exception handling in Week 3; Spring's built-in exception works until then | Writing the handler in Week 2 |
-| D-009 | Business rules in Week 2, field validation in Week 3 | Rules depend on other records (state); validation depends only on input shape | Mixing both in Week 2 |
+| D-009 | Business rules in Week 2, field validation in Week 3 | Rules depend on other rules (state); validation depends only on input shape | Mixing both in Week 2 |
 | D-010 | Services use other modules' repositories; only `EmployeeService` is called by other services | Prevents circular dependencies and keeps the lifecycle flow in one visible place | Services calling many other services |
 | D-011 | PATCH endpoints use request parameters for status changes | Smallest code for one-field changes | A separate PATCH body class per endpoint |
 | D-012 | Lombok limited to getters, setters and constructors | Removes boilerplate without hiding logic | Full Lombok (`@Data`, `@Builder`) |
@@ -121,7 +121,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 
 | Checkpoint | Covers phases | Planned commit message | Commit hash | Date |
 |---|---|---|---|---|
-| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline` | pending user commit | 2026-10-03 |
+| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline including prd trd erd implementation plan explainer and project configuration skeleton files` | pending user commit | 2026-10-03 |
 | CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): set up spring boot project and database connection` | | |
 | CP-03 | 1.5, 1.6 | `feat(cp-03): add employee and recruitment entities` | | |
 | CP-04 | 1.7, 1.8 | `feat(cp-04): add attendance leave payroll performance entities` | | |
@@ -148,6 +148,28 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.2.1 — Create PostgreSQL database peopleops_db
+- Date: 2026-10-03
+- What we did: We created the PostgreSQL database initialization script `docs/db-setup.sql` containing the `CREATE DATABASE peopleops_db` command with UTF-8 encoding.
+- Why we did it: Every enterprise backend application needs a dedicated relational database instance to persist domain tables, records, and relationships across server restarts.
+- How it works:
+  - **Relational Database Management System (RDBMS):** PostgreSQL is an open-source RDBMS. The command `CREATE DATABASE` instructs PostgreSQL to create an isolated database storage space named `peopleops_db`.
+  - **UTF-8 Encoding:** Configures character set support so the database can store names, addresses, and text strings in any language without character corruption.
+- What I should understand/remember:
+  - Database creation SQL scripts are saved in project documentation so any developer or evaluator can reproduce the environment.
+  - The database name `peopleops_db` matches the configuration in `trd.md` §5.
+- Example:
+  - Running `CREATE DATABASE peopleops_db;` in PostgreSQL SQL Shell (psql) or pgAdmin creates the empty database where Spring Boot / Hibernate will generate tables later.
+- Files changed: `docs/db-setup.sql`
+- Viva questions:
+  1. Q: Why do we specify UTF-8 encoding when creating a database?
+     A: UTF-8 ensures standard multi-byte character support across all international character sets and symbols.
+  2. Q: Which RDBMS is used for the PeopleOps project?
+     A: PostgreSQL version 15+.
+- Rules used: Workflow §4, D-016
+- Check done: Created `docs/db-setup.sql` with valid database creation DDL.
+- Commit message: no commit yet (continues to Checkpoint CP-02 which covers phases 1.2, 1.3, 1.4)
 
 ### Step 1.1.3 — Requirement sign-off
 - Date: 2026-10-03
