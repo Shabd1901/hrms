@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
+Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
-| Phases complete | 3 / 36 |
-| Steps complete | 6 / 196 |
-| Commits (checkpoints) made | 0 / 23 (CP-01 ready) |
-| Overall | 3.1% |
+| Phases complete | 4 / 36 |
+| Steps complete | 8 / 196 |
+| Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
+| Overall | 4.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 6 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 8 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -35,8 +35,8 @@ Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
 | 1.1 | Requirements and documentation baseline | 3 | 3 | CP-01 | Completed |
 | 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
-| 1.4 | Database connectivity | 2 | 0 | CP-02 | In progress |
-| 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | Not started |
+| 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
+| 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | In progress |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 6 | 190 | 0 / 23 |
+| 196 | 8 | 188 | 0 / 23 |
 
-Steps per week: W1 6/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 8/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.4.1 — Configure `application.properties` |
-| Next | 1.4.2 — Start the app and confirm database connection |
-| After that | 1.5.1 — Create package `enums` and `EmployeeStatus` |
+| Current | 1.5.1 — Create package `enums` and `EmployeeStatus` |
+| Next | 1.5.2 — Create `Department` entity |
+| After that | 1.5.3 — Create `Designation` entity |
 
 ## 6. Issues and remaining work
 
@@ -122,7 +122,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | Checkpoint | Covers phases | Planned commit message | Commit hash | Date |
 |---|---|---|---|---|
 | CP-01 | 1.1 | `docs(cp-01): add project documentation baseline including prd trd erd implementation plan explainer and project configuration skeleton files` | pending user commit | 2026-10-03 |
-| CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): set up spring boot project and database connection` | | |
+| CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): configure postgresql database connectivity and verify spring boot hikari connection pool initialization` | pending user commit | 2026-10-03 |
 | CP-03 | 1.5, 1.6 | `feat(cp-03): add employee and recruitment entities` | | |
 | CP-04 | 1.7, 1.8 | `feat(cp-04): add attendance leave payroll performance entities` | | |
 | CP-05 | 1.9, 1.10 | `feat(cp-05): add training asset document offboarding entities` | | |
@@ -148,6 +148,50 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.4.2 — Start the app and confirm database connection
+- Date: 2026-10-03
+- What we did: We started the Spring Boot application using `mvn spring-boot:run` and verified that HikariCP successfully connected to PostgreSQL `peopleops_db` on port 8080.
+- Why we did it: Verifying application startup with database connection pool initialization confirms that JPA, PostgreSQL drivers, and `application.properties` parameters work together seamlessly before creating entity models.
+- How it works:
+  - **HikariCP Connection Pool:** Spring Boot's default JDBC connection pool framework. It opens and maintains database connections to PostgreSQL so requests can re-use existing database links efficiently.
+  - **JPA EntityManagerFactory:** Hibernate initializes metadata for `peopleops_db` and starts embedded Tomcat server on port 8080.
+- What I should understand/remember:
+  - Database connectivity verification confirms three layers: RDBMS instance running, credentials/URL matching in `application.properties`, and JDBC driver loaded in `pom.xml`.
+- Example:
+  - Application console logged `Initialized JPA EntityManagerFactory for persistence unit 'default'` and `Tomcat started on port 8080`, confirming clean startup.
+- Files changed: None (verification step)
+- Viva questions:
+  1. Q: What is HikariCP in Spring Boot?
+     A: HikariCP is a high-performance JDBC connection pool framework that manages reusable database connections.
+  2. Q: What log entry confirms successful database initialization in Spring Boot?
+     A: `Initialized JPA EntityManagerFactory for persistence unit 'default'`.
+- Rules used: Workflow §4, D-005, D-016
+- Check done: Started application, verified clean HikariCP & Tomcat startup on port 8080, and completed CP-02.
+- Commit message: `"chore(cp-02): configure postgresql database connectivity and verify spring boot hikari connection pool initialization"`
+
+### Step 1.4.1 — Configure application.properties
+- Date: 2026-10-03
+- What we did: We created `src/main/resources/application.properties` and configured Spring Boot datasource parameters for PostgreSQL connection and Hibernate JPA properties.
+- Why we did it: Spring Boot needs database connection parameters (URL, driver, credentials) and JPA properties to connect to the PostgreSQL `peopleops_db` instance and manage relational data.
+- How it works:
+  - **`spring.datasource.url`:** Specifies the JDBC URL `jdbc:postgresql://localhost:5432/peopleops_db`.
+  - **`spring.jpa.hibernate.ddl-auto=update`:** Hibernate compares entity classes with database tables and creates or updates database tables automatically on application startup.
+  - **`spring.jpa.show-sql=true`:** Prints formatted SQL statements executed by Hibernate to the console log for easy debugging.
+- What I should understand/remember:
+  - `application.properties` centralizes key-value configuration parameters in Spring Boot.
+  - `ddl-auto=update` updates database table schemas automatically without dropping existing data.
+- Example:
+  - Setting `spring.datasource.username=postgres` tells Spring Data JPA which PostgreSQL user role to authenticate with when creating connection pools.
+- Files changed: `src/main/resources/application.properties`
+- Viva questions:
+  1. Q: What does `spring.jpa.hibernate.ddl-auto=update` do in Spring Boot?
+     A: It automatically updates PostgreSQL database tables to match Java `@Entity` mappings without deleting existing table data.
+  2. Q: What is the JDBC URL format for a local PostgreSQL database?
+     A: `jdbc:postgresql://localhost:5432/<database_name>`
+- Rules used: Workflow §4, D-005, D-016
+- Check done: Created valid `application.properties` with PostgreSQL driver and connection settings.
+- Commit message: no commit yet (continues to step 1.4.2 to complete phase 1.4 and CP-02)
 
 ### Step 1.3.2 — Confirm mvn clean compile passes
 - Date: 2026-10-03
