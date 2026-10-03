@@ -46,13 +46,17 @@ Any approved change to PRD/TRD/ERD/implementation.md must be logged in `explaine
 
 If a step seems to need something from this table, stop and ask in one line.
 
-## 4. The step loop (every change, no exceptions)
+## 4. The student-teacher step loop (interactive learning mode)
 
-1. **Plan:** a very short plan (max 5 lines): step ID, files to create/change, what each does.
-2. **Wait** for the user's approval ("go", "approved", "yes").
-3. **Implement** only what the plan said. Nothing extra.
-4. **Update `explainer.md`** (counters, current/next step, change log entry using teaching format, decisions if any).
-5. **Report the step done** and provide the 15–30 word commit message in `"mssg"` format. Immediately present the implementation plan for the next step.
+1. **Key Concepts & Annotations to Learn:** Introduce every new term, annotation, package, import, keyword, or technical concept in simple, beginner-friendly terms. (Previously learned concepts do not need unnecessary re-explanation unless asked).
+2. **What we are building:** Explain the exact goal and role of the target file in simple terms.
+3. **Manual Implementation Guide:**
+   - Specify the exact file path (e.g., `src/main/java/com/peopleops/entity/Department.java`).
+   - Provide the code in chat with inline teaching comments so the user can understand line-by-line while typing it manually into their project (actual project files must NOT contain comments).
+4. **Why each part exists:** Explain the design reasoning and architectural choices behind every annotation and method.
+5. **Commit Message:** Provide the 15–30 word commit message in `"mssg"` format.
+6. **Pause & Wait Gate:** Stop and wait for the user to type the code, review, test, or ask any questions. The AI does NOT automatically edit project code files or advance to the next step.
+7. **"next" Gate:** Only when the user says **"next"** (or "go"), the AI updates `explainer.md` (counters, status, change log entry in teaching format, viva Q&A) and presents the next learning step.
 
 The AI never runs `git commit`, `git push` or any destructive command. The user commits.
 

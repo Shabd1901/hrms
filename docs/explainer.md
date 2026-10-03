@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
+Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 4 / 36 |
-| Steps complete | 8 / 196 |
+| Steps complete | 9 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 4.1% |
+| Overall | 4.6% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 8 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 9 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -36,7 +36,7 @@ Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
 | 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
-| 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | In progress |
+| 1.5 | Core entities: Department, Designation, Employee | 5 | 1 | CP-03 | In progress |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-03 · Current step: **1.5.1** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 8 | 188 | 0 / 23 |
+| 196 | 9 | 187 | 0 / 23 |
 
-Steps per week: W1 8/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 9/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.5.1 — Create package `enums` and `EmployeeStatus` |
-| Next | 1.5.2 — Create `Department` entity |
-| After that | 1.5.3 — Create `Designation` entity |
+| Current | 1.5.2 — Create `Department` entity |
+| Next | 1.5.3 — Create `Designation` entity |
+| After that | 1.5.4 — Create `Employee` entity |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,28 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.5.1 — Create package enums and EmployeeStatus
+- Date: 2026-10-03
+- What we did: We created package `com.peopleops.enums` and defined the `EmployeeStatus` enumeration type.
+- Why we did it: Java `enum` types restrict property values to predefined constants (`ONBOARDING`, `ACTIVE`, `ON_NOTICE`, `EXITED`), eliminating invalid status strings and typos in employee records.
+- How it works:
+  - **Enumerations (`enum`):** A fixed set of named constants in Java.
+  - **Database Persistence:** JPA maps enums using `@Enumerated(EnumType.STRING)` to store clean, human-readable text values (`"ACTIVE"`, `"EXITED"`) in PostgreSQL table columns.
+- What I should understand/remember:
+  - Enums prevent illegal state values (e.g. typing `"actv"` instead of `"ACTIVE"`).
+  - Storing enums as string names (`EnumType.STRING`) avoids ordinal index bugs if enum values are added or reordered later.
+- Example:
+  - Setting `employee.setStatus(EmployeeStatus.ACTIVE)` ensures only valid lifecycle states are saved to the database.
+- Files changed: `src/main/java/com/peopleops/enums/EmployeeStatus.java`
+- Viva questions:
+  1. Q: Why should enums be stored as `EnumType.STRING` instead of `EnumType.ORDINAL` in JPA?
+     A: `STRING` stores constant names (e.g. `"ACTIVE"`), preventing data corruption if new constants are added or reordered in Java code.
+  2. Q: What are the four valid lifecycle states in `EmployeeStatus`?
+     A: `ONBOARDING`, `ACTIVE`, `ON_NOTICE`, `EXITED`.
+- Rules used: Workflow §4, D-006, D-016
+- Check done: Created `com.peopleops.enums.EmployeeStatus` enum.
+- Commit message: `"feat(step-1.5.1): add EmployeeStatus enum representing employee lifecycle states"`
 
 ### Step 1.4.2 — Start the app and confirm database connection
 - Date: 2026-10-03
