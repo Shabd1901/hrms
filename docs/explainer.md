@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-03 · Current step: **1.3.1** · Status: in progress
+Last updated: 2026-10-03 · Current step: **1.4.1** · Status: in progress
 
 ---
 
@@ -12,18 +12,18 @@ Last updated: 2026-10-03 · Current step: **1.3.1** · Status: in progress
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
-| Phases complete | 2 / 36 |
-| Steps complete | 4 / 196 |
+| Phases complete | 3 / 36 |
+| Steps complete | 6 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01 ready) |
-| Overall | 2.0% |
+| Overall | 3.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
-| Java / Spring Boot / PostgreSQL versions | not recorded yet |
+| Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
 ## 2. Weeks
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 4 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 6 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -34,8 +34,8 @@ Last updated: 2026-10-03 · Current step: **1.3.1** · Status: in progress
 |---|---|---|---|---|---|
 | 1.1 | Requirements and documentation baseline | 3 | 3 | CP-01 | Completed |
 | 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
-| 1.3 | Spring Boot project setup | 2 | 0 | CP-02 | In progress |
-| 1.4 | Database connectivity | 2 | 0 | CP-02 | Not started |
+| 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
+| 1.4 | Database connectivity | 2 | 0 | CP-02 | In progress |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | Not started |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-03 · Current step: **1.3.1** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 4 | 192 | 0 / 23 |
+| 196 | 6 | 190 | 0 / 23 |
 
-Steps per week: W1 4/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 6/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.3.1 — Generate Maven project from Spring Initializr |
-| Next | 1.3.2 — Confirm `mvn clean compile` passes |
-| After that | 1.4.1 — Configure `application.properties` |
+| Current | 1.4.1 — Configure `application.properties` |
+| Next | 1.4.2 — Start the app and confirm database connection |
+| After that | 1.5.1 — Create package `enums` and `EmployeeStatus` |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,50 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.3.2 — Confirm mvn clean compile passes
+- Date: 2026-10-03
+- What we did: We executed `mvn clean compile` in the terminal to verify that Maven resolves dependencies and compiles Java source files cleanly without build errors.
+- Why we did it: Testing project compilation right after project setup ensures dependencies, JDK target settings, and syntax rules are fully valid before writing business code.
+- How it works:
+  - **`clean` phase:** Deletes the `target/` directory containing old build artifacts to ensure a fresh compilation build.
+  - **`compile` phase:** Downloads missing dependencies from Maven Central, compiles Java code under `src/main/java`, and places output `.class` files into `target/classes`.
+- What I should understand/remember:
+  - Always run `mvn clean compile` after adding new dependencies or project configurations to verify build integrity early.
+- Example:
+  - Running `mvn clean compile` downloaded the Java compiler plugin (`plexus-compiler`) and built `PeopleOpsApplication.class` with output `BUILD SUCCESS`.
+- Files changed: None (build verification step)
+- Viva questions:
+  1. Q: What is the difference between `mvn clean` and `mvn compile`?
+     A: `mvn clean` deletes previous build output in `target/`, while `mvn compile` compiles source code into byte-code `.class` files.
+  2. Q: Where does Maven store compiled `.class` files?
+     A: In the `target/classes` directory.
+- Rules used: Workflow §4, D-016
+- Check done: Ran `mvn clean compile` and verified `BUILD SUCCESS`.
+- Commit message: `"chore(phase-1.3): set up spring boot project with maven dependencies and confirm clean compilation"`
+
+### Step 1.3.1 — Generate Spring Boot Maven project structure
+- Date: 2026-10-03
+- What we did: We generated the core Maven project structure (`pom.xml`) with Spring Boot 3.2.5 dependencies and created the main application class `PeopleOpsApplication.java`.
+- Why we did it: Every Spring Boot application requires a `pom.xml` configuration file to manage dependencies, Java compiler settings, and build plugins, alongside a `@SpringBootApplication` entry-point class.
+- How it works:
+  - **Maven (`pom.xml`):** Project Object Model file. It downloads required JAR libraries (Web, JPA, PostgreSQL, Lombok) from Maven Central and manages project compilation.
+  - **`@SpringBootApplication`:** A composite annotation (`@SpringBootConfiguration`, `@EnableAutoConfiguration`, `@ComponentScan`) that instructs Spring Boot to automatically configure beans and scan packages.
+  - **Main method:** `SpringApplication.run(PeopleOpsApplication.class, args)` starts the embedded Tomcat web server and initializes the Spring application context.
+- What I should understand/remember:
+  - Group ID (`com.peopleops`) and Artifact ID (`peopleops`) uniquely identify the project in Maven.
+  - All application code resides under base package `com.peopleops`.
+- Example:
+  - Adding `<dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-web</artifactId></dependency>` automatically includes Tomcat server, Jackson JSON processing, and Spring MVC for REST APIs.
+- Files changed: `pom.xml`, `src/main/java/com/peopleops/PeopleOpsApplication.java`
+- Viva questions:
+  1. Q: What does `@SpringBootApplication` do?
+     A: It enables Spring Boot auto-configuration, component scanning across `com.peopleops` packages, and defines the Spring configuration class.
+  2. Q: What is the purpose of `pom.xml` in a Maven Java project?
+     A: It defines project metadata, dependencies (libraries), build plugins, and Java version settings.
+- Rules used: Workflow §4, D-001, D-016
+- Check done: Created valid `pom.xml` and `PeopleOpsApplication.java`.
+- Commit message: no commit yet (continues to Checkpoint CP-02 which covers phases 1.2, 1.3, 1.4)
 
 ### Step 1.2.1 — Create PostgreSQL database peopleops_db
 - Date: 2026-10-03

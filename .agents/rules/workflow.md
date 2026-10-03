@@ -28,7 +28,7 @@ Any approved change to PRD/TRD/ERD/implementation.md must be logged in `explaine
 | 4 | Entity mappings (1-1, 1-N, N-1, N-N), mapping tests, JAR, final testing |
 
 - Weeks and phases run strictly in the order in `implementation.md`. Never skip, reorder or merge them.
-- Commits happen only at the 23 checkpoints (CP-01 … CP-23) listed in `implementation.md`. A checkpoint is one commit and covers one or more phases.
+- Commits happen for every completed phase, subphase, or change.
 - Never build a later-week feature early, even if it is convenient.
 
 ### Not allowed before its phase
@@ -51,8 +51,8 @@ If a step seems to need something from this table, stop and ask in one line.
 1. **Plan:** a very short plan (max 5 lines): step ID, files to create/change, what each does.
 2. **Wait** for the user's approval ("go", "approved", "yes").
 3. **Implement** only what the plan said. Nothing extra.
-4. **Update `explainer.md`** (counters, current/next step, change log entry, decisions if any).
-5. **Report the step done.** If this step completes a checkpoint, give the commit message from `implementation.md` (adjusted to what was built). Otherwise say "no commit yet". Then **stop**. Never start the next step by yourself.
+4. **Update `explainer.md`** (counters, current/next step, change log entry using teaching format, decisions if any).
+5. **Report the step done** and provide the 15–30 word commit message in `"mssg"` format. Immediately present the implementation plan for the next step.
 
 The AI never runs `git commit`, `git push` or any destructive command. The user commits.
 
@@ -60,7 +60,7 @@ The AI never runs `git commit`, `git push` or any destructive command. The user 
 
 - One step = one small unit: one entity, or one layer of one entity (repository + DTOs, GET + POST, PUT + DELETE, one PATCH group), or one configuration step.
 - Prefer touching 1–3 files per step. If a step needs more, split it and ask.
-- Never create a whole module or a whole week in one go. A checkpoint can contain many steps, but work still happens one step at a time.
+- Never create a whole module or a whole week in one go. Work happens one step at a time.
 
 ## 6. Scope control
 
@@ -100,17 +100,16 @@ The user must be able to open any file and explain what it does, why it exists, 
 
 ## 9. Documentation rules
 
-- `explainer.md` is updated after **every** step: counters, current/next step, a change log entry (what / why / how / files / connects to), decisions, issues, and the commit message.
-- When a checkpoint is reached, fill its commit row. At week end, mark the week status.
+- `explainer.md` is updated after **every** step: counters, current/next step, a change log entry in teaching-oriented format (what we did, why, how it works, what to remember, example, files, viva questions), decisions, issues, and the commit message.
+- When a phase/subphase is completed, provide the commit message. At week end, mark the week status.
 - Docs describe what exists. Never write docs for code that has not been built.
 
 ## 10. Git rules
 
-- Commit only when a checkpoint is reached (CP-01 … CP-23 in `implementation.md`). Never commit after every step.
-- Commit format: `type(cp-id): short message`, for example `feat(cp-03): add employee and recruitment entities`.
+- Commit after completed phases, subphases, or notable steps.
+- Commit message format: 15–30 words in standard type prefix `type(scope): description`.
+- Provide the message in chat as `"message"` for direct copy-paste.
 - Types: `feat`, `docs`, `chore`, `fix`, `refactor`, `test`.
-- Message: lowercase, under 70 characters, no full stop.
-- Between checkpoints the work stays uncommitted; the step log in `explainer.md` is the record.
 
 ## 11. Communication
 
