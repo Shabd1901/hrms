@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-02 · Current step: **1.1.1** · Status: not started
+Last updated: 2026-10-03 · Current step: **1.2.1** · Status: in progress
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-02 · Current step: **1.1.1** · Status: not started
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
-| Phases complete | 0 / 36 |
-| Steps complete | 0 / 196 |
-| Commits (checkpoints) made | 0 / 23 |
-| Overall | 0% |
+| Phases complete | 1 / 36 |
+| Steps complete | 3 / 196 |
+| Commits (checkpoints) made | 0 / 23 (CP-01 ready) |
+| Overall | 1.5% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | not recorded yet |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-02 · Current step: **1.1.1** · Status: not started
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 0 | 0 / 5 | Not started |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 3 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -32,8 +32,8 @@ Last updated: 2026-10-02 · Current step: **1.1.1** · Status: not started
 
 | Phase | Name | Steps | Done | Checkpoint | Status |
 |---|---|---|---|---|---|
-| 1.1 | Requirements and documentation baseline | 3 | 0 | CP-01 | Not started |
-| 1.2 | PostgreSQL database creation | 1 | 0 | CP-02 | Not started |
+| 1.1 | Requirements and documentation baseline | 3 | 3 | CP-01 | Completed |
+| 1.2 | PostgreSQL database creation | 1 | 0 | CP-02 | In progress |
 | 1.3 | Spring Boot project setup | 2 | 0 | CP-02 | Not started |
 | 1.4 | Database connectivity | 2 | 0 | CP-02 | Not started |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 0 | CP-03 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-02 · Current step: **1.1.1** · Status: not started
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 0 | 196 | 0 / 23 |
+| 196 | 3 | 193 | 0 / 23 |
 
-Steps per week: W1 0/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 3/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.1.1 — Create the repo folder and place `docs/` files |
-| Next | 1.1.2 — Add `.gitignore` and `README.md` skeleton |
-| After that | 1.1.3 — Requirement sign-off |
+| Current | 1.2.1 — Create database `peopleops_db` |
+| Next | 1.3.1 — Generate Maven project from Spring Initializr |
+| After that | 1.3.2 — Confirm `mvn clean compile` passes |
 
 ## 6. Issues and remaining work
 
@@ -121,7 +121,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 
 | Checkpoint | Covers phases | Planned commit message | Commit hash | Date |
 |---|---|---|---|---|
-| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline` | | |
+| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline` | pending user commit | 2026-10-03 |
 | CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): set up spring boot project and database connection` | | |
 | CP-03 | 1.5, 1.6 | `feat(cp-03): add employee and recruitment entities` | | |
 | CP-04 | 1.7, 1.8 | `feat(cp-04): add attendance leave payroll performance entities` | | |
@@ -145,25 +145,100 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-22 | 4.8 | `test(cp-22): verify all mappings` | | |
 | CP-23 | 4.9 | `chore(cp-23): build jar and complete project` | | |
 
-## 9. Change log
+## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.1.3 — Requirement sign-off
+- Date: 2026-10-03
+- What we did: We formally reviewed and signed off on the project requirements baseline (`prd.md`, `trd.md`, `erd.md`, and `implementation.md`), marking Phase 1.1 complete.
+- Why we did it: Requirement sign-off establishes a fixed baseline. It ensures that business goals, database designs, and technical rules are frozen before implementation begins so we don't change architecture mid-way without recording decision changes.
+- How it works:
+  - **Requirement Baseline:** In software development, sign-off is the gate where specifications transition from draft to active reference. Any future change to PRD/TRD/ERD must be logged as an explicit decision in `explainer.md` (§1 rule).
+  - **Checkpoint CP-01:** This step completes Phase 1.1 and satisfies Checkpoint CP-01. The repository baseline is now ready for its first Git commit.
+- What I should understand/remember:
+  - Never start coding database tables or REST APIs without signed-off design specs.
+  - Checkpoint CP-01 is reached when all documentation baseline files are created and signed off.
+- Example:
+  - If someone asks during a project review why the database uses plain `Long` foreign key IDs in Week 1 instead of `@ManyToOne` relationships, we point to the signed-off baseline rule D-004 in `explainer.md`.
+- Files changed: `docs/explainer.md`
+- Viva questions:
+  1. Q: Why is formal requirement sign-off important before starting database setup?
+     A: It prevents scope creep and ensures that entities, fields, and API endpoints follow an approved design roadmap.
+  2. Q: What git commit message belongs to Checkpoint CP-01?
+     A: `docs(cp-01): add project documentation baseline`
+- Rules used: Workflow §2, Workflow §10, D-016
+- Check done: Phase 1.1 marked completed; CP-01 commit message generated.
+- Commit message: `docs(cp-01): add project documentation baseline`
+
+### Step 1.1.2 — Add .gitignore and README.md skeleton
+- Date: 2026-10-03
+- What we did: We created two essential root-level configuration files: `.gitignore` and `README.md`.
+- Why we did it:
+  - `.gitignore` prevents cluttering the Git repository with compiled Java code (`target/`), temporary log files, and local IDE settings.
+  - `README.md` acts as the project front page, explaining what PeopleOps HRMS is, the tech stack, and providing links to full project documentation.
+- How it works:
+  - **Git & Ignore rules:** Git tracks file changes in a repository. Before staging files, Git evaluates `.gitignore` patterns. If a pattern matches (such as `target/` or `*.log`), Git completely ignores those files during status checks and commits.
+  - **Markdown rendering:** Files ending in `.md` use Markdown (a simple formatting markup). Code repositories (like GitHub) automatically convert Markdown files into styled web pages.
+- What I should understand/remember:
+  - Never commit generated build folders (like Maven's `target/`), binary output, or local editor configs into version control.
+  - A good project `README` gives anyone inspecting the codebase a quick overview of what the application does and how it is structured.
+- Example:
+  - When running `mvn clean compile`, Maven creates hundreds of compiled `.class` files in `target/`. Without `.gitignore`, Git would mark all of them as new files to track. With `.gitignore`, Git ignores the `target/` directory completely.
+- Files changed: `.gitignore`, `README.md`
+- Viva questions:
+  1. Q: Why is `.gitignore` important in a Maven Java project?
+     A: It prevents compiled byte-code (`target/` folder), log files, and personal IDE settings from polluting the shared Git repository.
+  2. Q: What is Markdown (`.md`) and why is it used for `README.md`?
+     A: Markdown is a lightweight text formatting syntax that Git platforms automatically convert into styled HTML documents for readable project documentation.
+- Rules used: Workflow §4, D-016
+- Check done: Created `.gitignore` and `README.md` files at repository root.
+- Commit message: no commit yet (checkpoint CP-01 requires completion of step 1.1.3)
+
+### Step 1.1.1 — Create the repo folder and place docs/ files
+- Date: 2026-10-03
+- What we did: We organized the project workspace and placed standard architecture and planning documents in the `docs/` directory.
+- Why we did it: Professional software development begins with planning. Having clear business specifications, database diagrams, and technical guidelines before writing Java code prevents design flaws and scope confusion.
+- How it works:
+  - **Document Roles:** 
+    - `prd.md` (Product Requirements Document): Describes *what* the system does and business rules (e.g., employee status flows).
+    - `trd.md` (Technical Requirements Document): Specifies *how* the technology stack and REST APIs are designed.
+    - `erd.md` (Entity-Relationship Diagram): Maps database tables, column data types, and foreign key relationships.
+    - `implementation.md`: The 196-step roadmap detailing the exact order to build entities, services, controllers, and tests.
+    - `explainer.md`: This living record for tracking step-by-step progress, learning concepts, decisions, and viva preparation.
+- What I should understand/remember:
+  - Requirements (PRD), Tech specs (TRD), Data schemas (ERD), and Step Plans (implementation plan) are distinct documents with specific purposes.
+  - Always consult `docs/` before implementing any feature to ensure compliance with predefined business and technical rules.
+- Example:
+  - Before writing the Java `Employee` entity, we look up `erd.md` for table field names/types and `prd.md` for rules like unique email checks (`BR-01`).
+- Files changed: `docs/prd.md`, `docs/trd.md`, `docs/erd.md`, `docs/implementation.md`, `docs/explainer.md`, `docs/complexity-benchmark.md`, `docs/IDE_starter_prompt.md`
+- Viva questions:
+  1. Q: What is the difference between a PRD and a TRD?
+     A: A PRD defines business functionality and domain rules from a user perspective, whereas a TRD defines software architecture, frameworks, and technical specifications.
+  2. Q: Why is an ERD created before writing database entity code?
+     A: An ERD visualizes tables, data types, primary/foreign keys, and relationships, preventing database schema design errors early.
+- Rules used: Workflow §2, D-016
+- Check done: Verified documentation baseline files in repository `docs/` directory.
+- Commit message: no commit yet (checkpoint CP-01 requires completion of step 1.1.3)
 
 ```
 ### Step <id> — <step name>
 - Date:
-- What changed: 
-- Why: 
+- What we did: 
+- Why we did it: 
 - How it works: 
-- Files: 
-- Connects to: 
+- What I should understand/remember: 
+- Example: 
+- Files changed: 
+- Viva questions:
+  1. Q: 
+     A: 
+  2. Q: 
+     A: 
 - Rules used: (BR-xx, decisions D-xxx)
 - Check done: 
 - Commit message: (only if this step completed a checkpoint)
-- Viva note: one sentence I can say if asked about this
 ```
-
-*(No entries yet.)*
 
 ## 10. Postman and test results
 
