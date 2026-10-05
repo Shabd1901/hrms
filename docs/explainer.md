@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
+Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 4 / 36 |
-| Steps complete | 9 / 196 |
+| Steps complete | 11 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 4.6% |
+| Overall | 5.6% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 9 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 11 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -36,7 +36,7 @@ Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
 | 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
-| 1.5 | Core entities: Department, Designation, Employee | 5 | 1 | CP-03 | In progress |
+| 1.5 | Core entities: Department, Designation, Employee | 5 | 3 | CP-03 | In progress |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-03 · Current step: **1.5.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 9 | 187 | 0 / 23 |
+| 196 | 11 | 185 | 0 / 23 |
 
-Steps per week: W1 9/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 11/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.5.2 — Create `Department` entity |
-| Next | 1.5.3 — Create `Designation` entity |
-| After that | 1.5.4 — Create `Employee` entity |
+| Current | 1.5.4 — Create `Employee` entity |
+| Next | 1.5.5 — Core entities verification |
+| After that | 1.6.1 — Create `JobOpening` entity |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,48 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.5.3 — Create Designation entity
+- Date: 2026-10-05
+- What we did: We created the `Designation` JPA entity class mapped to table `designations` in PostgreSQL with fields (`id`, `title`, `gradeLevel`, `description`).
+- Why we did it: Designations define job titles and pay grade ranks for employees across departments.
+- How it works:
+  - **`@Entity` & `@Table(name = "designations")`**: Hibernate ORM creates `designations` table in PostgreSQL.
+  - **`gradeLevel` Integer Mapping**: Maps numeric job grades (e.g. `1`, `2`) to PostgreSQL `INTEGER` column.
+- What I should understand/remember:
+  - Entity classes encapsulate domain attributes and DB column rules.
+- Example:
+  - `title` is `unique = true`, so creating duplicate titles like `"Software Engineer"` triggers a SQL constraint exception.
+- Files changed: `src/main/java/com/peopleops/entity/Designation.java`
+- Viva questions:
+  1. Q: How does JPA map a Java `Integer` field like `gradeLevel` to SQL?
+     A: It maps it to PostgreSQL `INTEGER` column, allowing nulls unless `nullable = false` is specified.
+- Rules used: Workflow §4, D-001, D-016
+- Check done: Created `Designation.java` entity, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.5.3): create designation entity with unique title and grade level columns and verify clean project compilation"`
+
+### Step 1.5.2 — Create Department entity
+- Date: 2026-10-05
+- What we did: We manually created the `Department` JPA entity class mapped to the `departments` table in PostgreSQL with fields (`id`, `name`, `code`, `description`, `active`).
+- Why we did it: `Department` is a core organizational domain entity. HR systems need to organize employees by departments, enforcing unique department names and short codes.
+- How it works:
+  - **`@Entity` & `@Table(name = "departments")`**: Instructs Hibernate ORM to create table `departments` in PostgreSQL.
+  - **`@Id` & `@GeneratedValue(strategy = GenerationType.IDENTITY)`**: Maps `id` to PostgreSQL auto-incrementing identity primary key.
+  - **`@Column(nullable = false, unique = true)`**: Generates SQL DDL column constraints enforcing non-null and unique rules.
+- What I should understand/remember:
+  - JPA `@Entity` classes bridge Java code and database tables.
+  - Lombok `@NoArgsConstructor` is required so Hibernate can construct objects via reflection when reading rows.
+- Example:
+  - `name` column has `unique = true`, so attempting to insert two departments named `"Engineering"` will trigger a database constraint violation.
+- Files changed: `src/main/java/com/peopleops/entity/Department.java`
+- Viva questions:
+  1. Q: What is the purpose of `@Table(name = "departments")`?
+     A: It explicitly sets the SQL table name to `departments` instead of defaulting to the class name `Department`.
+  2. Q: Why is `@NoArgsConstructor` required on JPA entities?
+     A: Hibernate needs an empty default constructor to instantiate objects when retrieving SQL database rows via reflection.
+- Rules used: Workflow §4, D-001, D-016
+- Check done: Created `Department.java` entity, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.5.2): add Department entity mapped to departments table with unique name and code constraints"`
 
 ### Step 1.5.1 — Create package enums and EmployeeStatus
 - Date: 2026-10-03
