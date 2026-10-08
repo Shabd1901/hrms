@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
+Last updated: 2026-10-08 · Current step: **1.5.5** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 4 / 36 |
-| Steps complete | 11 / 196 |
+| Steps complete | 12 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 5.6% |
+| Overall | 6.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 11 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 12 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -36,7 +36,7 @@ Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
 | 1.2 | PostgreSQL database creation | 1 | 1 | CP-02 | Completed |
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
-| 1.5 | Core entities: Department, Designation, Employee | 5 | 3 | CP-03 | In progress |
+| 1.5 | Core entities: Department, Designation, Employee | 5 | 4 | CP-03 | In progress |
 | 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | Not started |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-05 · Current step: **1.5.4** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 11 | 185 | 0 / 23 |
+| 196 | 12 | 184 | 0 / 23 |
 
-Steps per week: W1 11/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 12/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.5.4 — Create `Employee` entity |
-| Next | 1.5.5 — Core entities verification |
-| After that | 1.6.1 — Create `JobOpening` entity |
+| Current | 1.5.5 — Core entities verification |
+| Next | 1.6.1 — Create `JobOpening` entity |
+| After that | 1.6.2 — Create `Candidate` entity |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.5.4 — Create Employee entity
+- Date: 2026-10-08
+- What we did: We created the `Employee` JPA entity class mapped to table `employees` in PostgreSQL with personal details, hiring dates, salary (`BigDecimal`), status enum (`@Enumerated(EnumType.STRING)`), and plain `Long` foreign keys (`departmentId`, `designationId`, `managerId`).
+- Why we did it: `Employee` is the central domain entity of PeopleOps HRMS. Storing money as `BigDecimal` avoids floating-point binary rounding errors.
+- How it works:
+  - **`@Enumerated(EnumType.STRING)`**: Persists enum constants as human-readable strings (`"ACTIVE"`) instead of ordinal integers.
+  - **Plain `Long` Foreign Keys (Rule D-004)**: Avoids complex JPA relationship mappings in Week 1; will be converted to `@ManyToOne` in Week 4 without changing database schema columns.
+- What I should understand/remember:
+  - Never use `float` or `double` for currency/salary values in software systems; always use `BigDecimal`.
+- Example:
+  - `monthlySalary` has `precision = 12, scale = 2`, allowing salary values up to `99,999,999,999.99`.
+- Files changed: `src/main/java/com/peopleops/entity/Employee.java`
+- Viva questions:
+  1. Q: Why do we use `BigDecimal` instead of `double` for `monthlySalary`?
+     A: `double` suffers from binary floating-point rounding inaccuracy (e.g., `0.1 + 0.2 != 0.3`), whereas `BigDecimal` guarantees exact decimal precision.
+- Rules used: Workflow §4, D-001, D-004, D-006, D-007, D-016
+- Check done: Created `Employee.java` entity, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.5.4): create employee entity with personal details salary status and plain foreign key ids"`
 
 ### Step 1.5.3 — Create Designation entity
 - Date: 2026-10-05
