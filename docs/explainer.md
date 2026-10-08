@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
+Last updated: 2026-10-08 · Current step: **1.6.4** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 5 / 36 |
-| Steps complete | 14 / 196 |
+| Steps complete | 18 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 7.1% |
+| Overall | 9.2% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 14 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 18 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -37,7 +37,7 @@ Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
-| 1.6 | Recruitment and onboarding entities | 6 | 1 | CP-03 | In progress |
+| 1.6 | Recruitment and onboarding entities | 6 | 3 | CP-03 | In progress |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 14 | 182 | 0 / 23 |
+| 196 | 15 | 181 | 0 / 23 |
 
-Steps per week: W1 14/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 15/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.6.2 — Create `Candidate` entity |
-| Next | 1.6.3 — Create `Interview` entity |
-| After that | 1.6.4 — Create `OnboardingTask` entity |
+| Current | 1.6.3 — Create `Interview` entity |
+| Next | 1.6.4 — Create `OnboardingTask` entity |
+| After that | 1.6.5 — Recruitment & onboarding entities verification |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,44 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.6.3 — Create InterviewResult enum and Interview entity
+- Date: 2026-10-08
+- What we did: We created `InterviewResult` enum (`PENDING`, `PASSED`, `FAILED`) and the `Interview` JPA entity class mapped to table `interviews` in PostgreSQL with fields (`id`, `candidateId`, `interviewerId`, `scheduledAt`, `roundNumber`, `result`, `feedback`).
+- Why we did it: `Interview` tracks scheduled evaluation rounds for job candidates, assigned interviewers, timestamps, and evaluation outcomes.
+- How it works:
+  - **`LocalDateTime`**: Maps interview schedule timestamps (`scheduled_at`).
+  - **`@Enumerated(EnumType.STRING)`**: Persists enum outcome as text (`"PASSED"`, `"FAILED"`, `"PENDING"`).
+  - **Plain `Long` Foreign Keys**: `candidateId` and `interviewerId` link interviews to candidates and interviewer employees.
+- What I should understand/remember:
+  - Dates with precise time of day use `LocalDateTime` in Java 8+ / JPA entities.
+- Example:
+  - Round 1 technical interview scheduled at `2026-10-15T10:00:00` with `result = PENDING`.
+- Files changed: `src/main/java/com/peopleops/enums/InterviewResult.java`, `src/main/java/com/peopleops/entity/Interview.java`
+- Viva questions:
+  1. Q: Why do we use `LocalDateTime` for `scheduledAt` instead of `LocalDate`?
+     A: `LocalDate` stores only calendar date without time, whereas `LocalDateTime` stores both date and exact time required for interview scheduling.
+- Rules used: Workflow §4, D-001, D-004, D-006, D-016
+- Check done: Created `InterviewResult.java` and `Interview.java`, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.6.3): create interview result enum and interview entity for evaluation round tracking"`
+
+### Step 1.6.2 — Create CandidateStage enum and Candidate entity
+- Date: 2026-10-08
+- What we did: We created `CandidateStage` enum (`APPLIED`, `SCREENING`, `INTERVIEWING`, `OFFERED`, `HIRED`, `REJECTED`) and `Candidate` entity mapped to `candidates` table with unique constraint on `(job_opening_id, email)`.
+- Why we did it: `Candidate` represents applicants applying for job openings and moving through hiring funnel stages.
+- How it works:
+  - **`@UniqueConstraint(columnNames = {"job_opening_id", "email"})`**: Prevents a candidate from applying multiple times to the same job opening with the same email.
+- What I should understand/remember:
+  - Multi-column unique constraints are declared in `@Table(uniqueConstraints = ...)` in JPA.
+- Example:
+  - Candidate with email `"john@example.com"` applying to job opening ID `1`.
+- Files changed: `src/main/java/com/peopleops/enums/CandidateStage.java`, `src/main/java/com/peopleops/entity/Candidate.java`
+- Viva questions:
+  1. Q: How is a composite unique constraint declared on a JPA entity?
+     A: Using `@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"col1", "col2"})})`.
+- Rules used: Workflow §4, D-001, D-004, D-006, D-016
+- Check done: Created `CandidateStage.java` and `Candidate.java`, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.6.2): create candidate stage enum and candidate entity with job opening unique email constraint"`
 
 ### Step 1.6.1 — Create JobOpeningStatus enum and JobOpening entity
 - Date: 2026-10-08
