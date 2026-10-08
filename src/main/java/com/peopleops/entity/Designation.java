@@ -17,16 +17,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Designation{
+public class Designation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false, unique = true,length = 100)
+    @Column(name = "title", nullable = false, unique = true, length = 100)
     private String title;
 
-    @Column(name = "grade level", nullable = false, unique = true)
+    @Column(name = "grade_level", nullable = false)
     private Integer gradeLevel;
 
     @Column(name = "description", length = 255)

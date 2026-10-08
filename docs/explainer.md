@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-08 · Current step: **1.6.1** · Status: in progress
+Last updated: 2026-10-08 · Current step: **1.6.2** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-08 · Current step: **1.6.1** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 5 / 36 |
-| Steps complete | 13 / 196 |
+| Steps complete | 14 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 6.6% |
+| Overall | 7.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-08 · Current step: **1.6.1** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 13 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 14 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -37,7 +37,7 @@ Last updated: 2026-10-08 · Current step: **1.6.1** · Status: in progress
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
-| 1.6 | Recruitment and onboarding entities | 6 | 0 | CP-03 | In progress |
+| 1.6 | Recruitment and onboarding entities | 6 | 1 | CP-03 | In progress |
 | 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-08 · Current step: **1.6.1** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 13 | 183 | 0 / 23 |
+| 196 | 14 | 182 | 0 / 23 |
 
-Steps per week: W1 13/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 14/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.6.1 — Create `JobOpening` entity |
-| Next | 1.6.2 — Create `Candidate` entity |
-| After that | 1.6.3 — Create `Interview` entity |
+| Current | 1.6.2 — Create `Candidate` entity |
+| Next | 1.6.3 — Create `Interview` entity |
+| After that | 1.6.4 — Create `OnboardingTask` entity |
 
 ## 6. Issues and remaining work
 
@@ -148,6 +148,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.6.1 — Create JobOpeningStatus enum and JobOpening entity
+- Date: 2026-10-08
+- What we did: We created `JobOpeningStatus` enum (`OPEN`, `CLOSED`) and the `JobOpening` JPA entity class mapped to table `job_openings` in PostgreSQL with fields (`id`, `title`, `departmentId`, `designationId`, `openPositions`, `postedDate`, `status`).
+- Why we did it: `JobOpening` represents open job vacancies in the organization that accept candidate applications.
+- How it works:
+  - **`@Enumerated(EnumType.STRING)`**: Stores status as text (`"OPEN"`, `"CLOSED"`).
+  - **Plain `Long` Foreign Keys**: `departmentId` and `designationId` link vacancies to departments/designations.
+- What I should understand/remember:
+  - Recruitment starts with a job opening before candidates can apply.
+- Example:
+  - A `JobOpening` for `"Java Developer"` has `openPositions = 3` and `status = OPEN`.
+- Files changed: `src/main/java/com/peopleops/enums/JobOpeningStatus.java`, `src/main/java/com/peopleops/entity/JobOpening.java`
+- Viva questions:
+  1. Q: What fields link `JobOpening` to departments and designations in Week 1?
+     A: Plain `Long` foreign keys `departmentId` and `designationId`.
+- Rules used: Workflow §4, D-001, D-004, D-006, D-016
+- Check done: Created `JobOpeningStatus.java` and `JobOpening.java`, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.6.1): create job opening status enum and job opening entity for tracking job vacancies"`
 
 ### Step 1.5.5 — Core entities verification
 - Date: 2026-10-08

@@ -1,4 +1,4 @@
-package com.peopleops.enums.entity;
+package com.peopleops.entity;
 
 import com.peopleops.enums.EmployeeStatus;
 import jakarta.persistence.Column;
@@ -23,20 +23,21 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Employee {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "employee_code", nullable = false, unique = true, length = 20)
     private String employeeCode;
 
     @Column(name = "first_name", nullable = false, length = 50)
-    private String firstname;
+    private String firstName;
 
     @Column(name = "last_name", nullable = false, length = 50)
-    private String lastname;
+    private String lastName;
 
-    @Column (name = "email", nullable = false, unique = true, length = 100)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(name = "phone", length = 20)
@@ -56,11 +57,11 @@ public class Employee {
     private EmployeeStatus status;
 
     @Column(name = "department_id")
-    private long department_Id;
+    private Long departmentId;
 
     @Column(name = "designation_id")
     private Long designationId;
-    
+
     @Column(name = "manager_id")
     private Long managerId;
 }
