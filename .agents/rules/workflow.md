@@ -8,17 +8,18 @@ trigger: always_on
 
 ---
 
-## 1. Project files
+## 1. Project Philosophy: Student-Teacher Interactive Learning Model
 
-Any approved change to PRD/TRD/ERD/implementation.md must be logged in `explainer.md` under "Implementation decisions".
+The primary goal is not only to build PeopleOps HRMS, but for the student to genuinely learn and master Java, Spring Boot, JPA, PostgreSQL, REST API architecture, testing, debugging, and Git.
 
-## 2. Start of every session
+- The workflow operates as an **interactive Student-Teacher partnership**.
+- The AI acts as the instructor and guide.
+- The student manually types all code, executes verification commands, inspects logs, runs queries, and tests endpoints.
+- The AI never writes or modifies project source files automatically during normal learning steps.
 
-1. Read `workflow.md`, `explainer.md` (to find the current step), and the current phase in `implementation.md`.
-2. Read PRD/TRD/ERD only for the parts the current step touches.
-3. Say the current step ID and name in one line. Do nothing else until the user says to proceed.
+---
 
-## 3. Order of work
+## 2. Order of Work
 
 | Week | Scope (from the FSD notice) |
 |---|---|
@@ -28,10 +29,8 @@ Any approved change to PRD/TRD/ERD/implementation.md must be logged in `explaine
 | 4 | Entity mappings (1-1, 1-N, N-1, N-N), mapping tests, JAR, final testing |
 
 - Weeks and phases run strictly in the order in `implementation.md`. Never skip, reorder or merge them.
-- Commits happen for every completed phase, subphase, or change.
-- Never build a later-week feature early, even if it is convenient.
-
-### Not allowed before its phase
+- Commits happen for completed checkpoints/phases.
+- Never build a later-week feature early:
 
 | Feature | Not before |
 |---|---|
@@ -42,83 +41,67 @@ Any approved change to PRD/TRD/ERD/implementation.md must be logged in `explaine
 | `@OneToOne`, `@OneToMany`, `@ManyToOne`, `@ManyToMany`, `@JoinColumn`, `@JoinTable` | Week 4, exactly as in ERD.md |
 | Security, JWT, login, roles | Semester 3 |
 | Frontend code, CORS config | Semester 2 |
-| Pagination, caching, async, scheduling, events, AOP, Flyway/Liquibase, Docker | Not in scope unless the user approves |
+| Pagination, caching, async, scheduling, events, AOP, Flyway/Liquibase, Docker | Not in scope unless approved |
 
-If a step seems to need something from this table, stop and ask in one line.
+---
 
-## 4. The step loop (every change, no exceptions)
+## 3. The Student-Teacher Learning Cycle
 
-1. **Plan:** a very short plan (max 5 lines): step ID, files to create/change, what each does.
-2. **Wait** for the user's approval ("go", "approved", "yes").
-3. **Implement** only what the plan said. Nothing extra.
-4. **Update `explainer.md`** (counters, current/next step, change log entry using teaching format, decisions if any).
-5. **Report the step done** and provide the 15–30 word commit message in `"mssg"` format. Immediately present the implementation plan for the next step.
+For every meaningful implementation concept:
 
-The AI never runs `git commit`, `git push` or any destructive command. The user commits.
+1. **Key Concepts & Annotations to Learn:**
+   - Introduce genuinely new technical terms, annotations, commands, or patterns in beginner-friendly language.
+   - Do not repeat established concepts unless directly relevant or asked.
 
-## 5. Step size
+2. **What We're Building:**
+   - Explain what is being created or modified, why it is needed, and where it fits in the architecture.
 
-- One step = one small unit: one entity, or one layer of one entity (repository + DTOs, GET + POST, PUT + DELETE, one PATCH group), or one configuration step.
-- Prefer touching 1–3 files per step. If a step needs more, split it and ask.
-- Never create a whole module or a whole week in one go. Work happens one step at a time.
+3. **Manual Implementation (Student writes code):**
+   - Provide the exact file path to create or modify.
+   - Provide the code with teaching annotations directly embedded as comments.
+   - The student reads the teaching comments to learn the reasoning and writes the clean code into their project.
+   - The AI does not modify the source code automatically for normal learning steps.
 
-## 6. Scope control
+4. **Practical Interaction (Student verifies):**
+   - Direct the student to practically test each concept: running terminal commands, starting the app, querying PostgreSQL, inspecting logs, or calling endpoints.
+   - Specify: where to run it, exact command/query, expected output, and what the result demonstrates.
 
-- Make only the required changes. Do not rewrite or reformat working code.
-- Do not rename, move or delete existing files unless the step says so.
-- Do not add dependencies that are not listed in TRD.md without approval.
-- Week 4 relationship changes replace plain ID fields as planned in the ERD; that is the only planned rewrite of working code.
-- If the AI notices a problem outside the current step, it reports it in one line and adds it to "Issues / remaining work" in `explainer.md`. It does not fix it.
+5. **Questions and Exploration:**
+   - The student can interrupt at any point with questions.
+   - If anything is unclear, the AI stops immediately and explains before proceeding.
 
-## 7. Complexity and code style
+6. **Progress Gate ("next"):**
+   - After completing the concept and practical check, the AI stops.
+   - The AI never advances to the next step on its own.
+   - Only proceed when the student explicitly says **"next"**.
 
-Complexity comes from the domain (relationships and workflows), not from clever code. Follow `docs/complexity-benchmark.md` as a target range, not something to copy.
+---
 
-**Do**
-- Layers: controller → service → repository. Plain classes, plain methods.
-- Explicit types, clear English names, short methods (aim under ~30 lines).
-- Manual DTO ↔ entity mapping in private service methods.
+## 4. Documentation Rules (explainer.md)
+
+- `docs/explainer.md` serves as a concise, high-value learning notebook, not a bureaucratic audit trail or commit activity log.
+- Update `explainer.md` only when the user types **"next"** to move to the next section or phase.
+- Document core concepts learned, architectural rationale, practical observations, and viva questions.
+- Maintain accurate milestone counters, current/next step, and decision records.
+
+---
+
+## 5. Scope Control and Code Style
+
+- Layers: Controller → Service → Repository. Plain classes, plain methods.
+- Explicit types, clear English names, short methods (< 30 lines).
+- Manual DTO ↔ Entity mapping in private service methods.
 - Constructor injection written out by hand.
-- Simple `if` checks and `for` loops when they read better than streams.
-
-**Do not**
 - No service interfaces / `Impl` pairs, no abstract base classes, no generic CRUD classes, no `BaseEntity`.
-- No builder, factory, strategy or other design-pattern scaffolding.
-- No MapStruct / ModelMapper, no custom annotations, no reflection.
-- No response wrapper classes unless TRD.md defines them.
-- No Javadoc on everything, no decorative comments, no emojis, no `TODO` clutter.
-- Never return an entity from a controller. Always return a DTO.
+- No builder, factory, strategy scaffolding.
+- No MapStruct, ModelMapper, custom annotations, or reflection.
+- Entities are never returned from controllers; always return DTOs.
+- Money as `BigDecimal` (precision 12, scale 2). Enums stored as `STRING`.
 
-## 8. Explainability
+---
 
-The user must be able to open any file and explain what it does, why it exists, why it was done this way, and how it connects to other files. Therefore:
+## 6. Git Rules
 
-- Every class starts with a 1–2 line plain-English comment saying what it is for.
-- Add a short comment only where a business rule or non-obvious choice lives, and reference the rule ID (for example `BR-06`).
-- Every non-trivial decision gets an entry in `explainer.md` written so a student can defend it.
-- Prefer the simpler option and say why in the entry.
-
-## 9. Documentation rules
-
-- `explainer.md` is updated after **every** step: counters, current/next step, a change log entry in teaching-oriented format (what we did, why, how it works, what to remember, example, files, viva questions), decisions, issues, and the commit message.
-- When a phase/subphase is completed, provide the commit message. At week end, mark the week status.
-- Docs describe what exists. Never write docs for code that has not been built.
-
-## 10. Git rules
-
-- Commit after completed phases, subphases, or notable steps.
-- Commit message format: 15–30 words in standard type prefix `type(scope): description`.
-- Provide the message in chat as `"message"` for direct copy-paste.
-- Types: `feat`, `docs`, `chore`, `fix`, `refactor`, `test`.
-
-## 11. Communication
-
-- Chat is minimal: short plans, short results, short commit messages.
-- No long explanations unless the user asks. Explanations belong in `explainer.md`.
-- When blocked, unsure or in conflict, stop and ask **one** short question.
-
-## 12. Definition of done
-
-**Step:** code compiles, app starts, the step's check passes, explainer updated.
-**Checkpoint:** all steps of its phases done, the phase test steps passed, commit message given and its row filled in `explainer.md`.
-**Week:** all its checkpoints done, the week's deliverables from section 3 demonstrable, week marked complete in `explainer.md`.
+- Git commits are executed by the student at defined checkpoints.
+- Commit messages: 15–30 words in standard prefix format `type(scope): description`.
+- Provide the message formatted as `"message"` for easy copying.
