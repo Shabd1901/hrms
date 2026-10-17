@@ -23,7 +23,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 25 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 26 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -39,7 +39,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
 | 1.6 | Recruitment and onboarding entities | 5 | 5 | CP-03 | Completed |
 | 1.7 | Attendance and leave entities | 6 | 6 | CP-04 | Completed |
-| 1.8 | Payroll and performance entities | 4 | 1 | CP-04 | In progress |
+| 1.8 | Payroll and performance entities | 4 | 2 | CP-04 | In progress |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | Not started |
 | 2.1 | Department and Designation APIs | 8 | 0 | CP-06 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 25 | 171 | 0 / 23 |
+| 196 | 26 | 170 | 0 / 23 |
 
-Steps per week: W1 25/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 26/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.8.2 — Create `Payroll` entity |
-| Next | 1.8.3 — Create `PerformanceReview` entity |
-| After that | 1.8.4 — Run & verify 2 more tables |
+| Current | 1.8.3 — Create `PerformanceReview` entity |
+| Next | 1.8.4 — Run & verify 2 more tables |
+| After that | 1.9.1 — Enums: `TrainingStatus`, `EnrollmentStatus`, `AssetStatus`, `AssignmentStatus` |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,17 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.8.2 — Create Payroll entity
+- Date: 2026-10-17
+- What we did: Created the `Payroll` JPA entity mapped to the `payrolls` table in PostgreSQL with fields (`id`, `employeeId`, `payMonth`, `payYear`, `workingDays`, `lopDays`, `grossSalary`, `lopDeduction`, `pfDeduction`, `netSalary`, `status`, `generatedOn`) and a composite unique constraint on `(employee_id, pay_month, pay_year)`.
+- Why we did it: Records monthly calculated salary disbursements and statutory deductions per employee. The unique constraint prevents double-paying or generating duplicate payroll runs for the same employee in the same month.
+- How it works:
+  - Currency fields (`grossSalary`, `lopDeduction`, `pfDeduction`, `netSalary`) use `BigDecimal` with `precision = 12, scale = 2` to prevent precision loss.
+  - `lopDays` is a `Double` to support half-day absences (0.5 LOP per half-day).
+- Files changed: `src/main/java/com/peopleops/entity/Payroll.java`
+- Check done: Created entity, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.8.2): create payroll entity with monetary precision and composite unique constraint"`
 
 ### Step 1.8.1 — Create PayrollStatus and ReviewStatus enums
 - Date: 2026-10-17
