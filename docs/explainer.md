@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
+Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Phases 2.1 - 2.8 complete)
 
 ---
 
@@ -11,11 +11,11 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | Measure | Value |
 |---|---|
 | Semester | 1 (Backend) |
-| Weeks complete | 0 / 4 |
-| Phases complete | 6 / 36 |
-| Steps complete | 19 / 196 |
-| Commits (checkpoints) made | 0 / 23 (CP-01, CP-02, CP-03 ready) |
-| Overall | 9.7% |
+| Weeks complete | 1 / 4 |
+| Phases complete | 18 / 36 |
+| Steps complete | 110 / 196 |
+| Commits (checkpoints) made | 16 / 23 |
+| Overall | 56.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,8 +23,8 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 0 / 5 | Completed |
-| 2 | REST APIs | 12 | 90 | 1 | 0 / 8 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
+| 2 | REST APIs | 12 | 90 | 70 | 6 / 8 | In progress |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
@@ -42,14 +42,14 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.8 | Payroll and performance entities | 4 | 4 | CP-04 | Completed |
 | 1.9 | Training and asset entities | 7 | 7 | CP-05 | Completed |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 4 | CP-05 | Completed |
-| 2.1 | Department and Designation APIs | 8 | 1 | CP-06 | In progress |
-| 2.2 | Employee APIs | 6 | 0 | CP-06 | Not started |
-| 2.3 | Recruitment APIs | 13 | 0 | CP-07 | Not started |
-| 2.4 | Onboarding and the hire workflow | 7 | 0 | CP-08 | Not started |
-| 2.5 | Attendance and leave APIs | 15 | 0 | CP-09 | Not started |
-| 2.6 | Payroll APIs | 5 | 0 | CP-10 | Not started |
-| 2.7 | Performance APIs | 5 | 0 | CP-10 | Not started |
-| 2.8 | Training and skills APIs | 11 | 0 | CP-11 | Not started |
+| 2.1 | Department and Designation APIs | 8 | 8 | CP-06 | Completed |
+| 2.2 | Employee APIs | 6 | 6 | CP-06 | Completed |
+| 2.3 | Recruitment APIs | 13 | 13 | CP-07 | Completed |
+| 2.4 | Onboarding and the hire workflow | 7 | 7 | CP-08 | Completed |
+| 2.5 | Attendance and leave APIs | 15 | 15 | CP-09 | Completed |
+| 2.6 | Payroll APIs | 5 | 5 | CP-10 | Completed |
+| 2.7 | Performance APIs | 5 | 5 | CP-10 | Completed |
+| 2.8 | Training and skills APIs | 11 | 11 | CP-11 | Completed |
 | 2.9 | Asset APIs | 8 | 0 | CP-11 | Not started |
 | 2.10 | Documents and employee activation | 6 | 0 | CP-12 | Not started |
 | 2.11 | Offboarding APIs | 5 | 0 | CP-12 | Not started |
