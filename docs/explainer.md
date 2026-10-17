@@ -23,7 +23,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 32 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 33 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -40,7 +40,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.6 | Recruitment and onboarding entities | 5 | 5 | CP-03 | Completed |
 | 1.7 | Attendance and leave entities | 6 | 6 | CP-04 | Completed |
 | 1.8 | Payroll and performance entities | 4 | 4 | CP-04 | Completed |
-| 1.9 | Training and asset entities | 7 | 4 | CP-05 | In progress |
+| 1.9 | Training and asset entities | 7 | 5 | CP-05 | In progress |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | Not started |
 | 2.1 | Department and Designation APIs | 8 | 0 | CP-06 | Not started |
 | 2.2 | Employee APIs | 6 | 0 | CP-06 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 32 | 164 | 0 / 23 |
+| 196 | 33 | 163 | 0 / 23 |
 
-Steps per week: W1 32/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 33/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.9.5 — Create `Asset` entity |
-| Next | 1.9.6 — Create `AssetAssignment` entity |
-| After that | 1.9.7 — Run & verify 5 more tables |
+| Current | 1.9.6 — Create `AssetAssignment` entity |
+| Next | 1.9.7 — Run & verify 5 more tables |
+| After that | 1.10.1 — Enums: `DocumentType`, `OffboardingStatus` |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,15 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.9.5 — Create Asset entity
+- Date: 2026-10-17
+- What we did: Created `Asset` JPA entity mapped to table `assets` in PostgreSQL with fields (`id`, `assetTag`, `name`, `category`, `purchaseDate`, `status`) and unique constraint on `assetTag`.
+- Why we did it: Tracks corporate hardware equipment and inventory status (`AVAILABLE`, `ASSIGNED`, `RETIRED`).
+- How it works:
+  - `assetTag` has `unique = true` to prevent duplicate tracking tags.
+- Files changed: `src/main/java/com/peopleops/entity/Asset.java`
+- Commit message: `"feat(step-1.9.5): create asset entity with unique asset tag tracking"`
 
 ### Step 1.9.4 — Create TrainingEnrollment entity
 - Date: 2026-10-17
