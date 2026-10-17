@@ -23,7 +23,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 35 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 36 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -41,7 +41,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.7 | Attendance and leave entities | 6 | 6 | CP-04 | Completed |
 | 1.8 | Payroll and performance entities | 4 | 4 | CP-04 | Completed |
 | 1.9 | Training and asset entities | 7 | 7 | CP-05 | Completed |
-| 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | In progress |
+| 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 1 | CP-05 | In progress |
 | 2.1 | Department and Designation APIs | 8 | 0 | CP-06 | Not started |
 | 2.2 | Employee APIs | 6 | 0 | CP-06 | Not started |
 | 2.3 | Recruitment APIs | 13 | 0 | CP-07 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 35 | 161 | 0 / 23 |
+| 196 | 36 | 160 | 0 / 23 |
 
-Steps per week: W1 35/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 36/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.10.1 — Enums: `DocumentType`, `OffboardingStatus` |
-| Next | 1.10.2 — Create `EmployeeDocument` entity |
-| After that | 1.10.3 — Create `Offboarding` entity |
+| Current | 1.10.2 — Create `EmployeeDocument` entity |
+| Next | 1.10.3 — Create `Offboarding` entity |
+| After that | 1.10.4 — Run & verify all 20 tables against ERD.md; Week 1 demo checklist in `explainer.md` |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,13 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.10.1 — Create DocumentType and OffboardingStatus enums
+- Date: 2026-10-17
+- What we did: Created `DocumentType` (`ID_PROOF`, `ADDRESS_PROOF`, `OFFER_LETTER`, `CONTRACT`, `EDUCATION_CERTIFICATE`, `OTHER`) and `OffboardingStatus` (`INITIATED`, `COMPLETED`) enum types in package `com.peopleops.enums`.
+- Why we did it: Provides domain constants for employee compliance documents and formal separation lifecycle tracking.
+- Files changed: `src/main/java/com/peopleops/enums/DocumentType.java`, `src/main/java/com/peopleops/enums/OffboardingStatus.java`
+- Commit message: `"feat(step-1.10.1): create document type and offboarding status enums"`
 
 ### Step 1.9.7 — Run and verify training and asset schema creation in PostgreSQL
 - Date: 2026-10-17
