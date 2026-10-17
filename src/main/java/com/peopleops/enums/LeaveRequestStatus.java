@@ -1,4 +1,4 @@
-package com.peoplops.enums;
+package com.peopleops.enums;
 
 public enum LeaveRequestStatus {
     PENDING,

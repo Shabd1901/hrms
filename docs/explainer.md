@@ -23,7 +23,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 19 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 24 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -38,8 +38,8 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
 | 1.6 | Recruitment and onboarding entities | 5 | 5 | CP-03 | Completed |
-| 1.7 | Attendance and leave entities | 6 | 1 | CP-04 | In progress |
-| 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
+| 1.7 | Attendance and leave entities | 6 | 6 | CP-04 | Completed |
+| 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | In progress |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | Not started |
 | 2.1 | Department and Designation APIs | 8 | 0 | CP-06 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 19 | 177 | 0 / 23 |
+| 196 | 24 | 172 | 0 / 23 |
 
-Steps per week: W1 19/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 24/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.7.2 — Create `Attendance` entity |
-| Next | 1.7.3 — Create `LeaveType` entity |
-| After that | 1.7.4 — Create `LeaveBalance` entity |
+| Current | 1.8.1 — Create `PayrollStatus` and `ReviewStatus` enums |
+| Next | 1.8.2 — Create `Payroll` entity |
+| After that | 1.8.3 — Create `PerformanceReview` entity |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,65 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.7.6 — Run and verify attendance and leave schema creation in PostgreSQL
+- Date: 2026-10-17
+- What we did: Bootstrapped the Spring Boot application and verified via Hibernate DDL logs that tables `attendance_records`, `leave_types`, `leave_balances`, and `leave_requests` along with their composite unique constraints were created in PostgreSQL.
+- Why we did it: Confirms database schema alignment with ERD specifications before moving to payroll and performance entities.
+- How it works:
+  - Spring Boot executes Hibernate `ddl-auto=update`, generating `CREATE TABLE` and `ALTER TABLE ADD CONSTRAINT` statements automatically.
+- What I should understand/remember:
+  - Composite constraints `(employee_id, attendance_date)` and `(employee_id, leave_type_id, balance_year)` protect data integrity directly inside the database.
+- Files changed: Schema verified in `peopleops_db`.
+- Check done: App started cleanly, EntityManagerFactory initialized, 4 tables created.
+
+### Step 1.7.5 — Create LeaveRequest entity
+- Date: 2026-10-17
+- What we did: Created `LeaveRequest` JPA entity mapped to table `leave_requests` with fields (`id`, `employeeId`, `leaveTypeId`, `fromDate`, `toDate`, `days`, `reason`, `status`, `decidedById`, `decidedOn`).
+- Why we did it: Represents employee leave applications undergoing approval workflow lifecycle (`PENDING -> APPROVED / REJECTED / CANCELLED`).
+- How it works:
+  - `decidedById` and `decidedOn` are nullable fields populated upon approval/rejection by a manager or HR admin.
+  - `reason` has length 1000 for descriptive notes.
+- Files changed: `src/main/java/com/peopleops/entity/LeaveRequest.java`
+
+### Step 1.7.4 — Create LeaveBalance entity
+- Date: 2026-10-17
+- What we did: Created `LeaveBalance` JPA entity mapped to table `leave_balances` with fields (`id`, `employeeId`, `leaveTypeId`, `balanceYear`, `totalDays`, `usedDays`) and composite unique constraint on `(employee_id, leave_type_id, balance_year)`.
+- Why we did it: Tracks an employee's allocated vs consumed quota per leave type per calendar year, preventing over-utilization (BR-04).
+- How it works:
+  - The composite unique constraint ensures an employee cannot have multiple balance ledgers for the same leave type in the same calendar year.
+- Files changed: `src/main/java/com/peopleops/entity/LeaveBalance.java`
+
+### Step 1.7.3 — Create LeaveType entity
+- Date: 2026-10-17
+- What we did: Created `LeaveType` JPA entity mapped to table `leave_types` with fields (`id`, `name`, `annualQuota`, `paid`) and unique constraint on `name`.
+- Why we did it: Provides dynamic company-wide policy configuration for leave categories (e.g., Casual Leave, Sick Leave, Unpaid Leave).
+- How it works:
+  - `unique = true` prevents duplicate categories.
+  - `paid` (boolean) flags whether time off is paid or incurs Loss of Pay (LOP) payroll deductions.
+- Files changed: `src/main/java/com/peopleops/entity/LeaveType.java`
+
+### Step 1.7.2 — Create Attendance entity
+- Date: 2026-10-17
+- What we did: We created the `Attendance` JPA entity mapped to the `attendance_records` table in PostgreSQL with fields (`id`, `employeeId`, `attendanceDate`, `checkIn`, `checkOut`, `status`) and a composite unique constraint on `(employee_id, attendance_date)`.
+- Why we did it: Tracks daily attendance per employee, recording punch times and status (`PRESENT`, `HALF_DAY`, `ABSENT`, `ON_LEAVE`). The unique constraint prevents duplicate attendance logs for the same employee on the same date.
+- How it works:
+  - **`@Table(name = "attendance_records", uniqueConstraints = {@UniqueConstraint(columnNames = {"employee_id", "attendance_date"})})`**: Creates a composite unique index in PostgreSQL preventing duplicate check-ins on the same calendar day.
+  - **`java.time.LocalTime`**: Maps to PostgreSQL `time without time zone` columns (`check_in`, `check_out`), storing the time of day without timezone distortion.
+- What I should understand/remember:
+  - `checkIn` and `checkOut` can be null (e.g. for approved leaves with status `ON_LEAVE` or whole-day absences).
+  - Approving a leave request creates an `Attendance` record with status `ON_LEAVE` and null check-in/out times (BR-06).
+- Example:
+  - An employee checking in at 09:15 and checking out at 18:30 has `checkIn = 09:15:00`, `checkOut = 18:30:00`, and `status = PRESENT`.
+- Files changed: `src/main/java/com/peopleops/entity/Attendance.java`
+- Viva questions:
+  1. Q: Why is there a unique constraint on `(employee_id, attendance_date)`?
+     A: An employee can only have one attendance log per calendar day; the composite unique constraint enforces this at the database level.
+  2. Q: Which Java type is used to store `check_in` time without a date component?
+     A: `java.time.LocalTime`.
+- Rules used: BR-04, BR-06, BR-07, D-006, D-016
+- Check done: Created entity, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.7.2): create attendance entity with composite unique constraint on employee and date"`
 
 ### Step 1.7.1 — Create AttendanceStatus and LeaveRequestStatus enums
 - Date: 2026-10-17

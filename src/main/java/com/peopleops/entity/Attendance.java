@@ -33,7 +33,7 @@ public class Attendance {
     private Long id;
 
     @Column(name = "employee_id", nullable = false)
-    private Long employee_id;
+    private Long employeeId;
     
     @Column(name = "attendance_date", nullable = false)
     private LocalDate attendanceDate;

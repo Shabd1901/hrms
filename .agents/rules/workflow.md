@@ -12,10 +12,10 @@ trigger: always_on
 
 The primary goal is not only to build PeopleOps HRMS, but for the student to genuinely learn and master Java, Spring Boot, JPA, PostgreSQL, REST API architecture, testing, debugging, and Git.
 
-- The workflow operates as an **interactive Student-Teacher partnership**.
+- The workflow operates primarily as an **interactive Student-Teacher partnership**.
 - The AI acts as the instructor and guide.
-- The student manually types all code, executes verification commands, inspects logs, runs queries, and tests endpoints.
-- The AI never writes or modifies project source files automatically during normal learning steps.
+- **Default Learning Mode:** The student manually types all code, executes verification commands, inspects logs, runs queries, and tests endpoints. The AI does not write or modify project source files automatically during normal learning steps.
+- **On-Demand AI Implementation Mode:** If the student explicitly instructs the AI to implement certain steps or phases (e.g., *"implement steps X through Y yourself"*, *"AI do the implementation until I say so"*), the AI directly creates or updates the required project files, runs verification checks, and reports results. The AI rolls back to the Default Learning Mode immediately whenever the student asks (e.g., *"switch back to normal"*, *"I will implement"*).
 
 ---
 
@@ -26,7 +26,7 @@ The primary goal is not only to build PeopleOps HRMS, but for the student to gen
 | 1 | Requirement analysis, ER diagram, PostgreSQL database, Spring Boot setup, DB connectivity, entity creation |
 | 2 | REST APIs: GET, POST, PUT, DELETE, PATCH, with testing |
 | 3 | Logger, global exception handling, validation, Swagger/OpenAPI, API testing |
-| 4 | Entity mappings (1-1, 1-N, N-1, N-N), mapping tests, JAR, final testing |
+| 4 | Entity mappings (1-1, 1-N, N-1, N-N), mapping tests, JAR & WAR, final testing |
 
 - Weeks and phases run strictly in the order in `implementation.md`. Never skip, reorder or merge them.
 - Commits happen for completed checkpoints/phases.
@@ -56,11 +56,9 @@ For every meaningful implementation concept:
 2. **What We're Building:**
    - Explain what is being created or modified, why it is needed, and where it fits in the architecture.
 
-3. **Manual Implementation (Student writes code):**
-   - Provide the exact file path to create or modify.
-   - Provide the code with teaching annotations directly embedded as comments.
-   - The student reads the teaching comments to learn the reasoning and writes the clean code into their project.
-   - The AI does not modify the source code automatically for normal learning steps.
+3. **Implementation (Student or AI mode):**
+   - **Default Learning Mode:** Provide the exact file path to create or modify. Provide the code with teaching annotations directly embedded as comments. The student reads the teaching comments to learn the reasoning and writes the clean code into their project. The AI does not modify source code files automatically.
+   - **On-Demand AI Mode:** When requested by the student, the AI writes the clean code directly to the appropriate files, adhering to all architecture and naming standards, and provides a clear summary.
 
 4. **Practical Interaction (Student verifies):**
    - Direct the student to practically test each concept: running terminal commands, starting the app, querying PostgreSQL, inspecting logs, or calling endpoints.
