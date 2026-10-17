@@ -68,4 +68,12 @@ public class CandidateController {
         CandidateResponseDTO response = candidateService.updateStage(id, value);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{id}/hire")
+    public ResponseEntity<com.peopleops.dto.EmployeeResponseDTO> hireCandidate(
+            @PathVariable Long id,
+            @RequestBody com.peopleops.dto.HireRequestDTO request) {
+        com.peopleops.dto.EmployeeResponseDTO response = candidateService.hireCandidate(id, request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 }

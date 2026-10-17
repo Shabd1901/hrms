@@ -2,6 +2,8 @@ package com.peopleops.service;
 
 import com.peopleops.dto.CandidateRequestDTO;
 import com.peopleops.dto.CandidateResponseDTO;
+import com.peopleops.dto.EmployeeResponseDTO;
+import com.peopleops.dto.HireRequestDTO;
 import com.peopleops.entity.Candidate;
 import com.peopleops.entity.JobOpening;
 import com.peopleops.enums.CandidateStage;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -19,12 +22,15 @@ public class CandidateService {
 
     private final CandidateRepository candidateRepository;
     private final JobOpeningRepository jobOpeningRepository;
+    private final EmployeeService employeeService;
 
     public CandidateService(
             CandidateRepository candidateRepository,
-            JobOpeningRepository jobOpeningRepository) {
+            JobOpeningRepository jobOpeningRepository,
+            EmployeeService employeeService) {
         this.candidateRepository = candidateRepository;
         this.jobOpeningRepository = jobOpeningRepository;
+        this.employeeService = employeeService;
     }
 
     public CandidateResponseDTO createCandidate(CandidateRequestDTO request) {
@@ -121,6 +127,35 @@ public class CandidateService {
         candidate.setStage(targetStage);
         Candidate updated = candidateRepository.save(candidate);
         return toResponseDTO(updated);
+    }
+
+    @Transactional
+    public EmployeeResponseDTO hireCandidate(Long id, HireRequestDTO request) {
+        Candidate candidate = candidateRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id));
+
+        if (candidate.getStage() != CandidateStage.OFFERED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidate can only be hired when in OFFERED stage");
+        }
+
+        JobOpening opening = jobOpeningRepository.findById(candidate.getJobOpeningId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job opening not found with id: " + candidate.getJobOpeningId()));
+
+        if (opening.getStatus() != JobOpeningStatus.OPEN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot hire for a job opening that is not OPEN");
+        }
+
+        candidate.setStage(CandidateStage.HIRED);
+        candidateRepository.save(candidate);
+
+        int remaining = opening.getOpenPositions() - 1;
+        opening.setOpenPositions(remaining);
+        if (remaining <= 0) {
+            opening.setStatus(JobOpeningStatus.CLOSED);
+        }
+        jobOpeningRepository.save(opening);
+
+        return employeeService.createFromCandidate(candidate, opening, request);
     }
 
     private Candidate toEntity(CandidateRequestDTO dto) {
