@@ -47,6 +47,38 @@ public class DepartmentService {
         return toResponseDTO(department);
     }
 
+    public DepartmentResponseDTO updateDepartment(Long id, DepartmentRequestDTO request) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id));
+
+        if (!department.getName().equals(request.getName()) && departmentRepository.existsByName(request.getName())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department name already exists: " + request.getName());
+        }
+        if (!department.getCode().equals(request.getCode()) && departmentRepository.existsByCode(request.getCode())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department code already exists: " + request.getCode());
+        }
+
+        department.setName(request.getName());
+        department.setCode(request.getCode());
+        department.setDescription(request.getDescription());
+        Department updated = departmentRepository.save(department);
+        return toResponseDTO(updated);
+    }
+
+    public void deleteDepartment(Long id) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id));
+        departmentRepository.delete(department);
+    }
+
+    public DepartmentResponseDTO updateDepartmentActive(Long id, Boolean active) {
+        Department department = departmentRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id));
+        department.setActive(active);
+        Department updated = departmentRepository.save(department);
+        return toResponseDTO(updated);
+    }
+
     private Department toEntity(DepartmentRequestDTO dto) {
         Department department = new Department();
         department.setName(dto.getName());
