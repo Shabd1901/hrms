@@ -23,8 +23,8 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 38 | 0 / 5 | In progress |
-| 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 0 / 5 | Completed |
+| 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | In progress |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
@@ -41,7 +41,7 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 | 1.7 | Attendance and leave entities | 6 | 6 | CP-04 | Completed |
 | 1.8 | Payroll and performance entities | 4 | 4 | CP-04 | Completed |
 | 1.9 | Training and asset entities | 7 | 7 | CP-05 | Completed |
-| 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 3 | CP-05 | In progress |
+| 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 4 | CP-05 | Completed |
 | 2.1 | Department and Designation APIs | 8 | 0 | CP-06 | Not started |
 | 2.2 | Employee APIs | 6 | 0 | CP-06 | Not started |
 | 2.3 | Recruitment APIs | 13 | 0 | CP-07 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 38 | 158 | 0 / 23 |
+| 196 | 40 | 156 | 0 / 23 |
 
-Steps per week: W1 38/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 40/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.10.4 — Run & verify all 20 tables against ERD.md; Week 1 demo checklist in `explainer.md` |
-| Next | 2.1.1 — Department: Repo + DTOs |
-| After that | 2.1.2 — Designation: Repo + DTOs |
+| Current | 2.1.1 — Department: Repo + DTOs |
+| Next | 2.1.2 — Designation: Repo + DTOs |
+| After that | 2.1.3 — Employee: Repo + DTOs |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,33 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.10.4 — Run and verify all 20 tables against ERD.md; Week 1 demo checklist
+- Date: 2026-10-17
+- What we did: Bootstrapped Spring Boot and verified via Hibernate schema generation logs that all 20 tables and composite constraints defined in ERD.md were successfully created in PostgreSQL `peopleops_db`.
+- Week 1 Entity & Table Checklist (20 tables complete):
+  1. `departments` (`Department`)
+  2. `designations` (`Designation`)
+  3. `employees` (`Employee`)
+  4. `job_openings` (`JobOpening`)
+  5. `candidates` (`Candidate`) — unique `(job_opening_id, email)`
+  6. `interviews` (`Interview`)
+  7. `onboarding_tasks` (`OnboardingTask`)
+  8. `attendance_records` (`Attendance`) — unique `(employee_id, attendance_date)`
+  9. `leave_types` (`LeaveType`) — unique `name`
+  10. `leave_balances` (`LeaveBalance`) — unique `(employee_id, leave_type_id, balance_year)`
+  11. `leave_requests` (`LeaveRequest`)
+  12. `payrolls` (`Payroll`) — unique `(employee_id, pay_month, pay_year)`
+  13. `performance_reviews` (`PerformanceReview`) — unique `(employee_id, review_period)`
+  14. `skills` (`Skill`) — unique `name`
+  15. `training_programs` (`TrainingProgram`)
+  16. `training_enrollments` (`TrainingEnrollment`) — unique `(training_program_id, employee_id)`
+  17. `assets` (`Asset`) — unique `asset_tag`
+  18. `asset_assignments` (`AssetAssignment`)
+  19. `employee_documents` (`EmployeeDocument`)
+  20. `offboardings` (`Offboarding`) — unique `employee_id`
+- Check done: 36 Java source files compiled cleanly with `mvn clean compile`, Spring Boot application booted in 4.3 seconds, PostgreSQL schema verified.
+- Commit message: `"feat(step-1.10.4): verify all 20 tables and complete week 1 entities baseline"`
 
 ### Step 1.10.3 — Create Offboarding entity
 - Date: 2026-10-17
