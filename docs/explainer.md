@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-08 · Current step: **1.6.4** · Status: completed
+Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-08 · Current step: **1.6.4** · Status: completed
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
-| Phases complete | 5 / 36 |
-| Steps complete | 17 / 196 |
-| Commits (checkpoints) made | 0 / 23 (CP-01, CP-02 ready) |
-| Overall | 8.7% |
+| Phases complete | 6 / 36 |
+| Steps complete | 18 / 196 |
+| Commits (checkpoints) made | 0 / 23 (CP-01, CP-02, CP-03 ready) |
+| Overall | 9.2% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,7 +23,7 @@ Last updated: 2026-10-08 · Current step: **1.6.4** · Status: completed
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 17 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 18 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
@@ -37,8 +37,8 @@ Last updated: 2026-10-08 · Current step: **1.6.4** · Status: completed
 | 1.3 | Spring Boot project setup | 2 | 2 | CP-02 | Completed |
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
-| 1.6 | Recruitment and onboarding entities | 5 | 4 | CP-03 | In progress |
-| 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | Not started |
+| 1.6 | Recruitment and onboarding entities | 5 | 5 | CP-03 | Completed |
+| 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | In progress |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-08 · Current step: **1.6.4** · Status: completed
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 17 | 179 | 0 / 23 |
+| 196 | 18 | 178 | 0 / 23 |
 
-Steps per week: W1 17/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 18/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.6.4 — Create `OnboardingTask` entity (Completed) |
-| Next | 1.6.5 — Recruitment & onboarding entities verification |
-| After that | 1.7.1 — Enums: `AttendanceStatus`, `LeaveRequestStatus` |
+| Current | 1.7.1 — Create `AttendanceStatus` and `LeaveRequestStatus` enums |
+| Next | 1.7.2 — Create `Attendance` entity |
+| After that | 1.7.3 — Create `LeaveType` entity |
 
 ## 6. Issues and remaining work
 
