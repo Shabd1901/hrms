@@ -4,6 +4,7 @@ import com.peopleops.dto.DepartmentRequestDTO;
 import com.peopleops.dto.DepartmentResponseDTO;
 import com.peopleops.entity.Department;
 import com.peopleops.repository.DepartmentRepository;
+import com.peopleops.repository.EmployeeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public DepartmentService(DepartmentRepository departmentRepository) {
+    public DepartmentService(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
         this.departmentRepository = departmentRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO request) {
@@ -68,6 +71,11 @@ public class DepartmentService {
     public void deleteDepartment(Long id) {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id));
+
+        if (employeeRepository.existsByDepartmentId(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete department assigned to existing employees");
+        }
+
         departmentRepository.delete(department);
     }
 

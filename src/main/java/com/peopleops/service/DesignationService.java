@@ -4,6 +4,7 @@ import com.peopleops.dto.DesignationRequestDTO;
 import com.peopleops.dto.DesignationResponseDTO;
 import com.peopleops.entity.Designation;
 import com.peopleops.repository.DesignationRepository;
+import com.peopleops.repository.EmployeeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -14,9 +15,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class DesignationService {
 
     private final DesignationRepository designationRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public DesignationService(DesignationRepository designationRepository) {
+    public DesignationService(
+            DesignationRepository designationRepository,
+            EmployeeRepository employeeRepository) {
         this.designationRepository = designationRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public DesignationResponseDTO createDesignation(DesignationRequestDTO request) {
@@ -62,6 +67,11 @@ public class DesignationService {
     public void deleteDesignation(Long id) {
         Designation designation = designationRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + id));
+
+        if (employeeRepository.existsByDesignationId(id)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete designation assigned to existing employees");
+        }
+
         designationRepository.delete(designation);
     }
 
