@@ -51,7 +51,7 @@ Commit only when a checkpoint is reached, never after every step.
 | CP-20 | 4.6 | 3 | `feat(cp-20): add one-to-one mappings` |
 | CP-21 | 4.7 | 4 | `feat(cp-21): add many-to-many mappings` |
 | CP-22 | 4.8 | 2 | `test(cp-22): verify all mappings` |
-| CP-23 | 4.9 | 4 | `chore(cp-23): build jar and complete project` |
+| CP-23 | 4.9 | 4 | `chore(cp-23): build jar and war and complete project` |
  
 Per week: Week 1 = 5 commits, Week 2 = 8, Week 3 = 4, Week 4 = 6.
  
@@ -394,7 +394,7 @@ No commit here. Continues to CP-17 (phases 3.4, 3.5).
  
 ---
  
-# WEEK 4 — Mappings, JAR, Final Testing (35 steps)
+# WEEK 4 — Mappings, JAR & WAR, Final Testing (35 steps)
  
 Follow ERD.md §6. DTOs do not change except where stated. Each task replaces the plain `Long` field with the relationship and adjusts only the service lines that use it.
  
@@ -477,15 +477,15 @@ No commit here. Continues to CP-19 (phases 4.3, 4.4, 4.5).
  
 **Commit CP-22:** `test(cp-22): verify all mappings`
  
-### Phase 4.9 — JAR build and completion (4)
+### Phase 4.9 — JAR & WAR build and completion (4)
 | ID | Step |
 |---|---|
-| 4.9.1 | `mvn clean package`, confirm the JAR is produced |
-| 4.9.2 | Run with `java -jar`, check Swagger and one lifecycle flow |
+| 4.9.1 | Configure WAR packaging and `SpringBootServletInitializer`, run `mvn clean package`, confirm JAR/WAR artifacts are produced |
+| 4.9.2 | Run executable artifact with `java -jar`, verify deployment readiness, check Swagger and one lifecycle flow |
 | 4.9.3 | Final `README.md` (setup, run, endpoint overview, links to docs) |
 | 4.9.4 | Final `explainer.md` review and viva notes |
  
-**Commit CP-23:** `chore(cp-23): build jar and complete project`
+**Commit CP-23:** `chore(cp-23): build jar and war and complete project`
  
 ---
  

@@ -12,7 +12,7 @@ Version 1.0 · Created 2026-10-02 · Read with PRD.md (what) and ERD.md (data).
 | Framework | Spring Boot 3.x (Initializr's current 3.x release) |
 | Persistence | Spring Data JPA + Hibernate |
 | Database | PostgreSQL, database `peopleops_db` |
-| Build | Maven, packaging `jar` |
+| Build | Maven, packaging `jar` & `war` (dual/executable WAR support in Phase 4.9) |
 | API | REST, JSON |
 | Group / artifact | `com.peopleops` / `peopleops` |
 | Base package | `com.peopleops` |
@@ -215,10 +215,10 @@ Error body (`ErrorResponse`): `timestamp`, `status`, `error`, `message`, `path`,
  
 ```
 mvn clean package
-java -jar target/peopleops-0.0.1-SNAPSHOT.jar
+java -jar target/peopleops-0.0.1-SNAPSHOT.jar   # or .war (executable WAR)
 ```
  
-PostgreSQL must be running. The JAR is built with `spring-boot-maven-plugin` from Initializr. Verified in Phase 4.9.
+PostgreSQL must be running. Supports both JAR and executable WAR packaging (deployable to external servlet containers such as Tomcat or runnable directly via `java -jar`). Configured and verified in Phase 4.9.
  
 ## 13. Repository layout
  

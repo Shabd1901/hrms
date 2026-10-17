@@ -16,7 +16,7 @@ This semester (Semester 1) delivers the **backend** as a Spring Boot REST API, f
 - A working backend covering 13 areas: employees, departments, designations, recruitment, onboarding, attendance, leave, payroll, performance, training/skills, assets, documents, offboarding.
 - Modules that interact through the employee lifecycle (hire creates an employee, onboarding activates them, offboarding checks assets and payroll).
 - Clean, readable, student-level Java/Spring Boot code the author can fully explain.
-- Delivery as an executable JAR with Swagger/OpenAPI documentation.
+- Delivery as an executable JAR/WAR with Swagger/OpenAPI documentation.
 
 **Non-goals (this semester)**
 - No frontend (Semester 2). No authentication, login or roles (Semester 3).
@@ -113,13 +113,13 @@ Design choices in Semester 1 keep Semester 3 easy: "who did this" is already an 
 | 1 | Requirements, ERD, PostgreSQL DB, project setup, connectivity, entities | `peopleops_db` exists, app connects, 20 tables are created, fields match ERD.md |
 | 2 | REST APIs with GET/POST/PUT/DELETE/PATCH | Every endpoint in TRD §6 works in Postman; hire → onboard → work → exit runs end to end using IDs only |
 | 3 | Logging, exception handling, validation, Swagger, API testing | Log file written, errors return one JSON shape, invalid input rejected, Swagger UI lists all controllers |
-| 4 | Mappings, mapping tests, JAR, final testing | All ERD relationships mapped with real foreign keys, full lifecycle passes, `java -jar` runs the app |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | All ERD relationships mapped with real foreign keys, full lifecycle passes, `java -jar` runs the app and WAR is packaged for servlet container deployment |
 
 ## 9. Non-functional requirements
 
 - Readable code a student can explain; no needless abstraction.
 - PostgreSQL as the only database. REST over JSON.
-- Executable JAR built by Maven.
+- Executable JAR and WAR built by Maven.
 - Every change recorded in `explainer.md`; repository updated in the order of the weekly plan.
 
 ## 10. Assumptions

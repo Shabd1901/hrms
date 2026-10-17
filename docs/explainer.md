@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
+Last updated: 2026-10-17 · Current step: **1.7.2** · Status: in progress
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
 | Semester | 1 (Backend) |
 | Weeks complete | 0 / 4 |
 | Phases complete | 6 / 36 |
-| Steps complete | 18 / 196 |
+| Steps complete | 19 / 196 |
 | Commits (checkpoints) made | 0 / 23 (CP-01, CP-02, CP-03 ready) |
-| Overall | 9.2% |
+| Overall | 9.7% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -23,10 +23,10 @@ Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
 
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
-| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 18 | 0 / 5 | In progress |
+| 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 19 | 0 / 5 | In progress |
 | 2 | REST APIs | 12 | 90 | 0 | 0 / 8 | Not started |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
-| 4 | Mappings, mapping tests, JAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
 
@@ -38,7 +38,7 @@ Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
 | 1.4 | Database connectivity | 2 | 2 | CP-02 | Completed |
 | 1.5 | Core entities: Department, Designation, Employee | 5 | 5 | CP-03 | Completed |
 | 1.6 | Recruitment and onboarding entities | 5 | 5 | CP-03 | Completed |
-| 1.7 | Attendance and leave entities | 6 | 0 | CP-04 | In progress |
+| 1.7 | Attendance and leave entities | 6 | 1 | CP-04 | In progress |
 | 1.8 | Payroll and performance entities | 4 | 0 | CP-04 | Not started |
 | 1.9 | Training and asset entities | 7 | 0 | CP-05 | Not started |
 | 1.10 | Documents and offboarding entities, Week 1 wrap-up | 4 | 0 | CP-05 | Not started |
@@ -67,24 +67,24 @@ Last updated: 2026-10-17 · Current step: **1.7.1** · Status: in progress
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
 | 4.8 | Mapping verification | 2 | 0 | CP-22 | Not started |
-| 4.9 | JAR build and completion | 4 | 0 | CP-23 | Not started |
+| 4.9 | JAR & WAR build and completion | 4 | 0 | CP-23 | Not started |
 
 ## 4. Counters
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 18 | 178 | 0 / 23 |
+| 196 | 19 | 177 | 0 / 23 |
 
-Steps per week: W1 18/40 · W2 0/90 · W3 0/31 · W4 0/35
+Steps per week: W1 19/40 · W2 0/90 · W3 0/31 · W4 0/35
 Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 1.7.1 — Create `AttendanceStatus` and `LeaveRequestStatus` enums |
-| Next | 1.7.2 — Create `Attendance` entity |
-| After that | 1.7.3 — Create `LeaveType` entity |
+| Current | 1.7.2 — Create `Attendance` entity |
+| Next | 1.7.3 — Create `LeaveType` entity |
+| After that | 1.7.4 — Create `LeaveBalance` entity |
 
 ## 6. Issues and remaining work
 
@@ -114,6 +114,7 @@ Each decision is written as: what, why, and the alternative that was not chosen.
 | D-014 | Payroll is calculated, so no PUT | Net pay comes from attendance and leave, not typed in | Editable payroll rows |
 | D-015 | Postman is the test tool | Matches the notice (API testing) and gives a demo collection | Writing JUnit controller tests |
 | D-016 | 196 small steps but only 23 commits | Small steps keep every change explainable; commits are made at checkpoints so history stays short and still follows the weekly order | A commit per step, or one commit per week |
+| D-017 | Add WAR packaging alongside JAR in Phase 4.9 | Satisfies academic/servlet-container evaluation requirements without breaking standalone execution (Spring Boot executable WAR) | Leaving packaging as JAR only |
 
 ## 8. Commit checkpoints
 
@@ -143,11 +144,33 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | | |
 | CP-21 | 4.7 | `feat(cp-21): add many-to-many mappings` | | |
 | CP-22 | 4.8 | `test(cp-22): verify all mappings` | | |
-| CP-23 | 4.9 | `chore(cp-23): build jar and complete project` | | |
+| CP-23 | 4.9 | `chore(cp-23): build jar and war and complete project` | | |
 
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 1.7.1 — Create AttendanceStatus and LeaveRequestStatus enums
+- Date: 2026-10-17
+- What we did: We created `AttendanceStatus` (`PRESENT`, `HALF_DAY`, `ABSENT`, `ON_LEAVE`) and `LeaveRequestStatus` (`PENDING`, `APPROVED`, `REJECTED`, `CANCELLED`) enum types in package `com.peopleops.enums`.
+- Why we did it: Restricts daily attendance logs and leave request states to strictly validated domain constants, preventing invalid state transitions and typographical errors in the database.
+- How it works:
+  - **`AttendanceStatus`**: Represents daily work presence (`PRESENT`, `HALF_DAY`), absence, or approved leave (`ON_LEAVE`). Feeds directly into payroll Loss of Pay (LOP) calculations.
+  - **`LeaveRequestStatus`**: Represents the approval workflow lifecycle (`PENDING -> APPROVED / REJECTED / CANCELLED`).
+- What I should understand/remember:
+  - Daily attendance status directly drives monthly payroll deduction formulas (BR-07).
+  - Approving a leave request automatically creates `ON_LEAVE` attendance records for those calendar dates (BR-06).
+- Example:
+  - An employee working fewer than 4 hours is logged as `HALF_DAY`, which generates 0.5 days of LOP deduction during payroll calculation.
+- Files changed: `src/main/java/com/peopleops/enums/AttendanceStatus.java`, `src/main/java/com/peopleops/enums/LeaveRequestStatus.java`
+- Viva questions:
+  1. Q: What happens to attendance when a leave request is approved?
+     A: Per BR-06, approving a leave request automatically creates `ON_LEAVE` attendance records for each date in the leave period that does not already have a record.
+  2. Q: How does `HALF_DAY` attendance affect payroll?
+     A: Per BR-07, each `HALF_DAY` attendance record adds 0.5 to the employee's monthly Loss of Pay (LOP) days.
+- Rules used: BR-04, BR-06, BR-07, D-006, D-016
+- Check done: Created both enums, compiled cleanly with `mvn clean compile`.
+- Commit message: `"feat(step-1.7.1): create attendance status and leave request status enums for daily tracking and leave approval lifecycle"`
 
 ### Step 1.6.4 — Create OnboardingTaskStatus enum and OnboardingTask entity
 - Date: 2026-10-08
