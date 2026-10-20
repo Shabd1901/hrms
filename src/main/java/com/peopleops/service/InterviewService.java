@@ -34,6 +34,13 @@ public class InterviewService {
     }
 
     public InterviewResponseDTO createInterview(InterviewRequestDTO request) {
+        if (request.getCandidateId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidate id is required");
+        }
+        if (request.getInterviewerId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Interviewer id is required");
+        }
+
         Candidate candidate = candidateRepository.findById(request.getCandidateId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + request.getCandidateId()));
 

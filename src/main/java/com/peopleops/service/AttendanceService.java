@@ -32,6 +32,13 @@ public class AttendanceService {
     }
 
     public AttendanceResponseDTO createAttendance(AttendanceRequestDTO request) {
+        if (request.getEmployeeId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
+        }
+        if (request.getAttendanceDate() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Attendance date is required");
+        }
+
         Employee employee = employeeRepository.findById(request.getEmployeeId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
 

@@ -34,6 +34,9 @@ public class CandidateService {
     }
 
     public CandidateResponseDTO createCandidate(CandidateRequestDTO request) {
+        if (request.getJobOpeningId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job opening id is required");
+        }
         JobOpening opening = jobOpeningRepository.findById(request.getJobOpeningId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job opening not found with id: " + request.getJobOpeningId()));
 

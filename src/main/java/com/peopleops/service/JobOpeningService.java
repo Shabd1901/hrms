@@ -30,6 +30,12 @@ public class JobOpeningService {
     }
 
     public JobOpeningResponseDTO createJobOpening(JobOpeningRequestDTO request) {
+        if (request.getDepartmentId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Department id is required");
+        }
+        if (request.getDesignationId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Designation id is required");
+        }
         if (!departmentRepository.existsById(request.getDepartmentId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + request.getDepartmentId());
         }

@@ -49,6 +49,16 @@ public class PayrollService {
     }
 
     public PayrollResponseDTO generatePayroll(PayrollGenerateRequestDTO request) {
+        if (request.getEmployeeId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
+        }
+        if (request.getPayMonth() == null || request.getPayMonth() < 1 || request.getPayMonth() > 12) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay month (1-12) is required");
+        }
+        if (request.getPayYear() == null || request.getPayYear() < 2000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay year is required");
+        }
+
         Employee employee = employeeRepository.findById(request.getEmployeeId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
 

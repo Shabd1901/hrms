@@ -28,6 +28,12 @@ public class PerformanceReviewService {
     }
 
     public PerformanceReviewResponseDTO createPerformanceReview(PerformanceReviewRequestDTO request) {
+        if (request.getEmployeeId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
+        }
+        if (request.getReviewerId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer id is required");
+        }
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
         }
@@ -43,7 +49,7 @@ public class PerformanceReviewService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer cannot be the employee being reviewed");
         }
 
-        if (request.getRating() < 1 || request.getRating() > 5) {
+        if (request.getRating() != null && (request.getRating() < 1 || request.getRating() > 5)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
         }
 
