@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Pha
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 41 | 155 | 0 / 23 |
+| 196 | 110 | 86 | 16 / 23 |
 
-Steps per week: W1 40/40 · W2 1/90 · W3 0/31 · W4 0/35
-Commits per week: W1 0/5 · W2 0/8 · W3 0/4 · W4 0/6
+Steps per week: W1 40/40 · W2 70/90 · W3 0/31 · W4 0/35
+Commits per week: W1 5/5 · W2 6/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 2.1.2 — Department: GET + POST |
-| Next | 2.1.3 — Department: PUT + DELETE |
-| After that | 2.1.4 — Department: PATCH active |
+| Current | 2.8.11 — Training and skills APIs completed and verified |
+| Next | 2.9.1 — Asset: Repository, Request DTO, Response DTO |
+| After that | 2.9.2 — Asset: Service and Controller |
 
 ## 6. Issues and remaining work
 
@@ -122,33 +122,102 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 
 | Checkpoint | Covers phases | Planned commit message | Commit hash | Date |
 |---|---|---|---|---|
-| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline including prd trd erd implementation plan explainer and project configuration skeleton files` | pending user commit | 2026-10-03 |
-| CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): configure postgresql database connectivity and verify spring boot hikari connection pool initialization` | pending user commit | 2026-10-03 |
-| CP-03 | 1.5, 1.6 | `feat(cp-03): add employee and recruitment entities` | | |
-| CP-04 | 1.7, 1.8 | `feat(cp-04): add attendance leave payroll performance entities` | | |
-| CP-05 | 1.9, 1.10 | `feat(cp-05): add training asset document offboarding entities` | | |
-| CP-06 | 2.1, 2.2 | `feat(cp-06): add department designation employee apis` | | |
-| CP-07 | 2.3 | `feat(cp-07): add recruitment apis` | | |
-| CP-08 | 2.4 | `feat(cp-08): add onboarding and hire workflow` | | |
-| CP-09 | 2.5 | `feat(cp-09): add attendance and leave apis` | | |
-| CP-10 | 2.6, 2.7 | `feat(cp-10): add payroll and performance apis` | | |
-| CP-11 | 2.8, 2.9 | `feat(cp-11): add training skill and asset apis` | | |
-| CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | | |
-| CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | | |
-| CP-14 | 3.1 | `feat(cp-14): add logging` | | |
-| CP-15 | 3.2 | `feat(cp-15): add global exception handling` | | |
-| CP-16 | 3.3 | `feat(cp-16): add request validation` | | |
-| CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | | |
-| CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | | |
-| CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | | |
-| CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | | |
-| CP-21 | 4.7 | `feat(cp-21): add many-to-many mappings` | | |
-| CP-22 | 4.8 | `test(cp-22): verify all mappings` | | |
-| CP-23 | 4.9 | `chore(cp-23): build jar and war and complete project` | | |
+| CP-01 | 1.1 | `docs(cp-01): add project documentation baseline including prd trd erd implementation plan explainer and project configuration skeleton files` | `6616446` | 2026-10-03 |
+| CP-02 | 1.2, 1.3, 1.4 | `chore(cp-02): configure postgresql database connectivity and verify spring boot hikari connection pool initialization` | `6616446` | 2026-10-03 |
+| CP-03 | 1.5, 1.6 | `feat(cp-03): add employee and recruitment entities` | `6616446` | 2026-10-08 |
+| CP-04 | 1.7, 1.8 | `feat(cp-04): add attendance leave payroll performance entities` | `6616446` | 2026-10-17 |
+| CP-05 | 1.9, 1.10 | `feat(cp-05): add training asset document offboarding entities` | `6616446` | 2026-10-17 |
+| CP-06 | 2.1, 2.2 | `feat(cp-06): add department designation employee apis` | `09dc3d3` | 2026-10-17 |
+| CP-07 | 2.3 | `feat(cp-07): add recruitment apis` | `0e19eee` | 2026-10-17 |
+| CP-08 | 2.4 | `feat(cp-08): add onboarding and hire workflow` | `d622e2a` | 2026-10-17 |
+| CP-09 | 2.5 | `feat(cp-09): add attendance and leave apis` | `f06a302` | 2026-10-17 |
+| CP-10 | 2.6, 2.7 | `feat(cp-10): add payroll and performance apis` | `29dd0ad` | 2026-10-17 |
+| CP-11 | 2.8, 2.9 | `feat(cp-11): add training skill and asset apis` | `e0d43b4` (Phase 2.8) | 2026-10-17 |
+| CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | pending | |
+| CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | pending | |
+| CP-14 | 3.1 | `feat(cp-14): add logging` | pending | |
+| CP-15 | 3.2 | `feat(cp-15): add global exception handling` | pending | |
+| CP-16 | 3.3 | `feat(cp-16): add request validation` | pending | |
+| CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | pending | |
+| CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | pending | |
+| CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | pending | |
+| CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | pending | |
+| CP-21 | 4.7 | `feat(cp-21): add many-to-many mappings` | pending | |
+| CP-22 | 4.8 | `test(cp-22): verify all mappings` | pending | |
+| CP-23 | 4.9 | `chore(cp-23): build jar and war and complete project` | pending | |
 
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Phase 2.8 — Skill Catalog, Training Programs & Employee Enrollments (Steps 2.8.1 – 2.8.11)
+- Date: 2026-10-17
+- What we did: Implemented `SkillRepository`, `SkillService`, `SkillController`, `TrainingProgramRepository`, `TrainingProgramService`, `TrainingProgramController`, `TrainingEnrollmentRepository`, `TrainingEnrollmentService`, and `TrainingEnrollmentController`.
+- Why we did it: Manages organization skill taxonomy, corporate training courses, and employee course enrollments with status progression (`ENROLLED -> COMPLETED / DROPPED`).
+- How it works:
+  - Enforces unique skill names and composite unique enrollment `(training_program_id, employee_id)`.
+  - Sets `completionDate` automatically when enrollment status is patched to `COMPLETED`.
+- Commit message: `"feat(step-2.8.11): implement skill catalog training programs and employee training enrollment workflow with status patching"`
+
+### Phase 2.7 — Performance Review Management (Steps 2.7.1 – 2.7.5)
+- Date: 2026-10-17
+- What we did: Implemented `PerformanceReviewRepository`, `PerformanceReviewService`, and `PerformanceReviewController`.
+- Why we did it: Tracks quarterly appraisals and managerial evaluations under Rule BR-08.
+- How it works:
+  - Enforces reviewer != employee being reviewed, active reviewer status, and rating bounds (1 to 5).
+  - Draft reviews can be modified; once submitted via `PATCH /submit`, records are immutable.
+- Commit message: `"feat(step-2.7.5): implement performance review crud and draft submission patching with br-08 rules"`
+
+### Phase 2.6 — Payroll Generation & Querying (Steps 2.6.1 – 2.6.5)
+- Date: 2026-10-17
+- What we did: Implemented `PayrollRepository`, `PayrollService`, and `PayrollController` (`/api/payrolls`).
+- Why we did it: Automates monthly gross salary, PF deduction (12%), LOP attendance/leave deduction, and net salary calculations per Rule BR-07.
+- How it works:
+  - Queries working days in the month excluding weekends.
+  - Aggregates unapproved absences, half-days, and unpaid leaves to compute LOP deduction.
+  - Generates payroll record (`GENERATED`) with payment patching (`PAID`).
+- Commit message: `"feat(step-2.6.5): implement payroll calculation generation query payment patch and deletion apis"`
+
+### Phase 2.5 — Attendance & Leave Management (Steps 2.5.1 – 2.5.15)
+- Date: 2026-10-17
+- What we did: Implemented `AttendanceRepository`, `AttendanceService`, `AttendanceController`, `LeaveTypeRepository`, `LeaveTypeService`, `LeaveTypeController`, `LeaveBalanceRepository`, `LeaveBalanceService`, `LeaveBalanceController`, `LeaveRequestRepository`, `LeaveRequestService`, and `LeaveRequestController`.
+- Why we did it: Manages daily work check-in/out, leave policy types, annual quota tracking, and multi-day leave application approval workflows.
+- How it works:
+  - Calculates daily hours (< 4 hrs = `HALF_DAY`, >= 4 hrs = `PRESENT`).
+  - Approving a leave request verifies leave balance, decrements balance, and automatically creates synchronized `ON_LEAVE` attendance records (BR-05, BR-06).
+- Commit messages: `"feat(step-2.5.7)"`, `"feat(step-2.5.15)"`
+
+### Phase 2.4 — Onboarding Tasks & Candidate Hire Workflow (Steps 2.4.1 – 2.4.7)
+- Date: 2026-10-17
+- What we did: Implemented `OnboardingTaskRepository`, `OnboardingTaskService`, `OnboardingTaskController`, and the candidate hire workflow in `CandidateService`.
+- Why we did it: Seamlessly converts an `OFFERED` candidate into an `ONBOARDING` employee and automatically generates the 5 standard onboarding checklist tasks (BR-02, BR-03).
+- How it works:
+  - `POST /api/candidates/{id}/hire` transitions candidate to `HIRED`, decrements open positions on the job opening (closing opening if 0), creates the `Employee` record, and inserts the 5 tasks.
+- Commit message: `"feat(step-2.4.7): implement onboarding task crud completion and candidate hire workflow with automatic task creation"`
+
+### Phase 2.3 — Recruitment: Job Openings, Candidates & Interviews (Steps 2.3.1 – 2.3.13)
+- Date: 2026-10-17
+- What we did: Implemented repositories, services, and controllers for `JobOpening`, `Candidate`, and `Interview`.
+- Why we did it: Implements the talent acquisition funnel (`APPLIED -> SHORTLISTED -> INTERVIEWED -> OFFERED -> HIRED`).
+- How it works:
+  - Candidates can only apply to `OPEN` job openings with unique email.
+  - Passing an interview automatically advances candidate stage to `INTERVIEWED`.
+- Commit messages: `"feat(step-2.3.5)"`, `"feat(step-2.3.13)"`
+
+### Phase 2.2 — Employee Core Management, Transfer & Promotion (Steps 2.2.1 – 2.2.6)
+- Date: 2026-10-17
+- What we did: Implemented `EmployeeRepository`, `EmployeeService`, and `EmployeeController`.
+- Why we did it: Core employee directory management with automatic employee code generation (`EMP-0001`), department transfers, and designation promotions.
+- How it works:
+  - Guarantees unique email, validates manager cycles, and prevents deleting departments/designations that have assigned employees.
+- Commit message: `"feat(step-2.2.6): implement employee core crud transfer and promote apis with in use checks on department and designation"`
+
+### Phase 2.1 — Department & Designation APIs (Steps 2.1.1 – 2.1.8)
+- Date: 2026-10-17
+- What we did: Implemented full CRUD and status patching for `Department` and `Designation`.
+- Why we did it: Establishes organizational structure foundations.
+- How it works: Enforces unique department name/code and designation title.
+- Commit messages: `"feat(step-2.1.1)"`, `"feat(step-2.1.2)"`, `"feat(step-2.1.8)"`
 
 ### Step 2.1.1 — Create DepartmentRepository, DepartmentRequestDTO, and DepartmentResponseDTO
 - Date: 2026-10-17
