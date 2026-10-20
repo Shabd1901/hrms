@@ -6,12 +6,18 @@ import com.peopleops.dto.HireRequestDTO;
 import com.peopleops.entity.Candidate;
 import com.peopleops.entity.Employee;
 import com.peopleops.entity.JobOpening;
+import com.peopleops.entity.LeaveBalance;
+import com.peopleops.entity.LeaveType;
 import com.peopleops.entity.OnboardingTask;
+import com.peopleops.enums.DocumentType;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.OnboardingTaskStatus;
 import com.peopleops.repository.DepartmentRepository;
 import com.peopleops.repository.DesignationRepository;
+import com.peopleops.repository.EmployeeDocumentRepository;
 import com.peopleops.repository.EmployeeRepository;
+import com.peopleops.repository.LeaveBalanceRepository;
+import com.peopleops.repository.LeaveTypeRepository;
 import com.peopleops.repository.OnboardingTaskRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,16 +34,25 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final DesignationRepository designationRepository;
     private final OnboardingTaskRepository onboardingTaskRepository;
+    private final EmployeeDocumentRepository employeeDocumentRepository;
+    private final LeaveTypeRepository leaveTypeRepository;
+    private final LeaveBalanceRepository leaveBalanceRepository;
 
     public EmployeeService(
             EmployeeRepository employeeRepository,
             DepartmentRepository departmentRepository,
             DesignationRepository designationRepository,
-            OnboardingTaskRepository onboardingTaskRepository) {
+            OnboardingTaskRepository onboardingTaskRepository,
+            EmployeeDocumentRepository employeeDocumentRepository,
+            LeaveTypeRepository leaveTypeRepository,
+            LeaveBalanceRepository leaveBalanceRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.designationRepository = designationRepository;
         this.onboardingTaskRepository = onboardingTaskRepository;
+        this.employeeDocumentRepository = employeeDocumentRepository;
+        this.leaveTypeRepository = leaveTypeRepository;
+        this.leaveBalanceRepository = leaveBalanceRepository;
     }
 
     @Transactional
@@ -204,6 +219,7 @@ public class EmployeeService {
         return toResponseDTO(updated);
     }
 
+    @Transactional
     public void activateIfReady(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId).orElse(null);
         if (employee == null || employee.getStatus() != EmployeeStatus.ONBOARDING) {
@@ -213,9 +229,30 @@ public class EmployeeService {
         long totalTasks = onboardingTaskRepository.countByEmployeeId(employeeId);
         long doneTasks = onboardingTaskRepository.countByEmployeeIdAndStatus(employeeId, OnboardingTaskStatus.DONE);
 
-        if (totalTasks > 0 && totalTasks == doneTasks) {
-            employee.setStatus(EmployeeStatus.ACTIVE);
-            employeeRepository.save(employee);
+        if (totalTasks == 0 || totalTasks != doneTasks) {
+            return;
+        }
+
+        boolean hasVerifiedIdProof = employeeDocumentRepository.existsByEmployeeIdAndDocumentTypeAndVerifiedTrue(employeeId, DocumentType.ID_PROOF);
+        if (!hasVerifiedIdProof) {
+            return;
+        }
+
+        employee.setStatus(EmployeeStatus.ACTIVE);
+        employeeRepository.save(employee);
+
+        int currentYear = LocalDate.now().getYear();
+        List<LeaveType> leaveTypes = leaveTypeRepository.findAll();
+        for (LeaveType leaveType : leaveTypes) {
+            if (!leaveBalanceRepository.existsByEmployeeIdAndLeaveTypeIdAndBalanceYear(employeeId, leaveType.getId(), currentYear)) {
+                LeaveBalance balance = new LeaveBalance();
+                balance.setEmployeeId(employeeId);
+                balance.setLeaveTypeId(leaveType.getId());
+                balance.setBalanceYear(currentYear);
+                balance.setTotalDays(leaveType.getAnnualQuota());
+                balance.setUsedDays(0);
+                leaveBalanceRepository.save(balance);
+            }
         }
     }
 
