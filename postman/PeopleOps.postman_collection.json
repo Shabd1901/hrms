@@ -1,0 +1,379 @@
+{
+  "info": {
+    "name": "PeopleOps HRMS API",
+    "description": "Comprehensive Postman Collection covering all Week 2 REST API endpoints and end-to-end employee lifecycle workflows for PeopleOps HRMS.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Organization",
+      "item": [
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"code\": \"ENG\",\n  \"description\": \"Software development and IT operations\"\n}"
+            },
+            "url": "{{baseUrl}}/api/departments"
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/departments"
+          }
+        },
+        {
+          "name": "Create Designation",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Software Engineer\",\n  \"level\": 3\n}"
+            },
+            "url": "{{baseUrl}}/api/designations"
+          }
+        },
+        {
+          "name": "Get All Designations",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/designations"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Recruitment",
+      "item": [
+        {
+          "name": "Create Job Opening",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Full Stack Engineer\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"openPositions\": 2,\n  \"postedDate\": \"2026-10-01\"\n}"
+            },
+            "url": "{{baseUrl}}/api/job-openings"
+          }
+        },
+        {
+          "name": "Apply Candidate",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobOpeningId\": 1,\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Morgan\",\n  \"email\": \"alex.morgan@example.com\",\n  \"phone\": \"9876543210\",\n  \"resumeUrl\": \"https://storage.peopleops.local/resumes/alex.pdf\"\n}"
+            },
+            "url": "{{baseUrl}}/api/candidates"
+          }
+        },
+        {
+          "name": "Shortlist Candidate",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/candidates/1/stage?value=SCREENING"
+          }
+        },
+        {
+          "name": "Schedule Interview",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidateId\": 1,\n  \"interviewerId\": 1,\n  \"scheduledAt\": \"2026-10-25T11:00:00\",\n  \"roundNumber\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/interviews"
+          }
+        },
+        {
+          "name": "Pass Interview",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/interviews/1/result?value=PASSED&feedback=Excellent%20core%20Java%20and%20Spring%20knowledge"
+          }
+        },
+        {
+          "name": "Offer Candidate",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/candidates/1/stage?value=OFFERED"
+          }
+        },
+        {
+          "name": "Hire Candidate (Auto Onboarding)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dateOfJoining\": \"2026-11-01\",\n  \"monthlySalary\": 85000.00,\n  \"managerId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/candidates/1/hire"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Onboarding & Activation",
+      "item": [
+        {
+          "name": "Get Onboarding Tasks by Employee",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/onboarding-tasks?employeeId=1"
+          }
+        },
+        {
+          "name": "Complete Onboarding Task 1",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/onboarding-tasks/1/complete"
+          }
+        },
+        {
+          "name": "Upload ID Proof Document",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"documentType\": \"ID_PROOF\",\n  \"fileName\": \"passport_scan.pdf\",\n  \"fileUrl\": \"https://storage.peopleops.local/docs/passport_scan.pdf\"\n}"
+            },
+            "url": "{{baseUrl}}/api/employee-documents"
+          }
+        },
+        {
+          "name": "Verify ID Proof Document (Triggers BR-03 check)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/employee-documents/1/verify"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Attendance & Leaves",
+      "item": [
+        {
+          "name": "Check-In Attendance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"attendanceDate\": \"2026-10-20\",\n  \"checkIn\": \"09:00:00\"\n}"
+            },
+            "url": "{{baseUrl}}/api/attendance"
+          }
+        },
+        {
+          "name": "Check-Out Attendance",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/attendance/1/check-out?time=18:00:00"
+          }
+        },
+        {
+          "name": "Create Leave Type (Casual Leave)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Casual Leave\",\n  \"annualQuota\": 12,\n  \"paid\": true\n}"
+            },
+            "url": "{{baseUrl}}/api/leave-types"
+          }
+        },
+        {
+          "name": "Apply Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"leaveTypeId\": 1,\n  \"fromDate\": \"2026-10-28\",\n  \"toDate\": \"2026-10-29\",\n  \"reason\": \"Personal family commitment\"\n}"
+            },
+            "url": "{{baseUrl}}/api/leave-requests"
+          }
+        },
+        {
+          "name": "Approve Leave Request",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/leave-requests/1/approve?decidedById=2"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Payroll & Performance",
+      "item": [
+        {
+          "name": "Generate Monthly Payroll",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"payMonth\": 10,\n  \"payYear\": 2026\n}"
+            },
+            "url": "{{baseUrl}}/api/payrolls/generate"
+          }
+        },
+        {
+          "name": "Pay Payroll",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/payrolls/1/pay"
+          }
+        },
+        {
+          "name": "Create Performance Review Draft",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"reviewerId\": 2,\n  \"reviewPeriod\": \"Q3-2026\",\n  \"rating\": 5,\n  \"comments\": \"Outstanding performance on backend APIs and deliverables\"\n}"
+            },
+            "url": "{{baseUrl}}/api/performance-reviews"
+          }
+        },
+        {
+          "name": "Submit Performance Review",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/performance-reviews/1/submit"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Training & Assets",
+      "item": [
+        {
+          "name": "Create Skill",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Spring Boot\",\n  \"category\": \"Backend Frameworks\"\n}"
+            },
+            "url": "{{baseUrl}}/api/skills"
+          }
+        },
+        {
+          "name": "Create Training Program",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cloud Native Microservices\",\n  \"description\": \"Comprehensive microservices architectures with Spring Boot and PostgreSQL\",\n  \"trainerName\": \"Dr. Jane Doe\",\n  \"startDate\": \"2026-11-01\",\n  \"endDate\": \"2026-11-15\"\n}"
+            },
+            "url": "{{baseUrl}}/api/training-programs"
+          }
+        },
+        {
+          "name": "Enroll Employee in Training",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trainingProgramId\": 1,\n  \"employeeId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/training-enrollments"
+          }
+        },
+        {
+          "name": "Complete Training Enrollment",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/training-enrollments/1/complete"
+          }
+        },
+        {
+          "name": "Create Asset",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetTag\": \"AST-2026-001\",\n  \"name\": \"MacBook Pro 16-inch M3\",\n  \"category\": \"Laptops\",\n  \"purchaseDate\": \"2026-10-01\"\n}"
+            },
+            "url": "{{baseUrl}}/api/assets"
+          }
+        },
+        {
+          "name": "Assign Asset to Employee",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": 1,\n  \"employeeId\": 1,\n  \"assignedDate\": \"2026-10-20\"\n}"
+            },
+            "url": "{{baseUrl}}/api/asset-assignments"
+          }
+        },
+        {
+          "name": "Return Asset from Employee",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/asset-assignments/1/return"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Offboarding & Clearance",
+      "item": [
+        {
+          "name": "Initiate Offboarding",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": 1,\n  \"resignationDate\": \"2026-10-20\",\n  \"lastWorkingDate\": \"2026-11-20\",\n  \"reason\": \"Pursuing higher education abroad\",\n  \"exitInterviewNotes\": \"Very positive feedback on team and culture\"\n}"
+            },
+            "url": "{{baseUrl}}/api/offboardings"
+          }
+        },
+        {
+          "name": "Get Offboarding Status",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/offboardings/1"
+          }
+        },
+        {
+          "name": "Complete Offboarding Clearance (Assets Returned + Final Payroll)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/api/offboardings/1/complete"
+          }
+        }
+      ]
+    }
+  ]
+}

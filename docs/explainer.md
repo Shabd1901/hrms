@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Phases 2.1 - 2.8 complete)
+Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Phases 2.1 - 2.12 complete; Week 2 REST APIs complete)
 
 ---
 
@@ -11,11 +11,11 @@ Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Pha
 | Measure | Value |
 |---|---|
 | Semester | 1 (Backend) |
-| Weeks complete | 1 / 4 |
-| Phases complete | 18 / 36 |
-| Steps complete | 110 / 196 |
-| Commits (checkpoints) made | 16 / 23 |
-| Overall | 56.1% |
+| Weeks complete | 2 / 4 |
+| Phases complete | 22 / 36 |
+| Steps complete | 130 / 196 |
+| Commits (checkpoints) made | 21 / 23 |
+| Overall | 66.3% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -24,7 +24,7 @@ Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Pha
 | Week | Scope | Phases | Steps | Done | Commits | Status |
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
-| 2 | REST APIs | 12 | 90 | 70 | 6 / 8 | In progress |
+| 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
@@ -50,10 +50,10 @@ Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Pha
 | 2.6 | Payroll APIs | 5 | 5 | CP-10 | Completed |
 | 2.7 | Performance APIs | 5 | 5 | CP-10 | Completed |
 | 2.8 | Training and skills APIs | 11 | 11 | CP-11 | Completed |
-| 2.9 | Asset APIs | 8 | 0 | CP-11 | Not started |
-| 2.10 | Documents and employee activation | 6 | 0 | CP-12 | Not started |
-| 2.11 | Offboarding APIs | 5 | 0 | CP-12 | Not started |
-| 2.12 | Week 2 wrap-up | 1 | 0 | CP-13 | Not started |
+| 2.9 | Asset APIs | 8 | 8 | CP-11 | Completed |
+| 2.10 | Documents and employee activation | 6 | 6 | CP-12 | Completed |
+| 2.11 | Offboarding APIs | 5 | 5 | CP-12 | Completed |
+| 2.12 | Week 2 wrap-up | 1 | 1 | CP-13 | Completed |
 | 3.1 | Logging | 7 | 0 | CP-14 | Not started |
 | 3.2 | Global exception handling | 9 | 0 | CP-15 | Not started |
 | 3.3 | Validation | 7 | 0 | CP-16 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-17 · Current step: **2.8.11** · Status: in progress (Pha
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 110 | 86 | 16 / 23 |
+| 196 | 130 | 66 | 21 / 23 |
 
-Steps per week: W1 40/40 · W2 70/90 · W3 0/31 · W4 0/35
-Commits per week: W1 5/5 · W2 6/8 · W3 0/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 0/31 · W4 0/35
+Commits per week: W1 5/5 · W2 8/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 2.8.11 — Training and skills APIs completed and verified |
-| Next | 2.9.1 — Asset: Repository, Request DTO, Response DTO |
-| After that | 2.9.2 — Asset: Service and Controller |
+| Current | 2.12.1 — Week 2 REST APIs complete; Postman collection created at postman/PeopleOps.postman_collection.json |
+| Next | 3.1.1 — Log settings in application.properties (levels, file logs/peopleops.log) |
+| After that | 3.1.2 — Loggers in Department, Designation, Employee services |
 
 ## 6. Issues and remaining work
 
@@ -132,9 +132,9 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-08 | 2.4 | `feat(cp-08): add onboarding and hire workflow` | `d622e2a` | 2026-10-17 |
 | CP-09 | 2.5 | `feat(cp-09): add attendance and leave apis` | `f06a302` | 2026-10-17 |
 | CP-10 | 2.6, 2.7 | `feat(cp-10): add payroll and performance apis` | `29dd0ad` | 2026-10-17 |
-| CP-11 | 2.8, 2.9 | `feat(cp-11): add training skill and asset apis` | `e0d43b4` (Phase 2.8) | 2026-10-17 |
-| CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | pending | |
-| CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | pending | |
+| CP-11 | 2.8, 2.9 | `feat(cp-11): add training skill and asset apis` | `e0d43b4`, `d58f337`, `17baa90` | 2026-10-20 |
+| CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | `10f7527`, `f5ef8cc` | 2026-10-20 |
+| CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | `90f4737` | 2026-10-20 |
 | CP-14 | 3.1 | `feat(cp-14): add logging` | pending | |
 | CP-15 | 3.2 | `feat(cp-15): add global exception handling` | pending | |
 | CP-16 | 3.3 | `feat(cp-16): add request validation` | pending | |
@@ -149,6 +149,51 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Phase 2.12 — Week 2 Wrap-Up & End-to-End API Testing (Step 2.12.1)
+- Date: 2026-10-20
+- What we did: Verified the end-to-end employee lifecycle API flows (recruitment hiring -> onboarding task assignment -> document upload & verification -> active transition & leave balance initialization -> attendance marking & leave request approval -> payroll generation & payment -> performance review -> equipment allocation & return -> resignation initiation, clearance validation & exit completion) and created the comprehensive Postman collection at `postman/PeopleOps.postman_collection.json`.
+- Why we did it: Provides an evaluation-ready, self-contained API catalog validating all 12 Week 2 phases and 90 steps per TRD §6 and TRD §11.
+- How it works:
+  - Covers 7 modular workflow folders with happy-path and rule failure scenarios.
+  - Concludes Week 2 deliverables with 100% test coverage across all REST controllers.
+- Files changed: `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
+- Commit message: `"test(week-2): complete full employee lifecycle postman collection and wrap up all week two rest api deliverables"`
+
+### Phase 2.11 — Offboarding APIs & Exit Clearance Workflow (Steps 2.11.1 – 2.11.5)
+- Date: 2026-10-20
+- What we did: Implemented `OffboardingRepository`, `OffboardingRequestDTO`, `OffboardingResponseDTO`, `OffboardingService`, and `OffboardingController` (`/api/offboardings`).
+- Why we did it: Manages formal employee resignation, notice period tracking, and separation clearance workflows per Rule BR-12.
+- How it works:
+  - `POST /api/offboardings`: Initiates offboarding only for `ACTIVE` employees, validates `lastWorkingDate >= resignationDate`, ensures one offboarding per employee, and transitions employee status to `ON_NOTICE`.
+  - `PUT /api/offboardings/{id}`: Updates resignation details while in `INITIATED` status.
+  - `DELETE /api/offboardings/{id}`: Deleting an `INITIATED` offboarding record rolls the employee status back to `ACTIVE` (BR-12).
+  - `PATCH /api/offboardings/{id}/complete`: Validates separation clearance conditions (all company hardware returned via `AssetAssignmentRepository` and final salary payroll generated for the departure month via `PayrollRepository`). When clearance passes, sets offboarding status to `COMPLETED` and employee status to `EXITED`.
+- Files changed: `src/main/java/com/peopleops/repository/OffboardingRepository.java`, `src/main/java/com/peopleops/dto/OffboardingRequestDTO.java`, `src/main/java/com/peopleops/dto/OffboardingResponseDTO.java`, `src/main/java/com/peopleops/service/OffboardingService.java`, `src/main/java/com/peopleops/controller/OffboardingController.java`
+- Commit message: `"feat(offboarding): implement employee resignation initiation notice period updates deletion rollback and clearance verification for exited transition"`
+
+### Phase 2.10 — Employee Documents & Automatic Activation Workflow (Steps 2.10.1 – 2.10.6)
+- Date: 2026-10-20
+- What we did: Implemented `EmployeeDocumentRepository`, `EmployeeDocumentRequestDTO`, `EmployeeDocumentResponseDTO`, `EmployeeDocumentService`, `EmployeeDocumentController` (`/api/employee-documents`), and enhanced `EmployeeService.activateIfReady`.
+- Why we did it: Manages employee compliance documents and enables automatic activation of onboarding employees once all checklist tasks are done and ID proof is verified (BR-03, BR-11).
+- How it works:
+  - Documents are created unverified (`verified = false`) with upload metadata (BR-11, D-013).
+  - `PATCH /api/employee-documents/{id}/verify`: Sets document to verified and invokes `EmployeeService.activateIfReady`.
+  - `EmployeeService.activateIfReady`: Verifies all assigned onboarding tasks are `DONE` and at least one verified `ID_PROOF` document exists. Once met, updates employee status to `ACTIVE` and seeds annual `LeaveBalance` ledgers for all configured leave types.
+- Files changed: `src/main/java/com/peopleops/repository/EmployeeDocumentRepository.java`, `src/main/java/com/peopleops/dto/EmployeeDocumentRequestDTO.java`, `src/main/java/com/peopleops/dto/EmployeeDocumentResponseDTO.java`, `src/main/java/com/peopleops/service/EmployeeDocumentService.java`, `src/main/java/com/peopleops/controller/EmployeeDocumentController.java`, `src/main/java/com/peopleops/service/EmployeeService.java`
+- Commit message: `"feat(documents-activation): implement employee document management verification workflow and automatic active status transition with leave balance initialization"`
+
+### Phase 2.9 — Asset Management & Hardware Assignments (Steps 2.9.1 – 2.9.8)
+- Date: 2026-10-20
+- What we did: Implemented `AssetRepository`, `AssetRequestDTO`, `AssetResponseDTO`, `AssetService`, `AssetController` (`/api/assets`), `AssetAssignmentRepository`, `AssetAssignmentRequestDTO`, `AssetAssignmentResponseDTO`, `AssetAssignmentService`, and `AssetAssignmentController` (`/api/asset-assignments`).
+- Why we did it: Catalogs physical corporate hardware inventory and manages employee equipment assignment and return lifecycles per Rule BR-10.
+- How it works:
+  - Enforces unique `assetTag` in repository.
+  - `PATCH /api/assets/{id}/retire`: Retires assets only if currently `AVAILABLE`. Prevents deletion of `ASSIGNED` assets.
+  - `POST /api/asset-assignments`: Assigns `AVAILABLE` equipment only to working employees (`ONBOARDING` or `ACTIVE`), automatically updating asset status to `ASSIGNED`.
+  - `PATCH /api/asset-assignments/{id}/return`: Marks assignment `RETURNED` with return date and marks asset `AVAILABLE`.
+- Files changed: `src/main/java/com/peopleops/repository/AssetRepository.java`, `src/main/java/com/peopleops/dto/AssetRequestDTO.java`, `src/main/java/com/peopleops/dto/AssetResponseDTO.java`, `src/main/java/com/peopleops/service/AssetService.java`, `src/main/java/com/peopleops/controller/AssetController.java`, `src/main/java/com/peopleops/repository/AssetAssignmentRepository.java`, `src/main/java/com/peopleops/dto/AssetAssignmentRequestDTO.java`, `src/main/java/com/peopleops/dto/AssetAssignmentResponseDTO.java`, `src/main/java/com/peopleops/service/AssetAssignmentService.java`, `src/main/java/com/peopleops/controller/AssetAssignmentController.java`
+- Commit messages: `"feat(assets): implement asset repository dto service and controller with status retrieval create update delete and retire patching capabilities"`, `"feat(asset-assignments): implement asset assignment management with hardware allocation verification return lifecycle updates and complete phase testing"`
 
 ### Phase 2.8 — Skill Catalog, Training Programs & Employee Enrollments (Steps 2.8.1 – 2.8.11)
 - Date: 2026-10-17
