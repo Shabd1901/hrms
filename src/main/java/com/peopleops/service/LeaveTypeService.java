@@ -3,14 +3,14 @@ package com.peopleops.service;
 import com.peopleops.dto.LeaveTypeRequestDTO;
 import com.peopleops.dto.LeaveTypeResponseDTO;
 import com.peopleops.entity.LeaveType;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.LeaveTypeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class LeaveTypeService {
@@ -26,7 +26,7 @@ public class LeaveTypeService {
     public LeaveTypeResponseDTO createLeaveType(LeaveTypeRequestDTO request) {
         if (leaveTypeRepository.existsByName(request.getName())) {
             log.warn("Leave type creation failed: duplicate name '{}'", request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Leave type already exists with name: " + request.getName());
+            throw new DuplicateResourceException("Leave type already exists with name: " + request.getName());
         }
 
         LeaveType leaveType = toEntity(request);
@@ -48,7 +48,7 @@ public class LeaveTypeService {
         LeaveType leaveType = leaveTypeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave type lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + id);
+                return new ResourceNotFoundException("Leave type not found with id: " + id);
             });
         return toResponseDTO(leaveType);
     }
@@ -57,12 +57,12 @@ public class LeaveTypeService {
         LeaveType leaveType = leaveTypeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave type update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + id);
+                return new ResourceNotFoundException("Leave type not found with id: " + id);
             });
 
         if (!leaveType.getName().equals(request.getName()) && leaveTypeRepository.existsByName(request.getName())) {
             log.warn("Leave type update failed for id {}: duplicate name '{}'", id, request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Leave type already exists with name: " + request.getName());
+            throw new DuplicateResourceException("Leave type already exists with name: " + request.getName());
         }
 
         leaveType.setName(request.getName());
@@ -78,7 +78,7 @@ public class LeaveTypeService {
         LeaveType leaveType = leaveTypeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave type delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + id);
+                return new ResourceNotFoundException("Leave type not found with id: " + id);
             });
         leaveTypeRepository.delete(leaveType);
         log.info("Deleted leave type id: {}", id);

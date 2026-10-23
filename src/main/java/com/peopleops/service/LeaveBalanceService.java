@@ -3,6 +3,8 @@ package com.peopleops.service;
 import com.peopleops.dto.LeaveBalanceRequestDTO;
 import com.peopleops.dto.LeaveBalanceResponseDTO;
 import com.peopleops.entity.LeaveBalance;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.LeaveBalanceRepository;
 import com.peopleops.repository.LeaveTypeRepository;
@@ -10,9 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class LeaveBalanceService {
@@ -35,17 +35,17 @@ public class LeaveBalanceService {
     public LeaveBalanceResponseDTO createLeaveBalance(LeaveBalanceRequestDTO request) {
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Leave balance creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
         if (!leaveTypeRepository.existsById(request.getLeaveTypeId())) {
             log.warn("Leave balance creation failed: leave type id {} not found", request.getLeaveTypeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + request.getLeaveTypeId());
+            throw new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
         }
 
         if (leaveBalanceRepository.existsByEmployeeIdAndLeaveTypeIdAndBalanceYear(
                 request.getEmployeeId(), request.getLeaveTypeId(), request.getBalanceYear())) {
             log.warn("Leave balance creation failed: duplicate balance for employee id {}, leave type id {}, year {}", request.getEmployeeId(), request.getLeaveTypeId(), request.getBalanceYear());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Leave balance already exists for this employee, leave type, and year");
+            throw new DuplicateResourceException("Leave balance already exists for this employee, leave type, and year");
         }
 
         LeaveBalance balance = toEntity(request);
@@ -80,7 +80,7 @@ public class LeaveBalanceService {
         LeaveBalance balance = leaveBalanceRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave balance lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave balance not found with id: " + id);
+                return new ResourceNotFoundException("Leave balance not found with id: " + id);
             });
         return toResponseDTO(balance);
     }
@@ -89,16 +89,16 @@ public class LeaveBalanceService {
         LeaveBalance balance = leaveBalanceRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave balance update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave balance not found with id: " + id);
+                return new ResourceNotFoundException("Leave balance not found with id: " + id);
             });
 
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Leave balance update failed: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
         if (!leaveTypeRepository.existsById(request.getLeaveTypeId())) {
             log.warn("Leave balance update failed: leave type id {} not found", request.getLeaveTypeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + request.getLeaveTypeId());
+            throw new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
         }
 
         balance.setEmployeeId(request.getEmployeeId());
@@ -116,7 +116,7 @@ public class LeaveBalanceService {
         LeaveBalance balance = leaveBalanceRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave balance delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave balance not found with id: " + id);
+                return new ResourceNotFoundException("Leave balance not found with id: " + id);
             });
         leaveBalanceRepository.delete(balance);
         log.info("Deleted leave balance id: {}", id);

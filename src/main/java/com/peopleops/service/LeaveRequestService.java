@@ -10,6 +10,8 @@ import com.peopleops.entity.LeaveType;
 import com.peopleops.enums.AttendanceStatus;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.LeaveRequestStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.AttendanceRepository;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.LeaveBalanceRepository;
@@ -21,10 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class LeaveRequestService {
@@ -54,28 +54,28 @@ public class LeaveRequestService {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
             .orElseThrow(() -> {
                 log.warn("Leave request creation failed: employee id {} not found", request.getEmployeeId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
             });
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Leave request creation failed: employee id {} is EXITED", employee.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only working employees can request leave");
+            throw new BusinessRuleException("Only working employees can request leave");
         }
 
         LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
             .orElseThrow(() -> {
                 log.warn("Leave request creation failed: leave type id {} not found", request.getLeaveTypeId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + request.getLeaveTypeId());
+                return new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
             });
 
         if (request.getFromDate().isAfter(request.getToDate())) {
             log.warn("Leave request creation failed: fromDate {} is after toDate {}", request.getFromDate(), request.getToDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromDate must be on or before toDate");
+            throw new BusinessRuleException("fromDate must be on or before toDate");
         }
 
         if (request.getFromDate().getYear() != request.getToDate().getYear()) {
             log.warn("Leave request creation failed: crosses calendar year boundary ({} to {})", request.getFromDate(), request.getToDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request cannot span across multiple calendar years");
+            throw new BusinessRuleException("Leave request cannot span across multiple calendar years");
         }
 
         int days = (int) ChronoUnit.DAYS.between(request.getFromDate(), request.getToDate()) + 1;
@@ -86,7 +86,7 @@ public class LeaveRequestService {
                 boolean overlap = !(lr.getToDate().isBefore(request.getFromDate()) || lr.getFromDate().isAfter(request.getToDate()));
                 if (overlap) {
                     log.warn("Leave request creation failed for employee id {}: overlaps with existing request id {}", request.getEmployeeId(), lr.getId());
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request dates overlap with an existing pending or approved request");
+                    throw new BusinessRuleException("Leave request dates overlap with an existing pending or approved request");
                 }
             }
         }
@@ -96,13 +96,13 @@ public class LeaveRequestService {
                 .findByEmployeeIdAndLeaveTypeIdAndBalanceYear(request.getEmployeeId(), request.getLeaveTypeId(), request.getFromDate().getYear())
                 .orElseThrow(() -> {
                     log.warn("Leave request creation failed: no leave balance found for employee id {}, leave type id {}, year {}", request.getEmployeeId(), request.getLeaveTypeId(), request.getFromDate().getYear());
-                    return new ResponseStatusException(HttpStatus.BAD_REQUEST, "No leave balance found for this leave type and year");
+                    return new BusinessRuleException("No leave balance found for this leave type and year");
                 });
 
             int available = balance.getTotalDays() - balance.getUsedDays();
             if (available < days) {
                 log.warn("Leave request creation failed: insufficient balance (available: {}, requested: {}) for employee id {}", available, days, request.getEmployeeId());
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient leave balance: available " + available + ", requested " + days);
+                throw new BusinessRuleException("Insufficient leave balance: available " + available + ", requested " + days);
             }
         }
 
@@ -138,7 +138,7 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
         return toResponseDTO(leaveRequest);
     }
@@ -147,22 +147,22 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
 
         if (leaveRequest.getStatus() != LeaveRequestStatus.PENDING) {
             log.warn("Leave request update failed for id {}: status is {}", id, leaveRequest.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request can only be updated while in PENDING status");
+            throw new BusinessRuleException("Leave request can only be updated while in PENDING status");
         }
 
         if (request.getFromDate().isAfter(request.getToDate())) {
             log.warn("Leave request update failed for id {}: fromDate is after toDate", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "fromDate must be on or before toDate");
+            throw new BusinessRuleException("fromDate must be on or before toDate");
         }
 
         if (request.getFromDate().getYear() != request.getToDate().getYear()) {
             log.warn("Leave request update failed for id {}: cross year boundary", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request cannot span across multiple calendar years");
+            throw new BusinessRuleException("Leave request cannot span across multiple calendar years");
         }
 
         int days = (int) ChronoUnit.DAYS.between(request.getFromDate(), request.getToDate()) + 1;
@@ -183,12 +183,12 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
 
         if (leaveRequest.getStatus() != LeaveRequestStatus.PENDING) {
             log.warn("Leave request delete failed for id {}: status is {}", id, leaveRequest.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request can only be deleted while in PENDING status");
+            throw new BusinessRuleException("Leave request can only be deleted while in PENDING status");
         }
 
         leaveRequestRepository.delete(leaveRequest);
@@ -200,34 +200,34 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request approval failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
 
         if (leaveRequest.getStatus() != LeaveRequestStatus.PENDING) {
             log.warn("Leave request approval failed for id {}: status is {}", id, leaveRequest.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PENDING leave requests can be approved");
+            throw new BusinessRuleException("Only PENDING leave requests can be approved");
         }
 
         if (decidedById.equals(leaveRequest.getEmployeeId())) {
             log.warn("Leave request approval failed for id {}: decider cannot be requester", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Decider cannot be the employee requesting the leave");
+            throw new BusinessRuleException("Decider cannot be the employee requesting the leave");
         }
 
         Employee decider = employeeRepository.findById(decidedById)
             .orElseThrow(() -> {
                 log.warn("Leave request approval failed for id {}: decider id {} not found", id, decidedById);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Decider not found with id: " + decidedById);
+                return new ResourceNotFoundException("Decider not found with id: " + decidedById);
             });
 
         if (decider.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Leave request approval failed for id {}: decider id {} is EXITED", id, decidedById);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Decider must be an active or working employee");
+            throw new BusinessRuleException("Decider must be an active or working employee");
         }
 
         LeaveType leaveType = leaveTypeRepository.findById(leaveRequest.getLeaveTypeId())
             .orElseThrow(() -> {
                 log.warn("Leave request approval failed for id {}: leave type id {} not found", id, leaveRequest.getLeaveTypeId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave type not found with id: " + leaveRequest.getLeaveTypeId());
+                return new ResourceNotFoundException("Leave type not found with id: " + leaveRequest.getLeaveTypeId());
             });
 
         if (Boolean.TRUE.equals(leaveType.getPaid())) {
@@ -236,7 +236,7 @@ public class LeaveRequestService {
                     leaveRequest.getEmployeeId(), leaveRequest.getLeaveTypeId(), leaveRequest.getFromDate().getYear())
                 .orElseThrow(() -> {
                     log.warn("Leave request approval failed for id {}: no balance found", id);
-                    return new ResponseStatusException(HttpStatus.BAD_REQUEST, "No leave balance found to deduct approved leave");
+                    return new BusinessRuleException("No leave balance found to deduct approved leave");
                 });
 
             balance.setUsedDays(balance.getUsedDays() + leaveRequest.getDays());
@@ -266,28 +266,28 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request rejection failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
 
         if (leaveRequest.getStatus() != LeaveRequestStatus.PENDING) {
             log.warn("Leave request rejection failed for id {}: status is {}", id, leaveRequest.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PENDING leave requests can be rejected");
+            throw new BusinessRuleException("Only PENDING leave requests can be rejected");
         }
 
         if (decidedById.equals(leaveRequest.getEmployeeId())) {
             log.warn("Leave request rejection failed for id {}: decider cannot be requester", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Decider cannot be the employee requesting the leave");
+            throw new BusinessRuleException("Decider cannot be the employee requesting the leave");
         }
 
         Employee decider = employeeRepository.findById(decidedById)
             .orElseThrow(() -> {
                 log.warn("Leave request rejection failed for id {}: decider id {} not found", id, decidedById);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Decider not found with id: " + decidedById);
+                return new ResourceNotFoundException("Decider not found with id: " + decidedById);
             });
 
         if (decider.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Leave request rejection failed for id {}: decider id {} is EXITED", id, decidedById);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Decider must be an active or working employee");
+            throw new BusinessRuleException("Decider must be an active or working employee");
         }
 
         leaveRequest.setStatus(LeaveRequestStatus.REJECTED);
@@ -303,12 +303,12 @@ public class LeaveRequestService {
         LeaveRequest leaveRequest = leaveRequestRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Leave request cancel failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Leave request not found with id: " + id);
+                return new ResourceNotFoundException("Leave request not found with id: " + id);
             });
 
         if (leaveRequest.getStatus() != LeaveRequestStatus.PENDING) {
             log.warn("Leave request cancel failed for id {}: status is {}", id, leaveRequest.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leave request can only be cancelled while in PENDING status");
+            throw new BusinessRuleException("Leave request can only be cancelled while in PENDING status");
         }
 
         leaveRequest.setStatus(LeaveRequestStatus.CANCELLED);
