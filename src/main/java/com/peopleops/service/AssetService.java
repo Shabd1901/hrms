@@ -4,14 +4,15 @@ import com.peopleops.dto.AssetRequestDTO;
 import com.peopleops.dto.AssetResponseDTO;
 import com.peopleops.entity.Asset;
 import com.peopleops.enums.AssetStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.AssetRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AssetService {
@@ -27,7 +28,7 @@ public class AssetService {
     public AssetResponseDTO createAsset(AssetRequestDTO request) {
         if (assetRepository.existsByAssetTag(request.getAssetTag())) {
             log.warn("Create asset rejected: asset tag {} already exists", request.getAssetTag());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Asset already exists with tag: " + request.getAssetTag());
+            throw new DuplicateResourceException("Asset already exists with tag: " + request.getAssetTag());
         }
 
         Asset asset = toEntity(request);
@@ -48,17 +49,17 @@ public class AssetService {
 
     public AssetResponseDTO getAssetById(Long id) {
         Asset asset = assetRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
         return toResponseDTO(asset);
     }
 
     public AssetResponseDTO updateAsset(Long id, AssetRequestDTO request) {
         Asset asset = assetRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
 
         if (!asset.getAssetTag().equals(request.getAssetTag()) && assetRepository.existsByAssetTag(request.getAssetTag())) {
             log.warn("Update asset rejected: asset tag {} already exists for another asset", request.getAssetTag());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Asset already exists with tag: " + request.getAssetTag());
+            throw new DuplicateResourceException("Asset already exists with tag: " + request.getAssetTag());
         }
 
         asset.setAssetTag(request.getAssetTag());
@@ -73,11 +74,11 @@ public class AssetService {
 
     public void deleteAsset(Long id) {
         Asset asset = assetRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
 
         if (asset.getStatus() == AssetStatus.ASSIGNED) {
             log.warn("Delete asset rejected: asset id {} is currently assigned", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete an asset that is currently assigned");
+            throw new BusinessRuleException("Cannot delete an asset that is currently assigned");
         }
 
         assetRepository.delete(asset);
@@ -86,11 +87,11 @@ public class AssetService {
 
     public AssetResponseDTO retireAsset(Long id) {
         Asset asset = assetRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + id));
 
         if (asset.getStatus() != AssetStatus.AVAILABLE) {
             log.warn("Retire asset rejected: asset id {} status is {}", id, asset.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only AVAILABLE assets can be retired. Current status: " + asset.getStatus());
+            throw new BusinessRuleException("Only AVAILABLE assets can be retired. Current status: " + asset.getStatus());
         }
 
         asset.setStatus(AssetStatus.RETIRED);

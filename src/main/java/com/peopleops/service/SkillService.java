@@ -3,14 +3,14 @@ package com.peopleops.service;
 import com.peopleops.dto.SkillRequestDTO;
 import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.entity.Skill;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.SkillRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class SkillService {
@@ -26,7 +26,7 @@ public class SkillService {
     public SkillResponseDTO createSkill(SkillRequestDTO request) {
         if (skillRepository.existsByName(request.getName())) {
             log.warn("Skill creation failed: duplicate name '{}'", request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Skill already exists with name: " + request.getName());
+            throw new DuplicateResourceException("Skill already exists with name: " + request.getName());
         }
 
         Skill skill = toEntity(request);
@@ -48,7 +48,7 @@ public class SkillService {
         Skill skill = skillRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Skill lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Skill not found with id: " + id);
+                return new ResourceNotFoundException("Skill not found with id: " + id);
             });
         return toResponseDTO(skill);
     }
@@ -57,12 +57,12 @@ public class SkillService {
         Skill skill = skillRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Skill update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Skill not found with id: " + id);
+                return new ResourceNotFoundException("Skill not found with id: " + id);
             });
 
         if (!skill.getName().equals(request.getName()) && skillRepository.existsByName(request.getName())) {
             log.warn("Skill update failed for id {}: duplicate name '{}'", id, request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Skill already exists with name: " + request.getName());
+            throw new DuplicateResourceException("Skill already exists with name: " + request.getName());
         }
 
         skill.setName(request.getName());
@@ -77,7 +77,7 @@ public class SkillService {
         Skill skill = skillRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Skill delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Skill not found with id: " + id);
+                return new ResourceNotFoundException("Skill not found with id: " + id);
             });
         skillRepository.delete(skill);
         log.info("Deleted skill id: {}", id);

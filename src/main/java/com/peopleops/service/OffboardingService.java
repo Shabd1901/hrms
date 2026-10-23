@@ -7,6 +7,9 @@ import com.peopleops.entity.Offboarding;
 import com.peopleops.enums.AssignmentStatus;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.OffboardingStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.AssetAssignmentRepository;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.OffboardingRepository;
@@ -15,10 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class OffboardingService {
@@ -44,21 +45,21 @@ public class OffboardingService {
     @Transactional
     public OffboardingResponseDTO initiateOffboarding(OffboardingRequestDTO request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId()));
 
         if (employee.getStatus() != EmployeeStatus.ACTIVE) {
             log.warn("Initiate offboarding rejected: employee id {} is in status {}", employee.getId(), employee.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Offboarding can only be initiated for ACTIVE employees. Current status: " + employee.getStatus());
+            throw new BusinessRuleException("Offboarding can only be initiated for ACTIVE employees. Current status: " + employee.getStatus());
         }
 
         if (request.getLastWorkingDate().isBefore(request.getResignationDate())) {
             log.warn("Initiate offboarding rejected: last working date {} is before resignation date {}", request.getLastWorkingDate(), request.getResignationDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Last working date must be on or after resignation date");
+            throw new BusinessRuleException("Last working date must be on or after resignation date");
         }
 
         if (offboardingRepository.existsByEmployeeId(request.getEmployeeId())) {
             log.warn("Initiate offboarding rejected: offboarding already exists for employee id {}", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Offboarding has already been initiated for employee id: " + request.getEmployeeId());
+            throw new DuplicateResourceException("Offboarding has already been initiated for employee id: " + request.getEmployeeId());
         }
 
         Offboarding offboarding = toEntity(request);
@@ -83,22 +84,22 @@ public class OffboardingService {
 
     public OffboardingResponseDTO getOffboardingById(Long id) {
         Offboarding offboarding = offboardingRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offboarding record not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Offboarding record not found with id: " + id));
         return toResponseDTO(offboarding);
     }
 
     public OffboardingResponseDTO updateOffboarding(Long id, OffboardingRequestDTO request) {
         Offboarding offboarding = offboardingRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offboarding record not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Offboarding record not found with id: " + id));
 
         if (offboarding.getStatus() == OffboardingStatus.COMPLETED) {
             log.warn("Update offboarding rejected: offboarding id {} is already COMPLETED", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Completed offboarding records cannot be updated");
+            throw new BusinessRuleException("Completed offboarding records cannot be updated");
         }
 
         if (request.getLastWorkingDate().isBefore(request.getResignationDate())) {
             log.warn("Update offboarding rejected: last working date {} is before resignation date {}", request.getLastWorkingDate(), request.getResignationDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Last working date must be on or after resignation date");
+            throw new BusinessRuleException("Last working date must be on or after resignation date");
         }
 
         offboarding.setResignationDate(request.getResignationDate());
@@ -114,15 +115,15 @@ public class OffboardingService {
     @Transactional
     public void deleteOffboarding(Long id) {
         Offboarding offboarding = offboardingRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offboarding record not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Offboarding record not found with id: " + id));
 
         if (offboarding.getStatus() == OffboardingStatus.COMPLETED) {
             log.warn("Delete offboarding rejected: offboarding id {} is already COMPLETED", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Completed offboarding records cannot be deleted");
+            throw new BusinessRuleException("Completed offboarding records cannot be deleted");
         }
 
         Employee employee = employeeRepository.findById(offboarding.getEmployeeId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + offboarding.getEmployeeId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + offboarding.getEmployeeId()));
         employee.setStatus(EmployeeStatus.ACTIVE);
         employeeRepository.save(employee);
 
@@ -133,17 +134,17 @@ public class OffboardingService {
     @Transactional
     public OffboardingResponseDTO completeOffboarding(Long id) {
         Offboarding offboarding = offboardingRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offboarding record not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Offboarding record not found with id: " + id));
 
         if (offboarding.getStatus() == OffboardingStatus.COMPLETED) {
             log.warn("Complete offboarding rejected: offboarding id {} is already COMPLETED", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Offboarding is already completed");
+            throw new BusinessRuleException("Offboarding is already completed");
         }
 
         boolean hasAssignedAssets = assetAssignmentRepository.existsByEmployeeIdAndStatus(offboarding.getEmployeeId(), AssignmentStatus.ASSIGNED);
         if (hasAssignedAssets) {
             log.warn("Complete offboarding rejected: employee id {} has unreturned assets", offboarding.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot complete offboarding: employee still has assigned assets that must be returned");
+            throw new BusinessRuleException("Cannot complete offboarding: employee still has assigned assets that must be returned");
         }
 
         int month = offboarding.getLastWorkingDate().getMonthValue();
@@ -151,14 +152,14 @@ public class OffboardingService {
         boolean hasPayroll = payrollRepository.existsByEmployeeIdAndPayMonthAndPayYear(offboarding.getEmployeeId(), month, year);
         if (!hasPayroll) {
             log.warn("Complete offboarding rejected: final payroll for {}/{} not found for employee id {}", month, year, offboarding.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot complete offboarding: final payroll for " + month + "/" + year + " has not been generated");
+            throw new BusinessRuleException("Cannot complete offboarding: final payroll for " + month + "/" + year + " has not been generated");
         }
 
         offboarding.setStatus(OffboardingStatus.COMPLETED);
         Offboarding updated = offboardingRepository.save(offboarding);
 
         Employee employee = employeeRepository.findById(offboarding.getEmployeeId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + offboarding.getEmployeeId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + offboarding.getEmployeeId()));
         employee.setStatus(EmployeeStatus.EXITED);
         employeeRepository.save(employee);
 

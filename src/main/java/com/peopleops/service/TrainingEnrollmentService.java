@@ -8,6 +8,9 @@ import com.peopleops.entity.TrainingProgram;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.EnrollmentStatus;
 import com.peopleops.enums.TrainingStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.TrainingEnrollmentRepository;
 import com.peopleops.repository.TrainingProgramRepository;
@@ -16,9 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TrainingEnrollmentService {
@@ -40,24 +41,24 @@ public class TrainingEnrollmentService {
 
     public TrainingEnrollmentResponseDTO enrollEmployee(TrainingEnrollmentRequestDTO request) {
         Employee employee = employeeRepository.findById(request.getEmployeeId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId()));
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Enrollment rejected: employee {} is in EXITED status", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only working employees can be enrolled in training");
+            throw new BusinessRuleException("Only working employees can be enrolled in training");
         }
 
         TrainingProgram program = trainingProgramRepository.findById(request.getTrainingProgramId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + request.getTrainingProgramId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Training program not found with id: " + request.getTrainingProgramId()));
 
         if (program.getStatus() != TrainingStatus.PLANNED && program.getStatus() != TrainingStatus.ONGOING) {
             log.warn("Enrollment rejected: program {} has status {}", request.getTrainingProgramId(), program.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only enroll into PLANNED or ONGOING training programs");
+            throw new BusinessRuleException("Can only enroll into PLANNED or ONGOING training programs");
         }
 
         if (trainingEnrollmentRepository.existsByTrainingProgramIdAndEmployeeId(request.getTrainingProgramId(), request.getEmployeeId())) {
             log.warn("Enrollment rejected: employee {} is already enrolled in program {}", request.getEmployeeId(), request.getTrainingProgramId());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is already enrolled in this training program");
+            throw new DuplicateResourceException("Employee is already enrolled in this training program");
         }
 
         TrainingEnrollment enrollment = toEntity(request);
@@ -81,24 +82,24 @@ public class TrainingEnrollmentService {
 
     public TrainingEnrollmentResponseDTO getEnrollmentById(Long id) {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Training enrollment not found with id: " + id));
         return toResponseDTO(enrollment);
     }
 
     public void deleteEnrollment(Long id) {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Training enrollment not found with id: " + id));
         trainingEnrollmentRepository.delete(enrollment);
         log.info("Deleted training enrollment with id {}", id);
     }
 
     public TrainingEnrollmentResponseDTO completeEnrollment(Long id) {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Training enrollment not found with id: " + id));
 
         if (enrollment.getStatus() != EnrollmentStatus.ENROLLED) {
             log.warn("Complete enrollment rejected: enrollment {} has status {}", id, enrollment.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ENROLLED enrollments can be completed");
+            throw new BusinessRuleException("Only ENROLLED enrollments can be completed");
         }
 
         enrollment.setStatus(EnrollmentStatus.COMPLETED);
@@ -111,11 +112,11 @@ public class TrainingEnrollmentService {
 
     public TrainingEnrollmentResponseDTO dropEnrollment(Long id) {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Training enrollment not found with id: " + id));
 
         if (enrollment.getStatus() != EnrollmentStatus.ENROLLED) {
             log.warn("Drop enrollment rejected: enrollment {} has status {}", id, enrollment.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ENROLLED enrollments can be dropped");
+            throw new BusinessRuleException("Only ENROLLED enrollments can be dropped");
         }
 
         enrollment.setStatus(EnrollmentStatus.DROPPED);

@@ -3,6 +3,7 @@ package com.peopleops.service;
 import com.peopleops.dto.EmployeeDocumentRequestDTO;
 import com.peopleops.dto.EmployeeDocumentResponseDTO;
 import com.peopleops.entity.EmployeeDocument;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeDocumentRepository;
 import com.peopleops.repository.EmployeeRepository;
 import java.time.LocalDate;
@@ -10,10 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmployeeDocumentService {
@@ -36,7 +35,7 @@ public class EmployeeDocumentService {
     public EmployeeDocumentResponseDTO createDocument(EmployeeDocumentRequestDTO request) {
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Create document rejected: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         EmployeeDocument document = toEntity(request);
@@ -62,17 +61,17 @@ public class EmployeeDocumentService {
 
     public EmployeeDocumentResponseDTO getDocumentById(Long id) {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee document not found with id: " + id));
         return toResponseDTO(document);
     }
 
     public EmployeeDocumentResponseDTO updateDocument(Long id, EmployeeDocumentRequestDTO request) {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee document not found with id: " + id));
 
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Update document rejected: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         document.setEmployeeId(request.getEmployeeId());
@@ -87,7 +86,7 @@ public class EmployeeDocumentService {
 
     public void deleteDocument(Long id) {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee document not found with id: " + id));
         employeeDocumentRepository.delete(document);
         log.info("Deleted document id {}", id);
     }
@@ -95,7 +94,7 @@ public class EmployeeDocumentService {
     @Transactional
     public EmployeeDocumentResponseDTO verifyDocument(Long id) {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
+            .orElseThrow(() -> new ResourceNotFoundException("Employee document not found with id: " + id));
 
         document.setVerified(true);
         EmployeeDocument updated = employeeDocumentRepository.save(document);

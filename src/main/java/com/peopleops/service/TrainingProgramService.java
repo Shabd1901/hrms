@@ -4,14 +4,14 @@ import com.peopleops.dto.TrainingProgramRequestDTO;
 import com.peopleops.dto.TrainingProgramResponseDTO;
 import com.peopleops.entity.TrainingProgram;
 import com.peopleops.enums.TrainingStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.TrainingProgramRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TrainingProgramService {
@@ -27,7 +27,7 @@ public class TrainingProgramService {
     public TrainingProgramResponseDTO createTrainingProgram(TrainingProgramRequestDTO request) {
         if (request.getStartDate().isAfter(request.getEndDate())) {
             log.warn("Training program creation failed: startDate {} is after endDate {}", request.getStartDate(), request.getEndDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDate must be on or before endDate");
+            throw new BusinessRuleException("startDate must be on or before endDate");
         }
 
         TrainingProgram program = toEntity(request);
@@ -53,7 +53,7 @@ public class TrainingProgramService {
         TrainingProgram program = trainingProgramRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Training program lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+                return new ResourceNotFoundException("Training program not found with id: " + id);
             });
         return toResponseDTO(program);
     }
@@ -62,12 +62,12 @@ public class TrainingProgramService {
         TrainingProgram program = trainingProgramRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Training program update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+                return new ResourceNotFoundException("Training program not found with id: " + id);
             });
 
         if (request.getStartDate().isAfter(request.getEndDate())) {
             log.warn("Training program update failed for id {}: startDate {} is after endDate {}", id, request.getStartDate(), request.getEndDate());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDate must be on or before endDate");
+            throw new BusinessRuleException("startDate must be on or before endDate");
         }
 
         program.setTitle(request.getTitle());
@@ -85,7 +85,7 @@ public class TrainingProgramService {
         TrainingProgram program = trainingProgramRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Training program delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+                return new ResourceNotFoundException("Training program not found with id: " + id);
             });
         trainingProgramRepository.delete(program);
         log.info("Deleted training program id: {}", id);
@@ -95,7 +95,7 @@ public class TrainingProgramService {
         TrainingProgram program = trainingProgramRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Training program status update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+                return new ResourceNotFoundException("Training program not found with id: " + id);
             });
 
         program.setStatus(status);
