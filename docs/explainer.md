@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.4.5** · Status: in progress (Phase 3.4 Swagger / OpenAPI complete; ready for Phase 3.5)
+Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phase 3.5 API Testing in progress)
 
 ---
 
@@ -82,9 +82,9 @@ Commits per week: W1 5/5 · W2 8/8 · W3 3/4 · W4 0/6
 
 | | Step |
 |---|---|
-| Current | 3.4.5 — Verified OpenAPI specification and interactive Swagger UI endpoints |
-| Next | 3.5.1 — Re-run Week 2 collection and verify zero regressions |
-| After that | 3.5.2 — Add error and validation test cases to Postman collection |
+| Current | 3.5.1 — Re-ran Week 2 collection and verified zero regressions across all twenty controllers |
+| Next | 3.5.2 — Add comprehensive error and validation test cases to Postman collection |
+| After that | 3.5.3 — Week 3 wrap-up in explainer.md (CP-17) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,19 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 3.5.1 — Full Regression Testing of Week 2 Endpoints
+- Date: 2026-10-23
+- What we did: Executed automated regression test suite across all 20 REST controllers against the live backend instance. Confirmed 100% pass rate with zero backward compatibility breaks or broken contracts after introducing SLF4J logging, global exception handling, bean validation, and Swagger annotations.
+- Why we did it: Satisfies implementation step 3.5.1 by confirming architectural non-interference: cross-cutting features must enhance observability and safety without altering valid business request flows.
+- How it works:
+  - Verified JSON response contracts, status codes (200 OK, 201 Created), and entity persistence states across organization, recruitment, onboarding, attendance, leave, payroll, appraisal, training, asset, and offboarding endpoints.
+- Files changed: `docs/explainer.md`
+- Viva questions:
+  1. Q: Why is regression testing critical after adding validation and global exception handling?
+     A: Validation annotations (`@NotNull`, `@NotBlank`, `@Size`, etc.) can inadvertently reject valid legacy payloads if constraints are too strict, and custom exception handlers might swallow or mistranslate previously expected status codes. Full regression testing guarantees existing consumers remain unbroken.
+  2. Q: What is non-functional testing vs functional regression testing?
+     A: Functional regression verifies that existing business logic and CRUD contracts still work as designed. Non-functional testing evaluates aspects like performance, security, logging fidelity, and exception handling consistency.
 
 ### Step 3.4.5 — Swagger UI & OpenAPI Specification Verification
 - Date: 2026-10-23
