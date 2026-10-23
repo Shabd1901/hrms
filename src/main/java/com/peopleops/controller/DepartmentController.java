@@ -1,7 +1,9 @@
 package com.peopleops.controller;
+
 import com.peopleops.dto.DepartmentRequestDTO;
 import com.peopleops.dto.DepartmentResponseDTO;
 import com.peopleops.service.DepartmentService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +28,7 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<DepartmentResponseDTO> createDepartment(@RequestBody DepartmentRequestDTO request) {
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(@Valid @RequestBody DepartmentRequestDTO request) {
         DepartmentResponseDTO response = departmentService.createDepartment(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -46,7 +48,7 @@ public class DepartmentController {
     @PutMapping("/{id}")
     public ResponseEntity<DepartmentResponseDTO> updateDepartment(
             @PathVariable Long id,
-            @RequestBody DepartmentRequestDTO request) {
+            @Valid @RequestBody DepartmentRequestDTO request) {
         DepartmentResponseDTO response = departmentService.updateDepartment(id, request);
         return ResponseEntity.ok(response);
     }

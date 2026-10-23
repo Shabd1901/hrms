@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.DesignationRequestDTO;
 import com.peopleops.dto.DesignationResponseDTO;
 import com.peopleops.service.DesignationService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class DesignationController {
     }
 
     @PostMapping
-    public ResponseEntity<DesignationResponseDTO> createDesignation(@RequestBody DesignationRequestDTO request) {
+    public ResponseEntity<DesignationResponseDTO> createDesignation(@Valid @RequestBody DesignationRequestDTO request) {
         DesignationResponseDTO response = designationService.createDesignation(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -46,7 +47,7 @@ public class DesignationController {
     @PutMapping("/{id}")
     public ResponseEntity<DesignationResponseDTO> updateDesignation(
             @PathVariable Long id,
-            @RequestBody DesignationRequestDTO request) {
+            @Valid @RequestBody DesignationRequestDTO request) {
         DesignationResponseDTO response = designationService.updateDesignation(id, request);
         return ResponseEntity.ok(response);
     }

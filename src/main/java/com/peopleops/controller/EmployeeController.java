@@ -4,6 +4,7 @@ import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.service.EmployeeService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class EmployeeController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeResponseDTO> createEmployee(@RequestBody EmployeeRequestDTO request) {
+    public ResponseEntity<EmployeeResponseDTO> createEmployee(@Valid @RequestBody EmployeeRequestDTO request) {
         EmployeeResponseDTO response = employeeService.createEmployee(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -51,7 +52,7 @@ public class EmployeeController {
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeResponseDTO> updateEmployee(
             @PathVariable Long id,
-            @RequestBody EmployeeRequestDTO request) {
+            @Valid @RequestBody EmployeeRequestDTO request) {
         EmployeeResponseDTO response = employeeService.updateEmployee(id, request);
         return ResponseEntity.ok(response);
     }
