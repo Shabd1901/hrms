@@ -26,4 +26,7 @@ public class EmployeeResponseDTO {
     private Long departmentId;
     private Long designationId;
     private Long managerId;
+    private String departmentName;
+    private String designationTitle;
+    private String managerName;
 }

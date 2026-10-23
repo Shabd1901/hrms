@@ -363,6 +363,12 @@ public class EmployeeService {
     }
 
     private EmployeeResponseDTO toResponseDTO(Employee entity) {
+        String departmentName = entity.getDepartment() != null ? entity.getDepartment().getName() : null;
+        String designationTitle = entity.getDesignation() != null ? entity.getDesignation().getTitle() : null;
+        String managerName = entity.getManager() != null
+            ? (entity.getManager().getFirstName() + " " + entity.getManager().getLastName())
+            : null;
+
         return new EmployeeResponseDTO(
             entity.getId(),
             entity.getEmployeeCode(),
@@ -376,7 +382,10 @@ public class EmployeeService {
             entity.getStatus(),
             entity.getDepartment() != null ? entity.getDepartment().getId() : null,
             entity.getDesignation() != null ? entity.getDesignation().getId() : null,
-            entity.getManager() != null ? entity.getManager().getId() : null
+            entity.getManager() != null ? entity.getManager().getId() : null,
+            departmentName,
+            designationTitle,
+            managerName
         );
     }
 }
