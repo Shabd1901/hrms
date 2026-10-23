@@ -5,6 +5,7 @@ import com.peopleops.dto.EmployeeResponseDTO;
 import com.peopleops.dto.HireRequestDTO;
 import com.peopleops.entity.Candidate;
 import com.peopleops.entity.Department;
+import com.peopleops.entity.Designation;
 import com.peopleops.entity.Employee;
 import com.peopleops.entity.JobOpening;
 import com.peopleops.entity.LeaveBalance;
@@ -72,10 +73,11 @@ public class EmployeeService {
                 log.warn("Employee creation failed: department id {} not found", request.getDepartmentId());
                 return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
             });
-        if (!designationRepository.existsById(request.getDesignationId())) {
-            log.warn("Employee creation failed: designation id {} not found", request.getDesignationId());
-            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
-        }
+        Designation designation = designationRepository.findById(request.getDesignationId())
+            .orElseThrow(() -> {
+                log.warn("Employee creation failed: designation id {} not found", request.getDesignationId());
+                return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
+            });
         if (request.getManagerId() != null && !employeeRepository.existsById(request.getManagerId())) {
             log.warn("Employee creation failed: manager id {} not found", request.getManagerId());
             throw new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
@@ -88,6 +90,7 @@ public class EmployeeService {
         employee.setEmployeeCode(employeeCode);
         employee.setStatus(EmployeeStatus.ONBOARDING);
         employee.setDepartment(department);
+        employee.setDesignation(designation);
 
         Employee saved = employeeRepository.save(employee);
         log.info("Created employee with code: '{}' and id: {}", saved.getEmployeeCode(), saved.getId());
@@ -111,6 +114,8 @@ public class EmployeeService {
 
         Department department = departmentRepository.findById(opening.getDepartmentId())
             .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + opening.getDepartmentId()));
+        Designation designation = designationRepository.findById(opening.getDesignationId())
+            .orElseThrow(() -> new ResourceNotFoundException("Designation not found with id: " + opening.getDesignationId()));
 
         Employee employee = new Employee();
         employee.setEmployeeCode(employeeCode);
@@ -121,7 +126,7 @@ public class EmployeeService {
         employee.setDateOfJoining(hireRequest.getDateOfJoining());
         employee.setMonthlySalary(hireRequest.getMonthlySalary());
         employee.setDepartment(department);
-        employee.setDesignationId(opening.getDesignationId());
+        employee.setDesignation(designation);
         employee.setManagerId(hireRequest.getManagerId());
         employee.setStatus(EmployeeStatus.ONBOARDING);
 
@@ -175,10 +180,11 @@ public class EmployeeService {
                 log.warn("Employee update failed for id {}: department id {} not found", id, request.getDepartmentId());
                 return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
             });
-        if (!designationRepository.existsById(request.getDesignationId())) {
-            log.warn("Employee update failed for id {}: designation id {} not found", id, request.getDesignationId());
-            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
-        }
+        Designation designation = designationRepository.findById(request.getDesignationId())
+            .orElseThrow(() -> {
+                log.warn("Employee update failed for id {}: designation id {} not found", id, request.getDesignationId());
+                return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
+            });
         if (request.getManagerId() != null) {
             if (request.getManagerId().equals(id)) {
                 log.warn("Employee update failed for id {}: cannot be own manager", id);
@@ -198,7 +204,7 @@ public class EmployeeService {
         employee.setDateOfJoining(request.getDateOfJoining());
         employee.setMonthlySalary(request.getMonthlySalary());
         employee.setDepartment(department);
-        employee.setDesignationId(request.getDesignationId());
+        employee.setDesignation(designation);
         employee.setManagerId(request.getManagerId());
 
         Employee updated = employeeRepository.save(employee);
@@ -258,12 +264,13 @@ public class EmployeeService {
             log.warn("Employee promotion failed: id {} is EXITED", id);
             throw new BusinessRuleException("Employee is exited and cannot be promoted");
         }
-        if (!designationRepository.existsById(designationId)) {
-            log.warn("Employee promotion failed: target designation id {} not found", designationId);
-            throw new ResourceNotFoundException("Designation not found with id: " + designationId);
-        }
+        Designation designation = designationRepository.findById(designationId)
+            .orElseThrow(() -> {
+                log.warn("Employee promotion failed: target designation id {} not found", designationId);
+                return new ResourceNotFoundException("Designation not found with id: " + designationId);
+            });
 
-        employee.setDesignationId(designationId);
+        employee.setDesignation(designation);
         Employee updated = employeeRepository.save(employee);
         log.info("Promoted employee id: {} to designation id: {}", id, designationId);
         return toResponseDTO(updated);
@@ -341,7 +348,6 @@ public class EmployeeService {
         employee.setDateOfBirth(dto.getDateOfBirth());
         employee.setDateOfJoining(dto.getDateOfJoining());
         employee.setMonthlySalary(dto.getMonthlySalary());
-        employee.setDesignationId(dto.getDesignationId());
         employee.setManagerId(dto.getManagerId());
         return employee;
     }
@@ -359,7 +365,7 @@ public class EmployeeService {
             entity.getMonthlySalary(),
             entity.getStatus(),
             entity.getDepartment() != null ? entity.getDepartment().getId() : null,
-            entity.getDesignationId(),
+            entity.getDesignation() != null ? entity.getDesignation().getId() : null,
             entity.getManagerId()
         );
     }

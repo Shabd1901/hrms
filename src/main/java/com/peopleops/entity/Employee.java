@@ -63,8 +63,9 @@ public class Employee {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "designation_id")
-    private Long designationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "designation_id")
+    private Designation designation;
 
     @Column(name = "manager_id")
     private Long managerId;
