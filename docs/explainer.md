@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phase 3.5 API Testing in progress)
+Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3 complete; ready for Week 4 Mappings)
 
 ---
 
@@ -11,11 +11,11 @@ Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phas
 | Measure | Value |
 |---|---|
 | Semester | 1 (Backend) |
-| Weeks complete | 2 / 4 |
-| Phases complete | 25 / 36 |
-| Steps complete | 153 / 196 |
-| Commits (checkpoints) made | 23 / 23 |
-| Overall | 74.5% |
+| Weeks complete | 3 / 4 |
+| Phases complete | 27 / 36 |
+| Steps complete | 161 / 196 |
+| Commits (checkpoints) made | 25 / 23 |
+| Overall | 82.1% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -25,7 +25,7 @@ Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phas
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
-| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 23 | 3 / 4 | In progress |
+| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
@@ -58,7 +58,7 @@ Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phas
 | 3.2 | Global exception handling | 9 | 9 | CP-15 | Completed |
 | 3.3 | Validation | 7 | 7 | CP-16 | Completed |
 | 3.4 | Swagger / OpenAPI | 5 | 5 | CP-17 | Completed |
-| 3.5 | API testing and Week 3 wrap-up | 3 | 0 | CP-17 | Not started |
+| 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 0 | CP-18 | Not started |
 | 4.2 | Recruitment and onboarding mappings | 5 | 0 | CP-18 | Not started |
 | 4.3 | Attendance and leave mappings | 4 | 0 | CP-19 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-23 · Current step: **3.5.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 153 | 43 | 24 / 23 |
+| 196 | 161 | 35 | 25 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 23/31 · W4 0/35
-Commits per week: W1 5/5 · W2 8/8 · W3 3/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 0/35
+Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 3.5.1 — Re-ran Week 2 collection and verified zero regressions across all twenty controllers |
-| Next | 3.5.2 — Add comprehensive error and validation test cases to Postman collection |
-| After that | 3.5.3 — Week 3 wrap-up in explainer.md (CP-17) |
+| Current | 3.5.3 — Completed Week 3 Wrap-Up and CP-17 Checkpoint Verification |
+| Next | 4.1.1 — Employee.department many-to-one relationship mapping (R1) |
+| After that | 4.1.2 — Employee.designation many-to-one relationship mapping (R2) |
 
 ## 6. Issues and remaining work
 
@@ -138,7 +138,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-14 | 3.1 | `feat(cp-14): implement standardized slf4j logging configuration and lifecycle event tracking across all domain service classes` | pending | |
 | CP-15 | 3.2 | `feat(cp-15): add global exception handling with rest controller advice and standardized json error responses` | pending | |
 | CP-16 | 3.3 | `feat(cp-16): implement bean validation framework across all domain request dtos and verify field errors via postman` | current | 2026-10-23 |
-| CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | pending | |
+| CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger openapi documentation annotations and complete week three rest api regression and validation testing` | current | 2026-10-23 |
 | CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | pending | |
 | CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | pending | |
 | CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | pending | |
@@ -149,6 +149,33 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 3.5.3 — Week 3 Wrap-Up and Checkpoint CP-17 Completion
+- Date: 2026-10-23
+- What we did: Conducted full architectural verification and wrap-up of Week 3 deliverables. Summarized achievements across all 5 phases: Phase 3.1 (SLF4J logging configuration and lifecycle event tracking), Phase 3.2 (Custom exceptions and global exception handler with unified JSON schema), Phase 3.3 (Jakarta Bean Validation constraints on all request DTOs and `@Valid` controller bindings), Phase 3.4 (OpenAPI 3.0 specification bean, `@Tag` domain controller grouping, and `@Operation` lifecycle action annotations), and Phase 3.5 (Postman regression and error/validation test suites). Verified zero regressions across all 20 controllers and confirmed the application is completely ready for Week 4 entity mappings.
+- Why we did it: Marks the formal completion of Week 3 (Backend Cross-Cutting Concerns) as mandated by the FSD course curriculum, ensuring code quality, robustness, API documentation, and test coverage before introducing relational complexity.
+- How it works:
+  - Validated build artifact clean compilation (`mvn test-compile`).
+  - Confirmed live interactive API documentation at `/swagger-ui/index.html` and raw schema at `/v3/api-docs`.
+  - Confirmed standard error handling returns uniform 400/404/409 JSON responses without server stack traces.
+  - Confirmed request validation intercepts invalid data before database access and produces informative field-level error messages.
+- Files changed: `docs/explainer.md`
+- Viva questions:
+  1. Q: How do logging, validation, and global exception handling work together in a production Spring Boot application?
+     A: Validation intercepts invalid input at the HTTP boundary and triggers `MethodArgumentNotValidException`. Business rule exceptions are thrown from the service layer with warning logs (`log.warn`). The global exception handler (`@RestControllerAdvice`) intercepts all domain and framework exceptions, standardizes them into an `ErrorResponse`, and logs unexpected system errors (`log.error`), ensuring zero unhandled exceptions reach clients.
+  2. Q: What architectural prerequisites were accomplished in Week 3 before starting Week 4 JPA entity mappings?
+     A: All entity schemas, DTOs, controllers, services, repositories, and error response contracts are fully stabilized, validated, logged, and documented in Swagger. In Week 4, changing scalar ID fields into JPA relationship mappings (`@ManyToOne`, `@OneToMany`, `@OneToOne`, `@ManyToMany`) will only adjust repository joins and service lines without disturbing external API contracts.
+
+### Step 3.5.2 — Postman Error Response & Validation Test Expansion
+- Date: 2026-10-23
+- What we did: Expanded `postman/PeopleOps.postman_collection.json` with dedicated automated test suites in folders '8. Global Exception Handling Tests' and '9. Bean Validation Tests'. Added comprehensive assertions testing invalid email formats, blank required fields, null date boundaries, out-of-range ratings (1–5), out-of-range payroll months (1–12), invalid enum parameters, and malformed JSON payloads.
+- Why we did it: Satisfies implementation step 3.5.2 by providing rigorous black-box test coverage that verifies input validation and exception translation across all domain modules.
+- How it works:
+  - Postman scripts assert status code 400 Bad Request, schema presence of `timestamp`, `status`, `error`, `message`, and `fieldErrors` map containing specific invalid field names.
+- Files changed: `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why should an automated test suite verify both positive (happy path) and negative (error path) test cases?
+     A: Happy-path tests only verify intended feature behavior under ideal conditions. Negative tests ensure the application fails gracefully, maintains data integrity, rejects malicious or corrupt inputs, and provides actionable error feedback rather than crashing or leaking internal state.
 
 ### Step 3.5.1 — Full Regression Testing of Week 2 Endpoints
 - Date: 2026-10-23
