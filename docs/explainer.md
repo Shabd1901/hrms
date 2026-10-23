@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.3.7** · Status: in progress (Phase 3.3 Validation complete; ready for Phase 3.4)
+Last updated: 2026-10-23 · Current step: **3.4.5** · Status: in progress (Phase 3.4 Swagger / OpenAPI complete; ready for Phase 3.5)
 
 ---
 
@@ -57,7 +57,7 @@ Last updated: 2026-10-23 · Current step: **3.3.7** · Status: in progress (Phas
 | 3.1 | Logging | 7 | 7 | CP-14 | Completed |
 | 3.2 | Global exception handling | 9 | 9 | CP-15 | Completed |
 | 3.3 | Validation | 7 | 7 | CP-16 | Completed |
-| 3.4 | Swagger / OpenAPI | 5 | 0 | CP-17 | Not started |
+| 3.4 | Swagger / OpenAPI | 5 | 5 | CP-17 | Completed |
 | 3.5 | API testing and Week 3 wrap-up | 3 | 0 | CP-17 | Not started |
 | 4.1 | Employee core mappings | 6 | 0 | CP-18 | Not started |
 | 4.2 | Recruitment and onboarding mappings | 5 | 0 | CP-18 | Not started |
@@ -82,9 +82,9 @@ Commits per week: W1 5/5 · W2 8/8 · W3 3/4 · W4 0/6
 
 | | Step |
 |---|---|
-| Current | 3.3.7 — Verified Bean Validation returning 400 Bad Request with fieldErrors map in Postman (CP-16 complete) |
-| Next | 3.4.1 — Add springdoc dependency and configure OpenAPI |
-| After that | 3.4.2 — OpenApiConfig bean configuration |
+| Current | 3.4.5 — Verified OpenAPI specification and interactive Swagger UI endpoints |
+| Next | 3.5.1 — Re-run Week 2 collection and verify zero regressions |
+| After that | 3.5.2 — Add error and validation test cases to Postman collection |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,20 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 3.4.5 — Swagger UI & OpenAPI Specification Verification
+- Date: 2026-10-23
+- What we did: Started PostgreSQL and Spring Boot backend service, verified `/v3/api-docs` returns standard OpenAPI 3.0 JSON schema with title 'PeopleOps HRMS API', version '1.0', and all 20 tagged domain controller groupings. Confirmed `/swagger-ui/index.html` serves the interactive Swagger UI testing console with HTTP 200 OK.
+- Why we did it: Satisfies TRD §10 and implementation steps 3.4.1 to 3.4.5 by providing living API documentation for frontend teams, evaluators, and client integrations.
+- How it works:
+  - `springdoc-openapi-starter-webmvc-ui` scans Spring MVC `@RestController`, `@Tag`, and `@Operation` annotations at startup to dynamically synthesize an OpenAPI 3.0 specification tree.
+  - Swagger UI renders interactive documentation allowing parameter inspection, model schemas, and 'Try it out' live HTTP requests.
+- Files changed: `pom.xml`, `src/main/java/com/peopleops/config/OpenApiConfig.java`, all controller classes, `docs/explainer.md`
+- Viva questions:
+  1. Q: What is the difference between OpenAPI and Swagger?
+     A: OpenAPI is the vendor-neutral specification standard (OAS) managed by the OpenAPI Initiative, while Swagger refers to the toolset (Swagger UI, Swagger Editor, Swagger Codegen) built by SmartBear to implement and visualize OAS.
+  2. Q: Why use `@Tag` on controllers and `@Operation` only on lifecycle actions instead of every endpoint?
+     A: Tagging controllers provides clean semantic grouping without clutter. Limiting `@Operation` summaries to key lifecycle transitions (hire, activate, checkout, approve, pay, exit) focuses human attention on critical state mutations rather than repetitive standard CRUD operations.
 
 ### Step 3.3.7 — Postman Validation Tests & Checkpoint CP-16 Wrap-Up
 - Date: 2026-10-23
