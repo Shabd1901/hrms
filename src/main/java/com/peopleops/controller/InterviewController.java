@@ -4,6 +4,7 @@ import com.peopleops.dto.InterviewRequestDTO;
 import com.peopleops.dto.InterviewResponseDTO;
 import com.peopleops.enums.InterviewResult;
 import com.peopleops.service.InterviewService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class InterviewController {
     }
 
     @PostMapping
-    public ResponseEntity<InterviewResponseDTO> createInterview(@RequestBody InterviewRequestDTO request) {
+    public ResponseEntity<InterviewResponseDTO> createInterview(@Valid @RequestBody InterviewRequestDTO request) {
         InterviewResponseDTO response = interviewService.createInterview(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -50,7 +51,7 @@ public class InterviewController {
     @PutMapping("/{id}")
     public ResponseEntity<InterviewResponseDTO> updateInterview(
             @PathVariable Long id,
-            @RequestBody InterviewRequestDTO request) {
+            @Valid @RequestBody InterviewRequestDTO request) {
         InterviewResponseDTO response = interviewService.updateInterview(id, request);
         return ResponseEntity.ok(response);
     }

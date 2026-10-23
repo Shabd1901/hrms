@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.OnboardingTaskRequestDTO;
 import com.peopleops.dto.OnboardingTaskResponseDTO;
 import com.peopleops.service.OnboardingTaskService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class OnboardingTaskController {
     }
 
     @PostMapping
-    public ResponseEntity<OnboardingTaskResponseDTO> createTask(@RequestBody OnboardingTaskRequestDTO request) {
+    public ResponseEntity<OnboardingTaskResponseDTO> createTask(@Valid @RequestBody OnboardingTaskRequestDTO request) {
         OnboardingTaskResponseDTO response = onboardingTaskService.createTask(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -49,7 +50,7 @@ public class OnboardingTaskController {
     @PutMapping("/{id}")
     public ResponseEntity<OnboardingTaskResponseDTO> updateTask(
             @PathVariable Long id,
-            @RequestBody OnboardingTaskRequestDTO request) {
+            @Valid @RequestBody OnboardingTaskRequestDTO request) {
         OnboardingTaskResponseDTO response = onboardingTaskService.updateTask(id, request);
         return ResponseEntity.ok(response);
     }

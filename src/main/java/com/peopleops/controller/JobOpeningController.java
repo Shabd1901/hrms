@@ -4,6 +4,7 @@ import com.peopleops.dto.JobOpeningRequestDTO;
 import com.peopleops.dto.JobOpeningResponseDTO;
 import com.peopleops.enums.JobOpeningStatus;
 import com.peopleops.service.JobOpeningService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class JobOpeningController {
     }
 
     @PostMapping
-    public ResponseEntity<JobOpeningResponseDTO> createJobOpening(@RequestBody JobOpeningRequestDTO request) {
+    public ResponseEntity<JobOpeningResponseDTO> createJobOpening(@Valid @RequestBody JobOpeningRequestDTO request) {
         JobOpeningResponseDTO response = jobOpeningService.createJobOpening(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -50,7 +51,7 @@ public class JobOpeningController {
     @PutMapping("/{id}")
     public ResponseEntity<JobOpeningResponseDTO> updateJobOpening(
             @PathVariable Long id,
-            @RequestBody JobOpeningRequestDTO request) {
+            @Valid @RequestBody JobOpeningRequestDTO request) {
         JobOpeningResponseDTO response = jobOpeningService.updateJobOpening(id, request);
         return ResponseEntity.ok(response);
     }
