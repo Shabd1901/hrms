@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
@@ -65,7 +66,8 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/transfer")
+        @Operation(summary = "Transfer employee to another department")
+@PatchMapping("/{id}/transfer")
     public ResponseEntity<EmployeeResponseDTO> transferEmployee(
             @PathVariable Long id,
             @RequestParam Long departmentId) {
@@ -73,7 +75,8 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/promote")
+        @Operation(summary = "Promote employee to a new designation")
+@PatchMapping("/{id}/promote")
     public ResponseEntity<EmployeeResponseDTO> promoteEmployee(
             @PathVariable Long id,
             @RequestParam Long designationId) {

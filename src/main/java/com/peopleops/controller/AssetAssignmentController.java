@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AssetAssignmentRequestDTO;
 import com.peopleops.dto.AssetAssignmentResponseDTO;
@@ -28,6 +29,7 @@ public class AssetAssignmentController {
         this.assetAssignmentService = assetAssignmentService;
     }
 
+        @Operation(summary = "Assign company asset to employee (BR-10)")
     @PostMapping
     public ResponseEntity<AssetAssignmentResponseDTO> assignAsset(
             @Valid @RequestBody AssetAssignmentRequestDTO request) {
@@ -48,7 +50,8 @@ public class AssetAssignmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/return")
+        @Operation(summary = "Return assigned company asset (BR-10)")
+@PatchMapping("/{id}/return")
     public ResponseEntity<AssetAssignmentResponseDTO> returnAsset(@PathVariable Long id) {
         AssetAssignmentResponseDTO response = assetAssignmentService.returnAsset(id);
         return ResponseEntity.ok(response);

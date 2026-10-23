@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.OffboardingRequestDTO;
 import com.peopleops.dto.OffboardingResponseDTO;
@@ -29,6 +30,7 @@ public class OffboardingController {
         this.offboardingService = offboardingService;
     }
 
+        @Operation(summary = "Initiate employee offboarding workflow (BR-12)")
     @PostMapping
     public ResponseEntity<OffboardingResponseDTO> initiateOffboarding(
             @Valid @RequestBody OffboardingRequestDTO request) {
@@ -62,7 +64,8 @@ public class OffboardingController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/complete")
+        @Operation(summary = "Complete offboarding, verify clearances, and terminate employment (BR-12)")
+@PatchMapping("/{id}/complete")
     public ResponseEntity<OffboardingResponseDTO> completeOffboarding(@PathVariable Long id) {
         OffboardingResponseDTO response = offboardingService.completeOffboarding(id);
         return ResponseEntity.ok(response);

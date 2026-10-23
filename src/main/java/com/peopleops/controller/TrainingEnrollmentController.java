@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.TrainingEnrollmentRequestDTO;
 import com.peopleops.dto.TrainingEnrollmentResponseDTO;
@@ -55,13 +56,15 @@ public class TrainingEnrollmentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/complete")
+        @Operation(summary = "Complete training enrollment and award skills (BR-09)")
+@PatchMapping("/{id}/complete")
     public ResponseEntity<TrainingEnrollmentResponseDTO> completeEnrollment(@PathVariable Long id) {
         TrainingEnrollmentResponseDTO response = trainingEnrollmentService.completeEnrollment(id);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/drop")
+        @Operation(summary = "Drop employee training enrollment")
+@PatchMapping("/{id}/drop")
     public ResponseEntity<TrainingEnrollmentResponseDTO> dropEnrollment(@PathVariable Long id) {
         TrainingEnrollmentResponseDTO response = trainingEnrollmentService.dropEnrollment(id);
         return ResponseEntity.ok(response);

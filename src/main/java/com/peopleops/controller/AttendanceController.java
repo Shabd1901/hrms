@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AttendanceRequestDTO;
 import com.peopleops.dto.AttendanceResponseDTO;
@@ -66,7 +67,8 @@ public class AttendanceController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/check-out")
+        @Operation(summary = "Record employee check-out time (BR-04)")
+@PatchMapping("/{id}/check-out")
     public ResponseEntity<AttendanceResponseDTO> checkOut(
             @PathVariable Long id,
             @RequestParam LocalTime time) {

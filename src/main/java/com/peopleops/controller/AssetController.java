@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AssetRequestDTO;
 import com.peopleops.dto.AssetResponseDTO;
@@ -61,7 +62,8 @@ public class AssetController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/retire")
+        @Operation(summary = "Retire asset from active inventory")
+@PatchMapping("/{id}/retire")
     public ResponseEntity<AssetResponseDTO> retireAsset(@PathVariable Long id) {
         AssetResponseDTO response = assetService.retireAsset(id);
         return ResponseEntity.ok(response);

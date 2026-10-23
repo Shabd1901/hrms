@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.OnboardingTaskRequestDTO;
 import com.peopleops.dto.OnboardingTaskResponseDTO;
@@ -63,7 +64,8 @@ public class OnboardingTaskController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/complete")
+        @Operation(summary = "Complete onboarding task and check employee activation (BR-03)")
+@PatchMapping("/{id}/complete")
     public ResponseEntity<OnboardingTaskResponseDTO> completeTask(@PathVariable Long id) {
         OnboardingTaskResponseDTO response = onboardingTaskService.completeTask(id);
         return ResponseEntity.ok(response);

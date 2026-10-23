@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.PerformanceReviewRequestDTO;
 import com.peopleops.dto.PerformanceReviewResponseDTO;
@@ -64,7 +65,8 @@ public class PerformanceReviewController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/submit")
+        @Operation(summary = "Submit completed performance review (BR-08)")
+@PatchMapping("/{id}/submit")
     public ResponseEntity<PerformanceReviewResponseDTO> submitPerformanceReview(@PathVariable Long id) {
         PerformanceReviewResponseDTO response = performanceReviewService.submitPerformanceReview(id);
         return ResponseEntity.ok(response);

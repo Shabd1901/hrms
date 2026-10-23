@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.PayrollGenerateRequestDTO;
 import com.peopleops.dto.PayrollResponseDTO;
@@ -29,7 +30,8 @@ public class PayrollController {
         this.payrollService = payrollService;
     }
 
-    @PostMapping("/generate")
+        @Operation(summary = "Calculate and generate monthly payroll (BR-07)")
+@PostMapping("/generate")
     public ResponseEntity<PayrollResponseDTO> generatePayroll(@Valid @RequestBody PayrollGenerateRequestDTO request) {
         PayrollResponseDTO response = payrollService.generatePayroll(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -54,7 +56,8 @@ public class PayrollController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/pay")
+        @Operation(summary = "Mark payroll as paid")
+@PatchMapping("/{id}/pay")
     public ResponseEntity<PayrollResponseDTO> payPayroll(@PathVariable Long id) {
         PayrollResponseDTO response = payrollService.payPayroll(id);
         return ResponseEntity.ok(response);

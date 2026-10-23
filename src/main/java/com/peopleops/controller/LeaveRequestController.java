@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.LeaveRequestRequestDTO;
 import com.peopleops.dto.LeaveRequestResponseDTO;
@@ -65,7 +66,8 @@ public class LeaveRequestController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/approve")
+        @Operation(summary = "Approve leave request, deduct balance, and mark attendance (BR-05, BR-06)")
+@PatchMapping("/{id}/approve")
     public ResponseEntity<LeaveRequestResponseDTO> approveLeaveRequest(
             @PathVariable Long id,
             @RequestParam Long decidedById) {
@@ -73,7 +75,8 @@ public class LeaveRequestController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/reject")
+        @Operation(summary = "Reject submitted leave request (BR-05)")
+@PatchMapping("/{id}/reject")
     public ResponseEntity<LeaveRequestResponseDTO> rejectLeaveRequest(
             @PathVariable Long id,
             @RequestParam Long decidedById) {
@@ -81,7 +84,8 @@ public class LeaveRequestController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/cancel")
+        @Operation(summary = "Cancel approved leave request and restore balance (BR-05)")
+@PatchMapping("/{id}/cancel")
     public ResponseEntity<LeaveRequestResponseDTO> cancelLeaveRequest(@PathVariable Long id) {
         LeaveRequestResponseDTO response = leaveRequestService.cancelLeaveRequest(id);
         return ResponseEntity.ok(response);

@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.EmployeeDocumentRequestDTO;
 import com.peopleops.dto.EmployeeDocumentResponseDTO;
@@ -64,7 +65,8 @@ public class EmployeeDocumentController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/verify")
+        @Operation(summary = "Verify employee document and check employee activation (BR-03, BR-11)")
+@PatchMapping("/{id}/verify")
     public ResponseEntity<EmployeeDocumentResponseDTO> verifyDocument(@PathVariable Long id) {
         EmployeeDocumentResponseDTO response = employeeDocumentService.verifyDocument(id);
         return ResponseEntity.ok(response);

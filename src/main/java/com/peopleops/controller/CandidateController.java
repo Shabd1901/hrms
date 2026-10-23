@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.CandidateRequestDTO;
 import com.peopleops.dto.CandidateResponseDTO;
@@ -66,7 +67,8 @@ public class CandidateController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/stage")
+        @Operation(summary = "Update candidate recruitment stage")
+@PatchMapping("/{id}/stage")
     public ResponseEntity<CandidateResponseDTO> updateStage(
             @PathVariable Long id,
             @RequestParam CandidateStage value) {
@@ -74,7 +76,8 @@ public class CandidateController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/hire")
+        @Operation(summary = "Hire candidate and trigger onboarding workflow (BR-01)")
+@PostMapping("/{id}/hire")
     public ResponseEntity<EmployeeResponseDTO> hireCandidate(
             @PathVariable Long id,
             @Valid @RequestBody HireRequestDTO request) {

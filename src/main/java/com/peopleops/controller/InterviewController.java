@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.InterviewRequestDTO;
 import com.peopleops.dto.InterviewResponseDTO;
@@ -64,7 +65,8 @@ public class InterviewController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/result")
+        @Operation(summary = "Record interview result and feedback")
+@PatchMapping("/{id}/result")
     public ResponseEntity<InterviewResponseDTO> updateResult(
             @PathVariable Long id,
             @RequestParam InterviewResult value,
