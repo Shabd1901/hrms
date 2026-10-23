@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3 complete; ready for Week 4 Mappings)
+Last updated: 2026-10-23 · Current step: **4.1.6** · Status: in progress (Phase 4.1 Employee Core Mappings complete; ready for Phase 4.2)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 27 / 36 |
-| Steps complete | 161 / 196 |
+| Phases complete | 28 / 36 |
+| Steps complete | 167 / 196 |
 | Commits (checkpoints) made | 25 / 23 |
-| Overall | 82.1% |
+| Overall | 85.2% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 6 | 0 / 6 | In progress |
 
 ## 3. Phases
 
@@ -59,7 +59,7 @@ Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3
 | 3.3 | Validation | 7 | 7 | CP-16 | Completed |
 | 3.4 | Swagger / OpenAPI | 5 | 5 | CP-17 | Completed |
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
-| 4.1 | Employee core mappings | 6 | 0 | CP-18 | Not started |
+| 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 0 | CP-18 | Not started |
 | 4.3 | Attendance and leave mappings | 4 | 0 | CP-19 | Not started |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-23 · Current step: **3.5.3** · Status: completed (Week 3
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 161 | 35 | 25 / 23 |
+| 196 | 167 | 29 | 25 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 0/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 6/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 3.5.3 — Completed Week 3 Wrap-Up and CP-17 Checkpoint Verification |
-| Next | 4.1.1 — Employee.department many-to-one relationship mapping (R1) |
-| After that | 4.1.2 — Employee.designation many-to-one relationship mapping (R2) |
+| Current | 4.1.6 — Verified PostgreSQL foreign keys and enriched employee response DTO (Phase 4.1 complete) |
+| Next | 4.2.1 — JobOpening -> Department, Designation many-to-one mapping (R4) |
+| After that | 4.2.2 — Candidate.jobOpening and JobOpening.candidates (R5) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,29 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.1.6 — Phase 4.1 Employee Core Mappings Verification
+- Date: 2026-10-23
+- What we did: Completed Phase 4.1 (Steps 4.1.1 through 4.1.6):
+  1. Mapped `Employee.department` as `@ManyToOne(fetch = FetchType.LAZY)` with `@JoinColumn(name = "department_id")` (R1).
+  2. Mapped `Employee.designation` as `@ManyToOne(fetch = FetchType.LAZY)` with `@JoinColumn(name = "designation_id")` (R2).
+  3. Mapped `Employee.manager` as self-referencing `@ManyToOne(fetch = FetchType.LAZY)` with `@JoinColumn(name = "manager_id")` (R3).
+  4. Mapped `Department.employees` as `@OneToMany(mappedBy = "department")` inverse bidirectional relationship.
+  5. Enriched `EmployeeResponseDTO` with descriptive relationship fields (`departmentName`, `designationTitle`, `managerName`).
+  6. Tested and verified that PostgreSQL generated valid foreign key constraints on `employees` table and that `GET /api/employees` returns enriched relational metadata.
+- Why we did it: Satisfies Week 4 architectural objectives by replacing scalar foreign key IDs with rich JPA entity associations while keeping DTO boundaries and database column names completely stable.
+- How it works:
+  - Hibernate auto-detects `@JoinColumn` on startup with `ddl-auto=update` and alters the PostgreSQL schema to add foreign key constraints referencing `departments(id)`, `designations(id)`, and `employees(id)`.
+  - Lazy loading (`FetchType.LAZY`) ensures parent records are not eagerly queried until explicitly accessed.
+  - Spring Boot's Open Session in View (OSIV) permits `EmployeeService` mapping logic to navigate `entity.getDepartment().getName()` safely during DTO projection.
+- Files changed: `src/main/java/com/peopleops/entity/Employee.java`, `src/main/java/com/peopleops/entity/Department.java`, `src/main/java/com/peopleops/dto/EmployeeResponseDTO.java`, `src/main/java/com/peopleops/service/EmployeeService.java`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why use `FetchType.LAZY` instead of `FetchType.EAGER` for `@ManyToOne` relationships?
+     A: Default `@ManyToOne` in JPA is eager. If an employee list of 100 employees is queried, eager fetching would execute 100 extra queries (the N+1 select problem) or massive join queries. `FetchType.LAZY` defers loading until the relationship is explicitly accessed, providing optimal performance.
+  2. Q: What does `mappedBy = "department"` on `@OneToMany` signify?
+     A: It tells JPA that `Department` is the non-owning (inverse) side of the relationship and that the mapping is defined by the `department` field in the `Employee` entity. This prevents JPA from creating an unnecessary intermediate join table.
+  3. Q: Why do DTOs still retain scalar IDs (`departmentId`, `designationId`) alongside names?
+     A: Preserving IDs ensures full backward compatibility with REST consumers and API clients who need IDs for subsequent updates or transfers, while enriched names (`departmentName`, `designationTitle`) eliminate the need for clients to make extra round-trip HTTP requests just to display labels.
 
 ### Step 3.5.3 — Week 3 Wrap-Up and Checkpoint CP-17 Completion
 - Date: 2026-10-23
