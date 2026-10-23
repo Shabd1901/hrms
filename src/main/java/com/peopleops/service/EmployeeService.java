@@ -4,6 +4,7 @@ import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
 import com.peopleops.dto.HireRequestDTO;
 import com.peopleops.entity.Candidate;
+import com.peopleops.entity.Department;
 import com.peopleops.entity.Employee;
 import com.peopleops.entity.JobOpening;
 import com.peopleops.entity.LeaveBalance;
@@ -66,10 +67,11 @@ public class EmployeeService {
             log.warn("Employee creation failed: duplicate email '{}'", request.getEmail());
             throw new DuplicateResourceException("Email already exists: " + request.getEmail());
         }
-        if (!departmentRepository.existsById(request.getDepartmentId())) {
-            log.warn("Employee creation failed: department id {} not found", request.getDepartmentId());
-            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
-        }
+        Department department = departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> {
+                log.warn("Employee creation failed: department id {} not found", request.getDepartmentId());
+                return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
+            });
         if (!designationRepository.existsById(request.getDesignationId())) {
             log.warn("Employee creation failed: designation id {} not found", request.getDesignationId());
             throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
@@ -85,6 +87,7 @@ public class EmployeeService {
         Employee employee = toEntity(request);
         employee.setEmployeeCode(employeeCode);
         employee.setStatus(EmployeeStatus.ONBOARDING);
+        employee.setDepartment(department);
 
         Employee saved = employeeRepository.save(employee);
         log.info("Created employee with code: '{}' and id: {}", saved.getEmployeeCode(), saved.getId());
@@ -106,6 +109,9 @@ public class EmployeeService {
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
         String employeeCode = String.format("EMP-%04d", nextId);
 
+        Department department = departmentRepository.findById(opening.getDepartmentId())
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + opening.getDepartmentId()));
+
         Employee employee = new Employee();
         employee.setEmployeeCode(employeeCode);
         employee.setFirstName(candidate.getFirstName());
@@ -114,7 +120,7 @@ public class EmployeeService {
         employee.setPhone(candidate.getPhone());
         employee.setDateOfJoining(hireRequest.getDateOfJoining());
         employee.setMonthlySalary(hireRequest.getMonthlySalary());
-        employee.setDepartmentId(opening.getDepartmentId());
+        employee.setDepartment(department);
         employee.setDesignationId(opening.getDesignationId());
         employee.setManagerId(hireRequest.getManagerId());
         employee.setStatus(EmployeeStatus.ONBOARDING);
@@ -164,10 +170,11 @@ public class EmployeeService {
             log.warn("Employee update failed for id {}: duplicate email '{}'", id, request.getEmail());
             throw new DuplicateResourceException("Email already exists: " + request.getEmail());
         }
-        if (!departmentRepository.existsById(request.getDepartmentId())) {
-            log.warn("Employee update failed for id {}: department id {} not found", id, request.getDepartmentId());
-            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
-        }
+        Department department = departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> {
+                log.warn("Employee update failed for id {}: department id {} not found", id, request.getDepartmentId());
+                return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
+            });
         if (!designationRepository.existsById(request.getDesignationId())) {
             log.warn("Employee update failed for id {}: designation id {} not found", id, request.getDesignationId());
             throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
@@ -190,7 +197,7 @@ public class EmployeeService {
         employee.setDateOfBirth(request.getDateOfBirth());
         employee.setDateOfJoining(request.getDateOfJoining());
         employee.setMonthlySalary(request.getMonthlySalary());
-        employee.setDepartmentId(request.getDepartmentId());
+        employee.setDepartment(department);
         employee.setDesignationId(request.getDesignationId());
         employee.setManagerId(request.getManagerId());
 
@@ -228,12 +235,13 @@ public class EmployeeService {
             log.warn("Employee transfer failed: id {} is EXITED", id);
             throw new BusinessRuleException("Employee is exited and cannot be transferred");
         }
-        if (!departmentRepository.existsById(departmentId)) {
-            log.warn("Employee transfer failed: target department id {} not found", departmentId);
-            throw new ResourceNotFoundException("Department not found with id: " + departmentId);
-        }
+        Department department = departmentRepository.findById(departmentId)
+            .orElseThrow(() -> {
+                log.warn("Employee transfer failed: target department id {} not found", departmentId);
+                return new ResourceNotFoundException("Department not found with id: " + departmentId);
+            });
 
-        employee.setDepartmentId(departmentId);
+        employee.setDepartment(department);
         Employee updated = employeeRepository.save(employee);
         log.info("Transferred employee id: {} to department id: {}", id, departmentId);
         return toResponseDTO(updated);
@@ -333,7 +341,6 @@ public class EmployeeService {
         employee.setDateOfBirth(dto.getDateOfBirth());
         employee.setDateOfJoining(dto.getDateOfJoining());
         employee.setMonthlySalary(dto.getMonthlySalary());
-        employee.setDepartmentId(dto.getDepartmentId());
         employee.setDesignationId(dto.getDesignationId());
         employee.setManagerId(dto.getManagerId());
         return employee;
@@ -351,7 +358,7 @@ public class EmployeeService {
             entity.getDateOfJoining(),
             entity.getMonthlySalary(),
             entity.getStatus(),
-            entity.getDepartmentId(),
+            entity.getDepartment() != null ? entity.getDepartment().getId() : null,
             entity.getDesignationId(),
             entity.getManagerId()
         );
