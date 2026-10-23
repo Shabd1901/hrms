@@ -150,23 +150,152 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 
 Newest entry first. Copy the template for every step.
 
-### Phase 3.2 — Global Exception Handling (Steps 3.2.1 – 3.2.9)
+### Step 3.2.9 — Postman Error Response Tests & Checkpoint CP-15 Wrap-Up
 - Date: 2026-10-23
-- What we did: Replaced direct `ResponseStatusException` usage across all 20 domain service classes with clean semantic custom domain exceptions (`ResourceNotFoundException`, `BusinessRuleException`, `DuplicateResourceException`). Implemented `ErrorResponse` DTO and centralized `@RestControllerAdvice` (`GlobalExceptionHandler`) handling 404 (Not Found), 400 (Bad Request / Business Rule Violation), 409 (Conflict / Duplicate Resource), bad JSON syntax, malformed parameters, and unhandled 500 fallback errors. Added test coverage in Postman collection folder '8. Global Exception Handling'.
-- Why we did it: Satisfies TRD §8 error handling requirements. Eliminates leaky framework HTTP dependencies from business service classes and ensures every error returns an identical, structured JSON payload.
+- What we did: Added folder '8. Global Exception Handling' to `postman/PeopleOps.postman_collection.json` containing 5 targeted automated test requests covering 404 (Resource Not Found), 409 (Conflict on duplicate code), 400 (Business Rule rejection on future attendance), 400 (Bad enum parameter on employee status query), and 400 (Malformed JSON payload). Verified all return the identical standard `ErrorResponse` schema.
+- Why we did it: Satisfies TRD §8 and implementation step 3.2.9 by proving black-box contract uniformity across diverse failure modes.
 - How it works:
-  - Domain services throw domain exceptions with readable English messages without referencing `HttpStatus` or `ResponseStatusException`.
-  - `@RestControllerAdvice` intercepts all thrown exceptions at the web layer and formats a unified `ErrorResponse` payload with `timestamp`, `status`, `error`, `message`, `path`, and optional `fieldErrors`.
-  - Handles parameter format mismatches (`MethodArgumentTypeMismatchException`) and corrupt request bodies (`HttpMessageNotReadableException`) returning consistent HTTP 400 responses.
-- Files changed: `src/main/java/com/peopleops/exception/`, `src/main/java/com/peopleops/dto/ErrorResponse.java`, 20 service classes in `src/main/java/com/peopleops/service/`, `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
+  - Postman JavaScript test assertions validate HTTP status codes and confirm JSON properties `timestamp`, `status`, `error`, `message`, and `path`.
+  - Proves that neither Spring Boot white-label pages nor raw stack traces leak to the client.
+- Files changed: `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
 - Viva questions:
-  1. Q: Why is `@RestControllerAdvice` superior to handling exceptions inside each controller or service method?
-     A: It centralizes exception translation across the whole API, ensuring single responsibility (services only care about domain logic), reducing boilerplate try-catch blocks, and guaranteeing a uniform JSON error contract.
-  2. Q: What is the benefit of keeping domain exceptions as unchecked exceptions (`RuntimeException`)?
-     A: Unchecked exceptions avoid cluttersome `throws` clauses in method signatures across layers and automatically trigger Spring transaction rollbacks when annotated with `@Transactional`.
-- Rules used: TRD §8, Workflow §5, D-016
-- Check done: Verified `mvn clean compile` across 142 source files and executed Postman error response assertions.
-- Commit message: `"feat(cp-15): add global exception handling with rest controller advice and standardized json error responses"`
+  1. Q: Why is it crucial to test bad JSON payloads and invalid enum values alongside domain business rule rejections?
+     A: Malformed requests fail early during Spring's HTTP message conversion and argument binding phase before reaching service methods. Testing them verifies that `HttpMessageNotReadableException` and `MethodArgumentTypeMismatchException` are caught by the `@RestControllerAdvice` and return the same unified schema.
+  2. Q: What risk is mitigated by suppressing raw stack traces from API error responses?
+     A: Information leakage: raw traces expose server internals, library versions, and database schemas that attackers can exploit.
+- Rules used: TRD §8, Workflow §4, D-015, D-016
+- Check done: Ran requests against local server / verified JSON schemas in Postman test scripts.
+- Commit message: `"feat(cp-15): add global exception handling with rest controller advice and standardized json error response structures"` (Commit `d65855a`)
+
+### Step 3.2.8 — Replace ResponseStatusException in Training, Asset, Document, and Offboarding Services
+- Date: 2026-10-23
+- What we did: Replaced all `ResponseStatusException` occurrences across `SkillService`, `TrainingProgramService`, `TrainingEnrollmentService`, `AssetService`, `AssetAssignmentService`, `EmployeeDocumentService`, and `OffboardingService` with `ResourceNotFoundException`, `BusinessRuleException`, and `DuplicateResourceException`.
+- Why we did it: Cleans the remaining secondary domain services of direct Spring HTTP framework coupling, ensuring pure domain exception semantics.
+- How it works:
+  - Duplicate skill names or asset tags throw `DuplicateResourceException`.
+  - Non-existent programs, enrollments, assets, documents, or offboardings throw `ResourceNotFoundException`.
+  - Unmet prerequisites (e.g. attempting to offboard an employee with unreturned assets, or enrolling an exited employee) throw `BusinessRuleException`.
+- Files changed: `SkillService.java`, `TrainingProgramService.java`, `TrainingEnrollmentService.java`, `AssetService.java`, `AssetAssignmentService.java`, `EmployeeDocumentService.java`, `OffboardingService.java`
+- Viva questions:
+  1. Q: Why should business clearance rules (such as requiring all company hardware returned before completing offboarding) be checked inside `OffboardingService` rather than the web controller?
+     A: Clearance is an internal business domain workflow rule; enforcing it in the service guarantees clearance cannot be bypassed by other callers (e.g., scheduled jobs or internal services).
+- Rules used: TRD §8, BR-12, Workflow §5
+- Check done: Verified 0 occurrences of `ResponseStatusException` remain in all 20 service classes; `mvn clean compile` succeeded on 142 source files.
+- Commit message: `"refactor(service): complete migration to custom domain exceptions across training asset document and offboarding services"` (Commit `56c7db1`)
+
+### Step 3.2.7 — Replace ResponseStatusException in Payroll and Performance Services
+- Date: 2026-10-23
+- What we did: Replaced `ResponseStatusException` in `PayrollService` and `PerformanceReviewService` with `ResourceNotFoundException`, `BusinessRuleException`, and `DuplicateResourceException`.
+- Why we did it: Aligns salary generation and performance appraisal services with centralized exception handling.
+- How it works:
+  - Missing employees or reviewers throw `ResourceNotFoundException`.
+  - Exited employees, duplicate monthly payroll, self-reviews, or ratings outside 1–5 throw `BusinessRuleException` or `DuplicateResourceException`.
+- Files changed: `PayrollService.java`, `PerformanceReviewService.java`
+- Viva questions:
+  1. Q: How does throwing unchecked exceptions in transactional service methods affect database rollbacks?
+     A: By default in Spring, `@Transactional` automatically triggers rollback on unchecked exceptions (`RuntimeException` and its subclasses), ensuring operations fail atomically without partial persistence.
+- Rules used: TRD §8, Workflow §5
+- Check done: Verified compilation via `mvn test-compile`.
+- Commit message: `"refactor(payroll): migrate payroll and performance review domain services from response status exceptions to standardized custom domain exceptions"` (Commit `3bbcd4e`)
+
+### Step 3.2.6 — Replace ResponseStatusException in Attendance and Leave Services
+- Date: 2026-10-23
+- What we did: Refactored `AttendanceService`, `LeaveTypeService`, `LeaveBalanceService`, and `LeaveRequestService` to throw custom domain exceptions.
+- Why we did it: Removes HTTP dependency leakage from attendance and leave processing.
+- How it works:
+  - Unknown records throw `ResourceNotFoundException`.
+  - Duplicate check-ins, overlapping leave dates, future attendance records, or insufficient leave quotas throw `BusinessRuleException` or `DuplicateResourceException`.
+- Files changed: `AttendanceService.java`, `LeaveTypeService.java`, `LeaveBalanceService.java`, `LeaveRequestService.java`
+- Viva questions:
+  1. Q: Why is `DuplicateResourceException` mapped to HTTP 409 Conflict instead of HTTP 400 Bad Request?
+     A: RFC 9110 specifies 409 Conflict for requests that cannot be processed because of a conflict with the current state of the resource (e.g. duplicate unique key constraint).
+- Rules used: TRD §8, Workflow §5
+- Check done: Verified clean compilation via `mvn test-compile`.
+- Commit message: `"refactor(leave): refactor attendance and leave management domain services to utilize standardized custom domain exceptions"` (Commit `1112f57`)
+
+### Step 3.2.5 — Replace ResponseStatusException in Recruitment and Onboarding Services
+- Date: 2026-10-23
+- What we did: Refactored `CandidateService`, `InterviewService`, `JobOpeningService`, and `OnboardingTaskService` to use custom domain exceptions.
+- Why we did it: Standardizes error signaling across the hiring pipeline.
+- How it works:
+  - Missing job openings, candidates, or interviewers throw `ResourceNotFoundException`.
+  - Applying to closed jobs, invalid interview transitions, or hiring candidates not in OFFERED stage throw `BusinessRuleException`.
+  - Duplicate email applications for the same opening throw `DuplicateResourceException`.
+- Files changed: `CandidateService.java`, `InterviewService.java`, `JobOpeningService.java`, `OnboardingTaskService.java`
+- Viva questions:
+  1. Q: What is the benefit of defining explicit custom exception subclasses rather than a single generic `ApiException` with an error code?
+     A: Specific exception classes allow Spring's `@ExceptionHandler` to bind cleanly by type, enabling type-safe handling, self-documenting code, and distinct handling logic per semantic cause.
+- Rules used: TRD §8, Workflow §5
+- Check done: Verified clean compilation via `mvn test-compile`.
+- Commit message: `"refactor(recruitment): migrate recruitment and onboarding domain services from response status exceptions to standardized custom domain exceptions"` (Commit `3a7c85b`)
+
+### Step 3.2.4 — Replace ResponseStatusException in Core Services (Department, Designation, Employee)
+- Date: 2026-10-23
+- What we did: Replaced `ResponseStatusException` in `DepartmentService`, `DesignationService`, and `EmployeeService` with `ResourceNotFoundException`, `BusinessRuleException`, and `DuplicateResourceException`.
+- Why we did it: Core foundational services should not depend on web layer classes (`HttpStatus`, `ResponseStatusException`).
+- How it works:
+  - Looking up non-existent entity IDs throws `ResourceNotFoundException("... not found with id: " + id)`.
+  - Attempting to delete departments or designations with active employees throws `BusinessRuleException`.
+  - Duplicate department codes, names, or employee emails throw `DuplicateResourceException`.
+- Files changed: `DepartmentService.java`, `DesignationService.java`, `EmployeeService.java`
+- Viva questions:
+  1. Q: Why should service classes not import classes from `org.springframework.web.server.*` or `org.springframework.http.*`?
+     A: Following clean architecture and separation of concerns, the service layer represents domain business logic and should remain transport-agnostic (usable via REST, messaging queues, CLI, or test harnesses).
+- Rules used: TRD §8, Workflow §5, D-008
+- Check done: Verified clean compilation via `mvn test-compile`.
+- Commit message: `"refactor(service): replace response status exceptions with custom domain exceptions across department designation and employee core services"` (Commit `4fb0dc2`)
+
+### Step 3.2.3 — Centralized GlobalExceptionHandler (@RestControllerAdvice)
+- Date: 2026-10-23
+- What we did: Implemented `GlobalExceptionHandler` annotated with `@RestControllerAdvice` in package `com.peopleops.exception` to centralize exception handling and response payload generation across all REST controllers.
+- Why we did it: Fulfills TRD §8 requirement for a single centralized error handling interceptor mapping all domain and web exceptions to the uniform `ErrorResponse` contract.
+- How it works:
+  - `@ExceptionHandler(ResourceNotFoundException.class)` returns HTTP 404 Not Found.
+  - `@ExceptionHandler(BusinessRuleException.class)` returns HTTP 400 Bad Request.
+  - `@ExceptionHandler(DuplicateResourceException.class)` returns HTTP 409 Conflict.
+  - `@ExceptionHandler(MethodArgumentNotValidException.class)` returns HTTP 400 with populated field errors map.
+  - `@ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})` returns HTTP 400 for malformed JSON and invalid query parameter formats.
+  - `@ExceptionHandler(DataIntegrityViolationException.class)` returns HTTP 409 Conflict for database constraint breaches.
+  - `@ExceptionHandler(Exception.class)` acts as fallback catching unexpected runtime errors and returning HTTP 500 with a safe message.
+- Files changed: `src/main/java/com/peopleops/exception/GlobalExceptionHandler.java`
+- Viva questions:
+  1. Q: How does `@RestControllerAdvice` work internally in Spring MVC?
+     A: It is a specialization of `@Component` that uses AOP (Aspect-Oriented Programming) to intercept exceptions thrown out of any `@RequestMapping` or `@RestController` method, routing them through matching `@ExceptionHandler` methods before writing the HTTP response.
+  2. Q: Why return `ResponseEntity<ErrorResponse>` from exception handler methods?
+     A: It provides complete control over both the HTTP status code (header) and the serialized JSON body.
+- Rules used: TRD §8, D-008
+- Check done: Verified compilation via `mvn test-compile`.
+- Commit message: `"feat(exception): implement centralized rest controller advice global exception handler with standardized error responses and field error mapping"` (Commit `349cc3d`)
+
+### Step 3.2.2 — Standardized ErrorResponse DTO
+- Date: 2026-10-23
+- What we did: Created `ErrorResponse.java` in package `com.peopleops.dto` with fields `timestamp`, `status`, `error`, `message`, `path`, and `fieldErrors`.
+- Why we did it: Provides a consistent, predictable client-facing JSON structure for every non-2xx HTTP response across the PeopleOps REST API per TRD §8.
+- How it works:
+  - Uses `@JsonInclude(JsonInclude.Include.NON_NULL)` so `fieldErrors` is cleanly omitted for non-validation errors while serializing automatically when validation failures occur.
+  - Includes explicit constructors and getters/setters adhering to project style rules.
+- Files changed: `src/main/java/com/peopleops/dto/ErrorResponse.java`
+- Viva questions:
+  1. Q: What is the role of `@JsonInclude(JsonInclude.Include.NON_NULL)` on DTOs?
+     A: It instructs Jackson serializer to exclude fields whose values are `null`, keeping JSON payloads compact and clean for clients.
+- Rules used: TRD §8, Workflow §5
+- Check done: Verified compilation via `mvn test-compile`.
+- Commit message: `"feat(dto): create standardized error response data transfer object with field errors for rest api error payloads"` (Commit `7be71a3`)
+
+### Step 3.2.1 — Custom Domain Runtime Exceptions
+- Date: 2026-10-23
+- What we did: Created three foundational custom domain exceptions in package `com.peopleops.exception`: `ResourceNotFoundException`, `BusinessRuleException`, and `DuplicateResourceException`.
+- Why we did it: Establishes domain-level semantic exception types that extend `RuntimeException`, decoupling service classes from Spring HTTP classes.
+- How it works:
+  - All three extend `RuntimeException` (unchecked exceptions) and take a string message passed to `super(message)`.
+  - Enables services to express why an operation failed in pure business terminology.
+- Files changed: `ResourceNotFoundException.java`, `BusinessRuleException.java`, `DuplicateResourceException.java` in `src/main/java/com/peopleops/exception/`
+- Viva questions:
+  1. Q: Why use unchecked exceptions (extending `RuntimeException`) instead of checked exceptions (extending `Exception`) in Spring Boot services?
+     A: Unchecked exceptions avoid boilerplate throws declarations across interfaces and callers, and Spring automatically rolls back transactions for unchecked exceptions without extra `@Transactional(rollbackFor = ...)` configuration.
+- Rules used: TRD §8, Workflow §5
+- Check done: Verified compilation via `mvn test-compile`.
+- Commit message: `"feat(exception): define domain runtime exceptions for resource not found business rule violations and duplicate resources"` (Commit `67e107c`)
 
 ### Phase 3.1 — Application Logging Across All Domain Services (Steps 3.1.2 – 3.1.7)
 - Date: 2026-10-23
@@ -947,4 +1076,6 @@ Newest entry first. Copy the template for every step.
 
 | Phase | Date | Result | Notes |
 |---|---|---|---|
-| | | | |
+| Phase 2.12 | 2026-10-20 | PASS (100%) | Verified full employee lifecycle Postman collection (7 modular folders, all CRUD endpoints) |
+| Phase 3.1 | 2026-10-23 | PASS | Verified Logback file destination (`logs/peopleops.log`), logging patterns, and SLF4J service event emission |
+| Phase 3.2 | 2026-10-23 | PASS | Verified standardized JSON error responses across 404, 400, 409, malformed JSON, and bad query enums via Postman collection folder '8. Global Exception Handling' |
