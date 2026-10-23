@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.InterviewRequestDTO;
 import com.peopleops.dto.InterviewResponseDTO;
 import com.peopleops.enums.InterviewResult;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Interviews", description = "Candidate interview scheduling and evaluation APIs")
 @RestController
 @RequestMapping("/api/interviews")
 public class InterviewController {

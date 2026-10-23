@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.PerformanceReviewRequestDTO;
 import com.peopleops.dto.PerformanceReviewResponseDTO;
 import com.peopleops.service.PerformanceReviewService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Performance Reviews", description = "Employee performance appraisal and review APIs")
 @RestController
 @RequestMapping("/api/performance-reviews")
 public class PerformanceReviewController {

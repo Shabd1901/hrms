@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
 import com.peopleops.enums.EmployeeStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Employees", description = "Employee management and lifecycle APIs")
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {

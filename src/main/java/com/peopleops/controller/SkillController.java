@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.SkillRequestDTO;
 import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.service.SkillService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Skills", description = "Employee skill catalog management APIs")
 @RestController
 @RequestMapping("/api/skills")
 public class SkillController {

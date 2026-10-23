@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AttendanceRequestDTO;
 import com.peopleops.dto.AttendanceResponseDTO;
 import com.peopleops.service.AttendanceService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Attendance", description = "Employee daily attendance and checkout APIs")
 @RestController
 @RequestMapping("/api/attendance")
 public class AttendanceController {

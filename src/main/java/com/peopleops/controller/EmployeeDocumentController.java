@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.EmployeeDocumentRequestDTO;
 import com.peopleops.dto.EmployeeDocumentResponseDTO;
 import com.peopleops.service.EmployeeDocumentService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Employee Documents", description = "Employee document upload and verification APIs")
 @RestController
 @RequestMapping("/api/employee-documents")
 public class EmployeeDocumentController {

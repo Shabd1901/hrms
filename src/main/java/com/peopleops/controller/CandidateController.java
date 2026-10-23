@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.CandidateRequestDTO;
 import com.peopleops.dto.CandidateResponseDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Candidates", description = "Candidate recruitment and hiring APIs")
 @RestController
 @RequestMapping("/api/candidates")
 public class CandidateController {

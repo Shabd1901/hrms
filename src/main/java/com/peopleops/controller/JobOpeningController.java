@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.JobOpeningRequestDTO;
 import com.peopleops.dto.JobOpeningResponseDTO;
 import com.peopleops.enums.JobOpeningStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Job Openings", description = "Job opening management APIs")
 @RestController
 @RequestMapping("/api/job-openings")
 public class JobOpeningController {

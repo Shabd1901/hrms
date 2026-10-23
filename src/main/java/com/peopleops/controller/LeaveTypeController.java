@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.LeaveTypeRequestDTO;
 import com.peopleops.dto.LeaveTypeResponseDTO;
 import com.peopleops.service.LeaveTypeService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Leave Types", description = "Leave category and policy management APIs")
 @RestController
 @RequestMapping("/api/leave-types")
 public class LeaveTypeController {

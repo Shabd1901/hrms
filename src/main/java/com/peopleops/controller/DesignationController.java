@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.DesignationRequestDTO;
 import com.peopleops.dto.DesignationResponseDTO;
 import com.peopleops.service.DesignationService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Designations", description = "Designation management APIs")
 @RestController
 @RequestMapping("/api/designations")
 public class DesignationController {

@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.LeaveBalanceRequestDTO;
 import com.peopleops.dto.LeaveBalanceResponseDTO;
 import com.peopleops.service.LeaveBalanceService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Leave Balances", description = "Employee annual leave balance tracking APIs")
 @RestController
 @RequestMapping("/api/leave-balances")
 public class LeaveBalanceController {

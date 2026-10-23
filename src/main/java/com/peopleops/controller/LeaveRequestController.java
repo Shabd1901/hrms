@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.LeaveRequestRequestDTO;
 import com.peopleops.dto.LeaveRequestResponseDTO;
 import com.peopleops.enums.LeaveRequestStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Leave Requests", description = "Leave application and approval workflow APIs")
 @RestController
 @RequestMapping("/api/leave-requests")
 public class LeaveRequestController {

@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AssetRequestDTO;
 import com.peopleops.dto.AssetResponseDTO;
 import com.peopleops.service.AssetService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Assets", description = "Company hardware and equipment asset APIs")
 @RestController
 @RequestMapping("/api/assets")
 public class AssetController {

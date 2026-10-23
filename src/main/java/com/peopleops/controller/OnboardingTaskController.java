@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.OnboardingTaskRequestDTO;
 import com.peopleops.dto.OnboardingTaskResponseDTO;
 import com.peopleops.service.OnboardingTaskService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Onboarding Tasks", description = "Employee onboarding task checklist APIs")
 @RestController
 @RequestMapping("/api/onboarding-tasks")
 public class OnboardingTaskController {

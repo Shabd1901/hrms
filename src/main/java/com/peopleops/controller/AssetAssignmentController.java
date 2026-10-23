@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.AssetAssignmentRequestDTO;
 import com.peopleops.dto.AssetAssignmentResponseDTO;
 import com.peopleops.service.AssetAssignmentService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Asset Assignments", description = "Asset allocation and return tracking APIs")
 @RestController
 @RequestMapping("/api/asset-assignments")
 public class AssetAssignmentController {

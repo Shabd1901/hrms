@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.TrainingEnrollmentRequestDTO;
 import com.peopleops.dto.TrainingEnrollmentResponseDTO;
 import com.peopleops.service.TrainingEnrollmentService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Training Enrollments", description = "Employee training enrollment tracking APIs")
 @RestController
 @RequestMapping("/api/training-enrollments")
 public class TrainingEnrollmentController {

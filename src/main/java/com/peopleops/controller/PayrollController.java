@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.PayrollGenerateRequestDTO;
 import com.peopleops.dto.PayrollResponseDTO;
 import com.peopleops.service.PayrollService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Payrolls", description = "Monthly payroll generation and payment processing APIs")
 @RestController
 @RequestMapping("/api/payrolls")
 public class PayrollController {

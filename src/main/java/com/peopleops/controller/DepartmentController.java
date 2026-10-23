@@ -1,5 +1,6 @@
 package com.peopleops.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.DepartmentRequestDTO;
 import com.peopleops.dto.DepartmentResponseDTO;
 import com.peopleops.service.DepartmentService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Departments", description = "Department management APIs")
 @RestController
 @RequestMapping("/api/departments")
 public class DepartmentController {
