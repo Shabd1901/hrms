@@ -3,15 +3,16 @@ package com.peopleops.service;
 import com.peopleops.dto.DepartmentRequestDTO;
 import com.peopleops.dto.DepartmentResponseDTO;
 import com.peopleops.entity.Department;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.DepartmentRepository;
 import com.peopleops.repository.EmployeeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DepartmentService {
@@ -29,11 +30,11 @@ public class DepartmentService {
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO request) {
         if (departmentRepository.existsByName(request.getName())) {
             log.warn("Department creation failed: duplicate name '{}'", request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department name already exists: " + request.getName());
+            throw new DuplicateResourceException("Department name already exists: " + request.getName());
         }
         if (departmentRepository.existsByCode(request.getCode())) {
             log.warn("Department creation failed: duplicate code '{}'", request.getCode());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department code already exists: " + request.getCode());
+            throw new DuplicateResourceException("Department code already exists: " + request.getCode());
         }
 
         Department department = toEntity(request);
@@ -55,7 +56,7 @@ public class DepartmentService {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Department lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id);
+                return new ResourceNotFoundException("Department not found with id: " + id);
             });
         return toResponseDTO(department);
     }
@@ -64,16 +65,16 @@ public class DepartmentService {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Department update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id);
+                return new ResourceNotFoundException("Department not found with id: " + id);
             });
 
         if (!department.getName().equals(request.getName()) && departmentRepository.existsByName(request.getName())) {
             log.warn("Department update failed for id {}: duplicate name '{}'", id, request.getName());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department name already exists: " + request.getName());
+            throw new DuplicateResourceException("Department name already exists: " + request.getName());
         }
         if (!department.getCode().equals(request.getCode()) && departmentRepository.existsByCode(request.getCode())) {
             log.warn("Department update failed for id {}: duplicate code '{}'", id, request.getCode());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Department code already exists: " + request.getCode());
+            throw new DuplicateResourceException("Department code already exists: " + request.getCode());
         }
 
         department.setName(request.getName());
@@ -89,12 +90,12 @@ public class DepartmentService {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Department delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id);
+                return new ResourceNotFoundException("Department not found with id: " + id);
             });
 
         if (employeeRepository.existsByDepartmentId(id)) {
             log.warn("Department delete failed: id {} has assigned employees", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete department with assigned employees");
+            throw new BusinessRuleException("Cannot delete department with assigned employees");
         }
 
         departmentRepository.delete(department);
@@ -105,7 +106,7 @@ public class DepartmentService {
         Department department = departmentRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Department status patch failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + id);
+                return new ResourceNotFoundException("Department not found with id: " + id);
             });
 
         department.setActive(active);

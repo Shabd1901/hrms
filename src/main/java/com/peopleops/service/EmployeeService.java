@@ -12,6 +12,9 @@ import com.peopleops.entity.OnboardingTask;
 import com.peopleops.enums.DocumentType;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.OnboardingTaskStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.DepartmentRepository;
 import com.peopleops.repository.DesignationRepository;
 import com.peopleops.repository.EmployeeDocumentRepository;
@@ -24,10 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmployeeService {
@@ -63,19 +64,19 @@ public class EmployeeService {
     public EmployeeResponseDTO createEmployee(EmployeeRequestDTO request) {
         if (employeeRepository.existsByEmail(request.getEmail())) {
             log.warn("Employee creation failed: duplicate email '{}'", request.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists: " + request.getEmail());
+            throw new DuplicateResourceException("Email already exists: " + request.getEmail());
         }
         if (!departmentRepository.existsById(request.getDepartmentId())) {
             log.warn("Employee creation failed: department id {} not found", request.getDepartmentId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + request.getDepartmentId());
+            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
         }
         if (!designationRepository.existsById(request.getDesignationId())) {
             log.warn("Employee creation failed: designation id {} not found", request.getDesignationId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + request.getDesignationId());
+            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
         }
         if (request.getManagerId() != null && !employeeRepository.existsById(request.getManagerId())) {
             log.warn("Employee creation failed: manager id {} not found", request.getManagerId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager not found with id: " + request.getManagerId());
+            throw new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
         }
 
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
@@ -95,11 +96,11 @@ public class EmployeeService {
     public EmployeeResponseDTO createFromCandidate(Candidate candidate, JobOpening opening, HireRequestDTO hireRequest) {
         if (employeeRepository.existsByEmail(candidate.getEmail())) {
             log.warn("Hiring candidate failed: duplicate email '{}'", candidate.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists: " + candidate.getEmail());
+            throw new DuplicateResourceException("Email already exists: " + candidate.getEmail());
         }
         if (hireRequest.getManagerId() != null && !employeeRepository.existsById(hireRequest.getManagerId())) {
             log.warn("Hiring candidate failed: manager id {} not found", hireRequest.getManagerId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager not found with id: " + hireRequest.getManagerId());
+            throw new ResourceNotFoundException("Manager not found with id: " + hireRequest.getManagerId());
         }
 
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
@@ -147,7 +148,7 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Employee lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + id);
+                return new ResourceNotFoundException("Employee not found with id: " + id);
             });
         return toResponseDTO(employee);
     }
@@ -156,29 +157,29 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Employee update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + id);
+                return new ResourceNotFoundException("Employee not found with id: " + id);
             });
 
         if (!employee.getEmail().equals(request.getEmail()) && employeeRepository.existsByEmail(request.getEmail())) {
             log.warn("Employee update failed for id {}: duplicate email '{}'", id, request.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already exists: " + request.getEmail());
+            throw new DuplicateResourceException("Email already exists: " + request.getEmail());
         }
         if (!departmentRepository.existsById(request.getDepartmentId())) {
             log.warn("Employee update failed for id {}: department id {} not found", id, request.getDepartmentId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + request.getDepartmentId());
+            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
         }
         if (!designationRepository.existsById(request.getDesignationId())) {
             log.warn("Employee update failed for id {}: designation id {} not found", id, request.getDesignationId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + request.getDesignationId());
+            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
         }
         if (request.getManagerId() != null) {
             if (request.getManagerId().equals(id)) {
                 log.warn("Employee update failed for id {}: cannot be own manager", id);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "An employee cannot be their own manager");
+                throw new BusinessRuleException("An employee cannot be their own manager");
             }
             if (!employeeRepository.existsById(request.getManagerId())) {
                 log.warn("Employee update failed for id {}: manager id {} not found", id, request.getManagerId());
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager not found with id: " + request.getManagerId());
+                throw new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
             }
         }
 
@@ -203,12 +204,12 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Employee delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + id);
+                return new ResourceNotFoundException("Employee not found with id: " + id);
             });
 
         if (employee.getStatus() != EmployeeStatus.ONBOARDING) {
             log.warn("Employee delete failed: id {} is in {} status (must be ONBOARDING)", id, employee.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee can only be deleted while in ONBOARDING status");
+            throw new BusinessRuleException("Employee can only be deleted while in ONBOARDING status");
         }
 
         onboardingTaskRepository.deleteByEmployeeId(id);
@@ -220,16 +221,16 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Employee transfer failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + id);
+                return new ResourceNotFoundException("Employee not found with id: " + id);
             });
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Employee transfer failed: id {} is EXITED", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee is exited and cannot be transferred");
+            throw new BusinessRuleException("Employee is exited and cannot be transferred");
         }
         if (!departmentRepository.existsById(departmentId)) {
             log.warn("Employee transfer failed: target department id {} not found", departmentId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found with id: " + departmentId);
+            throw new ResourceNotFoundException("Department not found with id: " + departmentId);
         }
 
         employee.setDepartmentId(departmentId);
@@ -242,16 +243,16 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Employee promotion failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + id);
+                return new ResourceNotFoundException("Employee not found with id: " + id);
             });
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Employee promotion failed: id {} is EXITED", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee is exited and cannot be promoted");
+            throw new BusinessRuleException("Employee is exited and cannot be promoted");
         }
         if (!designationRepository.existsById(designationId)) {
             log.warn("Employee promotion failed: target designation id {} not found", designationId);
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + designationId);
+            throw new ResourceNotFoundException("Designation not found with id: " + designationId);
         }
 
         employee.setDesignationId(designationId);

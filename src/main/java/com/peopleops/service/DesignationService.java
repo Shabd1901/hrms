@@ -3,15 +3,16 @@ package com.peopleops.service;
 import com.peopleops.dto.DesignationRequestDTO;
 import com.peopleops.dto.DesignationResponseDTO;
 import com.peopleops.entity.Designation;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.DesignationRepository;
 import com.peopleops.repository.EmployeeRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class DesignationService {
@@ -31,7 +32,7 @@ public class DesignationService {
     public DesignationResponseDTO createDesignation(DesignationRequestDTO request) {
         if (designationRepository.existsByTitle(request.getTitle())) {
             log.warn("Designation creation failed: duplicate title '{}'", request.getTitle());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Designation title already exists: " + request.getTitle());
+            throw new DuplicateResourceException("Designation title already exists: " + request.getTitle());
         }
 
         Designation designation = toEntity(request);
@@ -53,7 +54,7 @@ public class DesignationService {
         Designation designation = designationRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Designation lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + id);
+                return new ResourceNotFoundException("Designation not found with id: " + id);
             });
         return toResponseDTO(designation);
     }
@@ -62,12 +63,12 @@ public class DesignationService {
         Designation designation = designationRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Designation update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + id);
+                return new ResourceNotFoundException("Designation not found with id: " + id);
             });
 
         if (!designation.getTitle().equals(request.getTitle()) && designationRepository.existsByTitle(request.getTitle())) {
             log.warn("Designation update failed for id {}: duplicate title '{}'", id, request.getTitle());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Designation title already exists: " + request.getTitle());
+            throw new DuplicateResourceException("Designation title already exists: " + request.getTitle());
         }
 
         designation.setTitle(request.getTitle());
@@ -83,12 +84,12 @@ public class DesignationService {
         Designation designation = designationRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Designation delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Designation not found with id: " + id);
+                return new ResourceNotFoundException("Designation not found with id: " + id);
             });
 
         if (employeeRepository.existsByDesignationId(id)) {
             log.warn("Designation delete failed: id {} has assigned employees", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete designation with assigned employees");
+            throw new BusinessRuleException("Cannot delete designation with assigned employees");
         }
 
         designationRepository.delete(designation);
