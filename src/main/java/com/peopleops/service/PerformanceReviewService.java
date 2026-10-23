@@ -6,15 +6,16 @@ import com.peopleops.entity.Employee;
 import com.peopleops.entity.PerformanceReview;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.ReviewStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.PerformanceReviewRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PerformanceReviewService {
@@ -34,41 +35,41 @@ public class PerformanceReviewService {
     public PerformanceReviewResponseDTO createPerformanceReview(PerformanceReviewRequestDTO request) {
         if (request.getEmployeeId() == null) {
             log.warn("Performance review creation failed: employeeId is null");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
+            throw new BusinessRuleException("Employee id is required");
         }
         if (request.getReviewerId() == null) {
             log.warn("Performance review creation failed: reviewerId is null");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer id is required");
+            throw new BusinessRuleException("Reviewer id is required");
         }
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Performance review creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         Employee reviewer = employeeRepository.findById(request.getReviewerId())
             .orElseThrow(() -> {
                 log.warn("Performance review creation failed: reviewer id {} not found", request.getReviewerId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Reviewer not found with id: " + request.getReviewerId());
+                return new ResourceNotFoundException("Reviewer not found with id: " + request.getReviewerId());
             });
 
         if (reviewer.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Performance review creation failed: reviewer id {} is EXITED", reviewer.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer must be an active or working employee");
+            throw new BusinessRuleException("Reviewer must be an active or working employee");
         }
 
         if (request.getReviewerId().equals(request.getEmployeeId())) {
             log.warn("Performance review creation failed: reviewer id {} cannot review themselves", request.getReviewerId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer cannot be the employee being reviewed");
+            throw new BusinessRuleException("Reviewer cannot be the employee being reviewed");
         }
 
         if (request.getRating() != null && (request.getRating() < 1 || request.getRating() > 5)) {
             log.warn("Performance review creation failed: invalid rating {}", request.getRating());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
+            throw new BusinessRuleException("Rating must be between 1 and 5");
         }
 
         if (performanceReviewRepository.existsByEmployeeIdAndReviewPeriod(request.getEmployeeId(), request.getReviewPeriod())) {
             log.warn("Performance review creation failed: duplicate review for employee id {} in period '{}'", request.getEmployeeId(), request.getReviewPeriod());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Review already exists for this employee and period: " + request.getReviewPeriod());
+            throw new DuplicateResourceException("Review already exists for this employee and period: " + request.getReviewPeriod());
         }
 
         PerformanceReview review = toEntity(request);
@@ -94,7 +95,7 @@ public class PerformanceReviewService {
         PerformanceReview review = performanceReviewRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Performance review lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Performance review not found with id: " + id);
+                return new ResourceNotFoundException("Performance review not found with id: " + id);
             });
         return toResponseDTO(review);
     }
@@ -103,44 +104,44 @@ public class PerformanceReviewService {
         PerformanceReview review = performanceReviewRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Performance review update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Performance review not found with id: " + id);
+                return new ResourceNotFoundException("Performance review not found with id: " + id);
             });
 
         if (review.getStatus() != ReviewStatus.DRAFT) {
             log.warn("Performance review update failed for id {}: cannot update SUBMITTED review", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A SUBMITTED review cannot be edited");
+            throw new BusinessRuleException("A SUBMITTED review cannot be edited");
         }
 
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Performance review update failed for id {}: employee id {} not found", id, request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         Employee reviewer = employeeRepository.findById(request.getReviewerId())
             .orElseThrow(() -> {
                 log.warn("Performance review update failed for id {}: reviewer id {} not found", id, request.getReviewerId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Reviewer not found with id: " + request.getReviewerId());
+                return new ResourceNotFoundException("Reviewer not found with id: " + request.getReviewerId());
             });
 
         if (reviewer.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Performance review update failed for id {}: reviewer id {} is EXITED", id, reviewer.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer must be an active or working employee");
+            throw new BusinessRuleException("Reviewer must be an active or working employee");
         }
 
         if (request.getReviewerId().equals(request.getEmployeeId())) {
             log.warn("Performance review update failed for id {}: self-review not allowed", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reviewer cannot be the employee being reviewed");
+            throw new BusinessRuleException("Reviewer cannot be the employee being reviewed");
         }
 
         if (request.getRating() < 1 || request.getRating() > 5) {
             log.warn("Performance review update failed for id {}: invalid rating {}", id, request.getRating());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rating must be between 1 and 5");
+            throw new BusinessRuleException("Rating must be between 1 and 5");
         }
 
         if ((!review.getEmployeeId().equals(request.getEmployeeId()) || !review.getReviewPeriod().equals(request.getReviewPeriod()))
                 && performanceReviewRepository.existsByEmployeeIdAndReviewPeriod(request.getEmployeeId(), request.getReviewPeriod())) {
             log.warn("Performance review update failed for id {}: duplicate review for period '{}'", id, request.getReviewPeriod());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Review already exists for this employee and period: " + request.getReviewPeriod());
+            throw new DuplicateResourceException("Review already exists for this employee and period: " + request.getReviewPeriod());
         }
 
         review.setEmployeeId(request.getEmployeeId());
@@ -159,12 +160,12 @@ public class PerformanceReviewService {
         PerformanceReview review = performanceReviewRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Performance review delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Performance review not found with id: " + id);
+                return new ResourceNotFoundException("Performance review not found with id: " + id);
             });
 
         if (review.getStatus() != ReviewStatus.DRAFT) {
             log.warn("Performance review delete failed for id {}: cannot delete SUBMITTED review", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A SUBMITTED review cannot be deleted");
+            throw new BusinessRuleException("A SUBMITTED review cannot be deleted");
         }
 
         performanceReviewRepository.delete(review);
@@ -175,7 +176,7 @@ public class PerformanceReviewService {
         PerformanceReview review = performanceReviewRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Performance review submit failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Performance review not found with id: " + id);
+                return new ResourceNotFoundException("Performance review not found with id: " + id);
             });
 
         review.setStatus(ReviewStatus.SUBMITTED);

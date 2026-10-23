@@ -11,6 +11,9 @@ import com.peopleops.enums.AttendanceStatus;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.LeaveRequestStatus;
 import com.peopleops.enums.PayrollStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.AttendanceRepository;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.LeaveRequestRepository;
@@ -24,9 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PayrollService {
@@ -55,32 +56,32 @@ public class PayrollService {
     public PayrollResponseDTO generatePayroll(PayrollGenerateRequestDTO request) {
         if (request.getEmployeeId() == null) {
             log.warn("Payroll generation failed: employeeId is null");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
+            throw new BusinessRuleException("Employee id is required");
         }
         if (request.getPayMonth() == null || request.getPayMonth() < 1 || request.getPayMonth() > 12) {
             log.warn("Payroll generation failed: invalid pay month {}", request.getPayMonth());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay month (1-12) is required");
+            throw new BusinessRuleException("Valid pay month (1-12) is required");
         }
         if (request.getPayYear() == null || request.getPayYear() < 2000) {
             log.warn("Payroll generation failed: invalid pay year {}", request.getPayYear());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay year is required");
+            throw new BusinessRuleException("Valid pay year is required");
         }
 
         Employee employee = employeeRepository.findById(request.getEmployeeId())
             .orElseThrow(() -> {
                 log.warn("Payroll generation failed: employee id {} not found", request.getEmployeeId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
             });
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
             log.warn("Payroll generation failed: employee id {} is EXITED", employee.getId());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot generate payroll for an exited employee");
+            throw new BusinessRuleException("Cannot generate payroll for an exited employee");
         }
 
         if (payrollRepository.existsByEmployeeIdAndPayMonthAndPayYear(
                 request.getEmployeeId(), request.getPayMonth(), request.getPayYear())) {
             log.warn("Payroll generation failed: duplicate payroll for employee id {} for {}/{}", request.getEmployeeId(), request.getPayMonth(), request.getPayYear());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Payroll already exists for this employee for month " + request.getPayMonth() + "/" + request.getPayYear());
+            throw new DuplicateResourceException("Payroll already exists for this employee for month " + request.getPayMonth() + "/" + request.getPayYear());
         }
 
         LocalDate start = LocalDate.of(request.getPayYear(), request.getPayMonth(), 1);
@@ -164,7 +165,7 @@ public class PayrollService {
         Payroll payroll = payrollRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Payroll lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+                return new ResourceNotFoundException("Payroll record not found with id: " + id);
             });
         return toResponseDTO(payroll);
     }
@@ -173,12 +174,12 @@ public class PayrollService {
         Payroll payroll = payrollRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Payroll delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+                return new ResourceNotFoundException("Payroll record not found with id: " + id);
             });
 
         if (payroll.getStatus() != PayrollStatus.GENERATED) {
             log.warn("Payroll delete failed for id {}: status is {}", id, payroll.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only GENERATED payroll records can be deleted");
+            throw new BusinessRuleException("Only GENERATED payroll records can be deleted");
         }
 
         payrollRepository.delete(payroll);
@@ -189,7 +190,7 @@ public class PayrollService {
         Payroll payroll = payrollRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Payroll pay patch failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+                return new ResourceNotFoundException("Payroll record not found with id: " + id);
             });
 
         payroll.setStatus(PayrollStatus.PAID);
