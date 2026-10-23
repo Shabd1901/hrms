@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phase 3.2 Global exception handling complete; ready for Phase 3.3)
+Last updated: 2026-10-23 · Current step: **3.3.7** · Status: in progress (Phase 3.3 Validation complete; ready for Phase 3.4)
 
 ---
 
@@ -12,8 +12,8 @@ Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 2 / 4 |
-| Phases complete | 24 / 36 |
-| Steps complete | 146 / 196 |
+| Phases complete | 25 / 36 |
+| Steps complete | 153 / 196 |
 | Commits (checkpoints) made | 23 / 23 |
 | Overall | 74.5% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
@@ -25,7 +25,7 @@ Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phas
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
-| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 16 | 2 / 4 | In progress |
+| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 23 | 3 / 4 | In progress |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
@@ -56,7 +56,7 @@ Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phas
 | 2.12 | Week 2 wrap-up | 1 | 1 | CP-13 | Completed |
 | 3.1 | Logging | 7 | 7 | CP-14 | Completed |
 | 3.2 | Global exception handling | 9 | 9 | CP-15 | Completed |
-| 3.3 | Validation | 7 | 0 | CP-16 | Not started |
+| 3.3 | Validation | 7 | 7 | CP-16 | Completed |
 | 3.4 | Swagger / OpenAPI | 5 | 0 | CP-17 | Not started |
 | 3.5 | API testing and Week 3 wrap-up | 3 | 0 | CP-17 | Not started |
 | 4.1 | Employee core mappings | 6 | 0 | CP-18 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 146 | 50 | 23 / 23 |
+| 196 | 153 | 43 | 24 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 16/31 · W4 0/35
-Commits per week: W1 5/5 · W2 8/8 · W3 2/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 23/31 · W4 0/35
+Commits per week: W1 5/5 · W2 8/8 · W3 3/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 3.2.9 — Verified standardized JSON error shape across 400, 404, 409, bad JSON, and bad enum parameters |
-| Next | 3.3.1 — Add validation dependency and handle MethodArgumentNotValidException |
-| After that | 3.3.2 — Bean Validation annotations on DTOs |
+| Current | 3.3.7 — Verified Bean Validation returning 400 Bad Request with fieldErrors map in Postman (CP-16 complete) |
+| Next | 3.4.1 — Add springdoc dependency and configure OpenAPI |
+| After that | 3.4.2 — OpenApiConfig bean configuration |
 
 ## 6. Issues and remaining work
 
@@ -137,7 +137,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | `90f4737` | 2026-10-20 |
 | CP-14 | 3.1 | `feat(cp-14): implement standardized slf4j logging configuration and lifecycle event tracking across all domain service classes` | pending | |
 | CP-15 | 3.2 | `feat(cp-15): add global exception handling with rest controller advice and standardized json error responses` | pending | |
-| CP-16 | 3.3 | `feat(cp-16): add request validation` | pending | |
+| CP-16 | 3.3 | `feat(cp-16): implement bean validation framework across all domain request dtos and verify field errors via postman` | current | 2026-10-23 |
 | CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | pending | |
 | CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | pending | |
 | CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | pending | |
@@ -149,6 +149,21 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 3.3.7 — Postman Validation Tests & Checkpoint CP-16 Wrap-Up
+- Date: 2026-10-23
+- What we did: Added folder '10. Validation Tests' to `postman/PeopleOps.postman_collection.json` containing 4 targeted automated validation test requests covering blank department fields, invalid employee email and negative salary, out-of-bounds performance rating, and out-of-range payroll month/year. Verified that all invalid payloads trigger HTTP 400 Bad Request containing the structured `fieldErrors` map.
+- Why we did it: Satisfies TRD §8 and implementation step 3.3.7 by demonstrating end-to-end request validation enforcement and user-friendly error response formats.
+- How it works:
+  - Spring Boot intercepts requests marked with `@Valid` in `@RestController` method parameters before controller execution.
+  - Hibernate Validator inspects constraint annotations (`@NotBlank`, `@NotNull`, `@Size`, `@Email`, `@Min`, `@Max`, `@PositiveOrZero`).
+  - Constraint violations raise `MethodArgumentNotValidException`, which `GlobalExceptionHandler` converts into a standardized `ErrorResponse` populated with `fieldErrors: { fieldName: errorMessage }`.
+- Files changed: `pom.xml`, all DTO classes across all modules, all Controller classes, `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
+- Viva questions:
+  1. Q: What is the architectural difference between Bean Validation and business rule validation?
+     A: Bean Validation (JSR-380) checks syntactic and structural data integrity (presence, format, ranges, length) directly on DTOs at the boundary layer without touching the database or external state. Business rules (e.g., BR-04 preventing checkout before checkin, BR-05 checking leave balances) require domain state inspection and reside inside Service classes.
+  2. Q: How does Spring MVC know to trigger validation on a request body?
+     A: By placing `@Valid` (or `@Validated`) before `@RequestBody` in the controller method signature. Without `@Valid`, Jakarta validation constraint annotations on the DTO fields are silently ignored by the dispatcher.
 
 ### Step 3.2.9 — Postman Error Response Tests & Checkpoint CP-15 Wrap-Up
 - Date: 2026-10-23

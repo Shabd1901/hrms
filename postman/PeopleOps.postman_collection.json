@@ -693,6 +693,160 @@
           ]
         }
       ]
+    },
+    {
+      "name": "10. Validation Tests",
+      "item": [
+        {
+          "name": "1. 400 Validation Error - Blank Department Fields",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"code\": \"\",\n  \"description\": \"Missing required fields\"\n}"
+            },
+            "url": "{{baseUrl}}/api/departments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Validation error contains fieldErrors map\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.status).to.eql(400);",
+                  "    pm.expect(data.error).to.eql(\"Bad Request\");",
+                  "    pm.expect(data.message).to.eql(\"Validation failed\");",
+                  "    pm.expect(data.fieldErrors).to.be.an(\"object\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"name\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"code\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. 400 Validation Error - Invalid Employee Email and Negative Salary",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"not-an-email\",\n  \"phone\": \"12345\",\n  \"hireDate\": \"2026-10-01\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"salary\": -1000.0\n}"
+            },
+            "url": "{{baseUrl}}/api/employees"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Validation field errors for email and salary\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"firstName\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"lastName\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"email\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"salary\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. 400 Validation Error - Performance Review Invalid Rating",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": null,\n  \"reviewerId\": null,\n  \"reviewPeriod\": \"\",\n  \"rating\": 7\n}"
+            },
+            "url": "{{baseUrl}}/api/performance-reviews"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Rating out of bounds validation\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"rating\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"employeeId\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"reviewerId\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"reviewPeriod\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. 400 Validation Error - Payroll Generate Invalid Month and Year",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": null,\n  \"payMonth\": 13,\n  \"payYear\": 1995\n}"
+            },
+            "url": "{{baseUrl}}/api/payrolls/generate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Payroll month out of range validation\", function () {",
+                  "    var data = pm.response.json();",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"payMonth\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"payYear\");",
+                  "    pm.expect(data.fieldErrors).to.have.property(\"employeeId\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
