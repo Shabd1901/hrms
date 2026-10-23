@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Phases 2.1 - 2.12 complete; Week 2 REST APIs complete)
+Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phase 3.1 Logging in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Pha
 | Semester | 1 (Backend) |
 | Weeks complete | 2 / 4 |
 | Phases complete | 22 / 36 |
-| Steps complete | 130 / 196 |
+| Steps complete | 131 / 196 |
 | Commits (checkpoints) made | 21 / 23 |
-| Overall | 66.3% |
+| Overall | 66.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -25,7 +25,7 @@ Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Pha
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
-| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 0 | 0 / 4 | Not started |
+| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 1 | 0 / 4 | In progress |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
@@ -54,7 +54,7 @@ Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Pha
 | 2.10 | Documents and employee activation | 6 | 6 | CP-12 | Completed |
 | 2.11 | Offboarding APIs | 5 | 5 | CP-12 | Completed |
 | 2.12 | Week 2 wrap-up | 1 | 1 | CP-13 | Completed |
-| 3.1 | Logging | 7 | 0 | CP-14 | Not started |
+| 3.1 | Logging | 7 | 1 | CP-14 | In progress |
 | 3.2 | Global exception handling | 9 | 0 | CP-15 | Not started |
 | 3.3 | Validation | 7 | 0 | CP-16 | Not started |
 | 3.4 | Swagger / OpenAPI | 5 | 0 | CP-17 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-20 · Current step: **2.12.1** · Status: in progress (Pha
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 130 | 66 | 21 / 23 |
+| 196 | 131 | 65 | 21 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 0/31 · W4 0/35
+Steps per week: W1 40/40 · W2 90/90 · W3 1/31 · W4 0/35
 Commits per week: W1 5/5 · W2 8/8 · W3 0/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 2.12.1 — Week 2 REST APIs complete; Postman collection created at postman/PeopleOps.postman_collection.json |
-| Next | 3.1.1 — Log settings in application.properties (levels, file logs/peopleops.log) |
-| After that | 3.1.2 — Loggers in Department, Designation, Employee services |
+| Current | 3.1.1 — Configured application.properties logging settings, patterns, and logs/peopleops.log destination |
+| Next | 3.1.2 — Loggers in Department, Designation, Employee services |
+| After that | 3.1.3 — Loggers in Candidate, Interview, JobOpening, OnboardingTask services |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,15 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 3.1.1 — Configure log settings in application.properties
+- Date: 2026-10-22
+- What we did: Configured Logback log settings in `application.properties` with log file destination `logs/peopleops.log`, root level `INFO`, application level `com.peopleops=DEBUG`, and clean standardized date/time console and file logging patterns.
+- Why we did it: Establishes centralized operational observability and file persistence for application events before introducing log statements into domain services.
+- How it works:
+  - Spring Boot auto-creates the `logs/` directory and `peopleops.log` on startup if absent.
+  - Standard SLF4J patterns `%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n` format output across console and disk.
+- Files changed: `src/main/resources/application.properties`
 
 ### Phase 2.12 — Week 2 Wrap-Up & End-to-End API Testing (Step 2.12.1)
 - Date: 2026-10-20
