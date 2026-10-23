@@ -4,6 +4,7 @@ import com.peopleops.dto.LeaveRequestRequestDTO;
 import com.peopleops.dto.LeaveRequestResponseDTO;
 import com.peopleops.enums.LeaveRequestStatus;
 import com.peopleops.service.LeaveRequestService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class LeaveRequestController {
     }
 
     @PostMapping
-    public ResponseEntity<LeaveRequestResponseDTO> createLeaveRequest(@RequestBody LeaveRequestRequestDTO request) {
+    public ResponseEntity<LeaveRequestResponseDTO> createLeaveRequest(@Valid @RequestBody LeaveRequestRequestDTO request) {
         LeaveRequestResponseDTO response = leaveRequestService.createLeaveRequest(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -51,7 +52,7 @@ public class LeaveRequestController {
     @PutMapping("/{id}")
     public ResponseEntity<LeaveRequestResponseDTO> updateLeaveRequest(
             @PathVariable Long id,
-            @RequestBody LeaveRequestRequestDTO request) {
+            @Valid @RequestBody LeaveRequestRequestDTO request) {
         LeaveRequestResponseDTO response = leaveRequestService.updateLeaveRequest(id, request);
         return ResponseEntity.ok(response);
     }

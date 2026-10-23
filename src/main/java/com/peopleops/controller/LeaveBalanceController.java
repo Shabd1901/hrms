@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.LeaveBalanceRequestDTO;
 import com.peopleops.dto.LeaveBalanceResponseDTO;
 import com.peopleops.service.LeaveBalanceService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class LeaveBalanceController {
     }
 
     @PostMapping
-    public ResponseEntity<LeaveBalanceResponseDTO> createLeaveBalance(@RequestBody LeaveBalanceRequestDTO request) {
+    public ResponseEntity<LeaveBalanceResponseDTO> createLeaveBalance(@Valid @RequestBody LeaveBalanceRequestDTO request) {
         LeaveBalanceResponseDTO response = leaveBalanceService.createLeaveBalance(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -49,7 +50,7 @@ public class LeaveBalanceController {
     @PutMapping("/{id}")
     public ResponseEntity<LeaveBalanceResponseDTO> updateLeaveBalance(
             @PathVariable Long id,
-            @RequestBody LeaveBalanceRequestDTO request) {
+            @Valid @RequestBody LeaveBalanceRequestDTO request) {
         LeaveBalanceResponseDTO response = leaveBalanceService.updateLeaveBalance(id, request);
         return ResponseEntity.ok(response);
     }

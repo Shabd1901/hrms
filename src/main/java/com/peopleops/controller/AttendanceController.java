@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.AttendanceRequestDTO;
 import com.peopleops.dto.AttendanceResponseDTO;
 import com.peopleops.service.AttendanceService;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -30,7 +31,7 @@ public class AttendanceController {
     }
 
     @PostMapping
-    public ResponseEntity<AttendanceResponseDTO> createAttendance(@RequestBody AttendanceRequestDTO request) {
+    public ResponseEntity<AttendanceResponseDTO> createAttendance(@Valid @RequestBody AttendanceRequestDTO request) {
         AttendanceResponseDTO response = attendanceService.createAttendance(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -52,7 +53,7 @@ public class AttendanceController {
     @PutMapping("/{id}")
     public ResponseEntity<AttendanceResponseDTO> updateAttendance(
             @PathVariable Long id,
-            @RequestBody AttendanceRequestDTO request) {
+            @Valid @RequestBody AttendanceRequestDTO request) {
         AttendanceResponseDTO response = attendanceService.updateAttendance(id, request);
         return ResponseEntity.ok(response);
     }
