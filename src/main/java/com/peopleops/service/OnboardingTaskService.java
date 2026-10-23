@@ -4,6 +4,7 @@ import com.peopleops.dto.OnboardingTaskRequestDTO;
 import com.peopleops.dto.OnboardingTaskResponseDTO;
 import com.peopleops.entity.OnboardingTask;
 import com.peopleops.enums.OnboardingTaskStatus;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.OnboardingTaskRepository;
 import java.time.LocalDate;
@@ -11,10 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class OnboardingTaskService {
@@ -37,7 +36,7 @@ public class OnboardingTaskService {
     public OnboardingTaskResponseDTO createTask(OnboardingTaskRequestDTO request) {
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Onboarding task creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         OnboardingTask task = toEntity(request);
@@ -63,7 +62,7 @@ public class OnboardingTaskService {
         OnboardingTask task = onboardingTaskRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Onboarding task lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Onboarding task not found with id: " + id);
+                return new ResourceNotFoundException("Onboarding task not found with id: " + id);
             });
         return toResponseDTO(task);
     }
@@ -72,12 +71,12 @@ public class OnboardingTaskService {
         OnboardingTask task = onboardingTaskRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Onboarding task update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Onboarding task not found with id: " + id);
+                return new ResourceNotFoundException("Onboarding task not found with id: " + id);
             });
 
         if (!employeeRepository.existsById(request.getEmployeeId())) {
             log.warn("Onboarding task update failed for id {}: employee id {} not found", id, request.getEmployeeId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
         }
 
         task.setEmployeeId(request.getEmployeeId());
@@ -94,7 +93,7 @@ public class OnboardingTaskService {
         OnboardingTask task = onboardingTaskRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Onboarding task delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Onboarding task not found with id: " + id);
+                return new ResourceNotFoundException("Onboarding task not found with id: " + id);
             });
         onboardingTaskRepository.delete(task);
         log.info("Deleted onboarding task id: {}", id);
@@ -105,7 +104,7 @@ public class OnboardingTaskService {
         OnboardingTask task = onboardingTaskRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Onboarding task complete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Onboarding task not found with id: " + id);
+                return new ResourceNotFoundException("Onboarding task not found with id: " + id);
             });
 
         task.setStatus(OnboardingTaskStatus.DONE);

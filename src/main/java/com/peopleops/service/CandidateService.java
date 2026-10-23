@@ -8,16 +8,17 @@ import com.peopleops.entity.Candidate;
 import com.peopleops.entity.JobOpening;
 import com.peopleops.enums.CandidateStage;
 import com.peopleops.enums.JobOpeningStatus;
+import com.peopleops.exception.BusinessRuleException;
+import com.peopleops.exception.DuplicateResourceException;
+import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.CandidateRepository;
 import com.peopleops.repository.JobOpeningRepository;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class CandidateService {
@@ -40,22 +41,22 @@ public class CandidateService {
     public CandidateResponseDTO createCandidate(CandidateRequestDTO request) {
         if (request.getJobOpeningId() == null) {
             log.warn("Candidate application failed: jobOpeningId is null");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Job opening id is required");
+            throw new BusinessRuleException("Job opening id is required");
         }
         JobOpening opening = jobOpeningRepository.findById(request.getJobOpeningId())
             .orElseThrow(() -> {
                 log.warn("Candidate application failed: job opening id {} not found", request.getJobOpeningId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Job opening not found with id: " + request.getJobOpeningId());
+                return new ResourceNotFoundException("Job opening not found with id: " + request.getJobOpeningId());
             });
 
         if (opening.getStatus() != JobOpeningStatus.OPEN) {
             log.warn("Candidate application failed: job opening id {} is not OPEN ({})", request.getJobOpeningId(), opening.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot apply to a job opening that is not OPEN");
+            throw new BusinessRuleException("Cannot apply to a job opening that is not OPEN");
         }
 
         if (candidateRepository.existsByJobOpeningIdAndEmail(request.getJobOpeningId(), request.getEmail())) {
             log.warn("Candidate application failed: duplicate email '{}' for opening id {}", request.getEmail(), request.getJobOpeningId());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Candidate has already applied for this opening with email: " + request.getEmail());
+            throw new DuplicateResourceException("Candidate has already applied for this opening with email: " + request.getEmail());
         }
 
         Candidate candidate = toEntity(request);
@@ -81,7 +82,7 @@ public class CandidateService {
         Candidate candidate = candidateRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Candidate lookup failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id);
+                return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
         return toResponseDTO(candidate);
     }
@@ -90,18 +91,18 @@ public class CandidateService {
         Candidate candidate = candidateRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Candidate update failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id);
+                return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
 
         if (!jobOpeningRepository.existsById(request.getJobOpeningId())) {
             log.warn("Candidate update failed for id {}: job opening id {} not found", id, request.getJobOpeningId());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job opening not found with id: " + request.getJobOpeningId());
+            throw new ResourceNotFoundException("Job opening not found with id: " + request.getJobOpeningId());
         }
 
         if ((!candidate.getJobOpeningId().equals(request.getJobOpeningId()) || !candidate.getEmail().equals(request.getEmail()))
                 && candidateRepository.existsByJobOpeningIdAndEmail(request.getJobOpeningId(), request.getEmail())) {
             log.warn("Candidate update failed for id {}: duplicate application with email '{}'", id, request.getEmail());
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Candidate has already applied for this opening with email: " + request.getEmail());
+            throw new DuplicateResourceException("Candidate has already applied for this opening with email: " + request.getEmail());
         }
 
         candidate.setJobOpeningId(request.getJobOpeningId());
@@ -121,7 +122,7 @@ public class CandidateService {
         Candidate candidate = candidateRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Candidate delete failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id);
+                return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
         candidateRepository.delete(candidate);
         log.info("Deleted candidate id: {}", id);
@@ -131,18 +132,18 @@ public class CandidateService {
         Candidate candidate = candidateRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Candidate stage transition failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id);
+                return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
 
         CandidateStage currentStage = candidate.getStage();
         if (currentStage == CandidateStage.HIRED || currentStage == CandidateStage.REJECTED) {
             log.warn("Candidate stage transition failed: id {} is already {}", id, currentStage);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot change stage of a candidate who is already " + currentStage);
+            throw new BusinessRuleException("Cannot change stage of a candidate who is already " + currentStage);
         }
 
         if (targetStage == CandidateStage.HIRED) {
             log.warn("Candidate stage transition failed: HIRED stage cannot be set via stage patch for id {}", id);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "HIRED stage can only be set via the hire endpoint");
+            throw new BusinessRuleException("HIRED stage can only be set via the hire endpoint");
         }
 
         if (targetStage != CandidateStage.REJECTED) {
@@ -153,7 +154,7 @@ public class CandidateService {
 
             if (!validForwardMove) {
                 log.warn("Candidate stage transition failed: invalid transition from {} to {} for id {}", currentStage, targetStage, id);
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid stage transition from " + currentStage + " to " + targetStage);
+                throw new BusinessRuleException("Invalid stage transition from " + currentStage + " to " + targetStage);
             }
         }
 
@@ -168,23 +169,23 @@ public class CandidateService {
         Candidate candidate = candidateRepository.findById(id)
             .orElseThrow(() -> {
                 log.warn("Candidate hire failed: id {} not found", id);
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Candidate not found with id: " + id);
+                return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
 
         if (candidate.getStage() != CandidateStage.OFFERED) {
             log.warn("Candidate hire failed: id {} is in {} stage (must be OFFERED)", id, candidate.getStage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Candidate can only be hired when in OFFERED stage");
+            throw new BusinessRuleException("Candidate can only be hired when in OFFERED stage");
         }
 
         JobOpening opening = jobOpeningRepository.findById(candidate.getJobOpeningId())
             .orElseThrow(() -> {
                 log.warn("Candidate hire failed: opening id {} not found", candidate.getJobOpeningId());
-                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Job opening not found with id: " + candidate.getJobOpeningId());
+                return new ResourceNotFoundException("Job opening not found with id: " + candidate.getJobOpeningId());
             });
 
         if (opening.getStatus() != JobOpeningStatus.OPEN) {
             log.warn("Candidate hire failed: opening id {} is not OPEN ({})", opening.getId(), opening.getStatus());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot hire for a job opening that is not OPEN");
+            throw new BusinessRuleException("Cannot hire for a job opening that is not OPEN");
         }
 
         candidate.setStage(CandidateStage.HIRED);
