@@ -1,5 +1,8 @@
 package com.peopleops.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +13,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PayrollGenerateRequestDTO {
+
+    @NotNull(message = "Employee id is required")
     private Long employeeId;
+
+    @NotNull(message = "Pay month is required")
+    @Min(value = 1, message = "Pay month must be between 1 and 12")
+    @Max(value = 12, message = "Pay month must be between 1 and 12")
     private Integer payMonth;
+
+    @NotNull(message = "Pay year is required")
+    @Min(value = 2000, message = "Pay year must be valid")
     private Integer payYear;
 }

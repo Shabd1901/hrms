@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.PayrollGenerateRequestDTO;
 import com.peopleops.dto.PayrollResponseDTO;
 import com.peopleops.service.PayrollService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class PayrollController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<PayrollResponseDTO> generatePayroll(@RequestBody PayrollGenerateRequestDTO request) {
+    public ResponseEntity<PayrollResponseDTO> generatePayroll(@Valid @RequestBody PayrollGenerateRequestDTO request) {
         PayrollResponseDTO response = payrollService.generatePayroll(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.PerformanceReviewRequestDTO;
 import com.peopleops.dto.PerformanceReviewResponseDTO;
 import com.peopleops.service.PerformanceReviewService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class PerformanceReviewController {
 
     @PostMapping
     public ResponseEntity<PerformanceReviewResponseDTO> createPerformanceReview(
-            @RequestBody PerformanceReviewRequestDTO request) {
+            @Valid @RequestBody PerformanceReviewRequestDTO request) {
         PerformanceReviewResponseDTO response = performanceReviewService.createPerformanceReview(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -50,7 +51,7 @@ public class PerformanceReviewController {
     @PutMapping("/{id}")
     public ResponseEntity<PerformanceReviewResponseDTO> updatePerformanceReview(
             @PathVariable Long id,
-            @RequestBody PerformanceReviewRequestDTO request) {
+            @Valid @RequestBody PerformanceReviewRequestDTO request) {
         PerformanceReviewResponseDTO response = performanceReviewService.updatePerformanceReview(id, request);
         return ResponseEntity.ok(response);
     }
