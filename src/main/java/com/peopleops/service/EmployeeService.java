@@ -78,9 +78,13 @@ public class EmployeeService {
                 log.warn("Employee creation failed: designation id {} not found", request.getDesignationId());
                 return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
             });
-        if (request.getManagerId() != null && !employeeRepository.existsById(request.getManagerId())) {
-            log.warn("Employee creation failed: manager id {} not found", request.getManagerId());
-            throw new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
+        Employee manager = null;
+        if (request.getManagerId() != null) {
+            manager = employeeRepository.findById(request.getManagerId())
+                .orElseThrow(() -> {
+                    log.warn("Employee creation failed: manager id {} not found", request.getManagerId());
+                    return new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
+                });
         }
 
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
@@ -91,6 +95,7 @@ public class EmployeeService {
         employee.setStatus(EmployeeStatus.ONBOARDING);
         employee.setDepartment(department);
         employee.setDesignation(designation);
+        employee.setManager(manager);
 
         Employee saved = employeeRepository.save(employee);
         log.info("Created employee with code: '{}' and id: {}", saved.getEmployeeCode(), saved.getId());
@@ -104,9 +109,13 @@ public class EmployeeService {
             log.warn("Hiring candidate failed: duplicate email '{}'", candidate.getEmail());
             throw new DuplicateResourceException("Email already exists: " + candidate.getEmail());
         }
-        if (hireRequest.getManagerId() != null && !employeeRepository.existsById(hireRequest.getManagerId())) {
-            log.warn("Hiring candidate failed: manager id {} not found", hireRequest.getManagerId());
-            throw new ResourceNotFoundException("Manager not found with id: " + hireRequest.getManagerId());
+        Employee manager = null;
+        if (hireRequest.getManagerId() != null) {
+            manager = employeeRepository.findById(hireRequest.getManagerId())
+                .orElseThrow(() -> {
+                    log.warn("Hiring candidate failed: manager id {} not found", hireRequest.getManagerId());
+                    return new ResourceNotFoundException("Manager not found with id: " + hireRequest.getManagerId());
+                });
         }
 
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
@@ -127,7 +136,7 @@ public class EmployeeService {
         employee.setMonthlySalary(hireRequest.getMonthlySalary());
         employee.setDepartment(department);
         employee.setDesignation(designation);
-        employee.setManagerId(hireRequest.getManagerId());
+        employee.setManager(manager);
         employee.setStatus(EmployeeStatus.ONBOARDING);
 
         Employee saved = employeeRepository.save(employee);
@@ -185,15 +194,17 @@ public class EmployeeService {
                 log.warn("Employee update failed for id {}: designation id {} not found", id, request.getDesignationId());
                 return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
             });
+        Employee manager = null;
         if (request.getManagerId() != null) {
             if (request.getManagerId().equals(id)) {
                 log.warn("Employee update failed for id {}: cannot be own manager", id);
                 throw new BusinessRuleException("An employee cannot be their own manager");
             }
-            if (!employeeRepository.existsById(request.getManagerId())) {
-                log.warn("Employee update failed for id {}: manager id {} not found", id, request.getManagerId());
-                throw new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
-            }
+            manager = employeeRepository.findById(request.getManagerId())
+                .orElseThrow(() -> {
+                    log.warn("Employee update failed for id {}: manager id {} not found", id, request.getManagerId());
+                    return new ResourceNotFoundException("Manager not found with id: " + request.getManagerId());
+                });
         }
 
         employee.setFirstName(request.getFirstName());
@@ -205,7 +216,7 @@ public class EmployeeService {
         employee.setMonthlySalary(request.getMonthlySalary());
         employee.setDepartment(department);
         employee.setDesignation(designation);
-        employee.setManagerId(request.getManagerId());
+        employee.setManager(manager);
 
         Employee updated = employeeRepository.save(employee);
         log.info("Updated employee id: {}", updated.getId());
@@ -348,7 +359,6 @@ public class EmployeeService {
         employee.setDateOfBirth(dto.getDateOfBirth());
         employee.setDateOfJoining(dto.getDateOfJoining());
         employee.setMonthlySalary(dto.getMonthlySalary());
-        employee.setManagerId(dto.getManagerId());
         return employee;
     }
 
@@ -366,7 +376,7 @@ public class EmployeeService {
             entity.getStatus(),
             entity.getDepartment() != null ? entity.getDepartment().getId() : null,
             entity.getDesignation() != null ? entity.getDesignation().getId() : null,
-            entity.getManagerId()
+            entity.getManager() != null ? entity.getManager().getId() : null
         );
     }
 }
