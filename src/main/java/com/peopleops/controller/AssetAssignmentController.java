@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.AssetAssignmentRequestDTO;
 import com.peopleops.dto.AssetAssignmentResponseDTO;
 import com.peopleops.service.AssetAssignmentService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,8 @@ public class AssetAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<AssetAssignmentResponseDTO> assignAsset(@RequestBody AssetAssignmentRequestDTO request) {
+    public ResponseEntity<AssetAssignmentResponseDTO> assignAsset(
+            @Valid @RequestBody AssetAssignmentRequestDTO request) {
         AssetAssignmentResponseDTO response = assetAssignmentService.assignAsset(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

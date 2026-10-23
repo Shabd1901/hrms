@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.OffboardingRequestDTO;
 import com.peopleops.dto.OffboardingResponseDTO;
 import com.peopleops.service.OffboardingService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,8 @@ public class OffboardingController {
     }
 
     @PostMapping
-    public ResponseEntity<OffboardingResponseDTO> initiateOffboarding(@RequestBody OffboardingRequestDTO request) {
+    public ResponseEntity<OffboardingResponseDTO> initiateOffboarding(
+            @Valid @RequestBody OffboardingRequestDTO request) {
         OffboardingResponseDTO response = offboardingService.initiateOffboarding(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -47,7 +49,7 @@ public class OffboardingController {
     @PutMapping("/{id}")
     public ResponseEntity<OffboardingResponseDTO> updateOffboarding(
             @PathVariable Long id,
-            @RequestBody OffboardingRequestDTO request) {
+            @Valid @RequestBody OffboardingRequestDTO request) {
         OffboardingResponseDTO response = offboardingService.updateOffboarding(id, request);
         return ResponseEntity.ok(response);
     }

@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.TrainingEnrollmentRequestDTO;
 import com.peopleops.dto.TrainingEnrollmentResponseDTO;
 import com.peopleops.service.TrainingEnrollmentService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class TrainingEnrollmentController {
 
     @PostMapping
     public ResponseEntity<TrainingEnrollmentResponseDTO> enrollEmployee(
-            @RequestBody TrainingEnrollmentRequestDTO request) {
+            @Valid @RequestBody TrainingEnrollmentRequestDTO request) {
         TrainingEnrollmentResponseDTO response = trainingEnrollmentService.enrollEmployee(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

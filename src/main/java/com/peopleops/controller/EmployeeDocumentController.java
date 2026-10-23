@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.EmployeeDocumentRequestDTO;
 import com.peopleops.dto.EmployeeDocumentResponseDTO;
 import com.peopleops.service.EmployeeDocumentService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,8 @@ public class EmployeeDocumentController {
     }
 
     @PostMapping
-    public ResponseEntity<EmployeeDocumentResponseDTO> createDocument(@RequestBody EmployeeDocumentRequestDTO request) {
+    public ResponseEntity<EmployeeDocumentResponseDTO> createDocument(
+            @Valid @RequestBody EmployeeDocumentRequestDTO request) {
         EmployeeDocumentResponseDTO response = employeeDocumentService.createDocument(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -49,7 +51,7 @@ public class EmployeeDocumentController {
     @PutMapping("/{id}")
     public ResponseEntity<EmployeeDocumentResponseDTO> updateDocument(
             @PathVariable Long id,
-            @RequestBody EmployeeDocumentRequestDTO request) {
+            @Valid @RequestBody EmployeeDocumentRequestDTO request) {
         EmployeeDocumentResponseDTO response = employeeDocumentService.updateDocument(id, request);
         return ResponseEntity.ok(response);
     }

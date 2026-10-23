@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.AssetRequestDTO;
 import com.peopleops.dto.AssetResponseDTO;
 import com.peopleops.service.AssetService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class AssetController {
     }
 
     @PostMapping
-    public ResponseEntity<AssetResponseDTO> createAsset(@RequestBody AssetRequestDTO request) {
+    public ResponseEntity<AssetResponseDTO> createAsset(@Valid @RequestBody AssetRequestDTO request) {
         AssetResponseDTO response = assetService.createAsset(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -47,7 +48,7 @@ public class AssetController {
     @PutMapping("/{id}")
     public ResponseEntity<AssetResponseDTO> updateAsset(
             @PathVariable Long id,
-            @RequestBody AssetRequestDTO request) {
+            @Valid @RequestBody AssetRequestDTO request) {
         AssetResponseDTO response = assetService.updateAsset(id, request);
         return ResponseEntity.ok(response);
     }

@@ -3,6 +3,7 @@ package com.peopleops.controller;
 import com.peopleops.dto.SkillRequestDTO;
 import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.service.SkillService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class SkillController {
     }
 
     @PostMapping
-    public ResponseEntity<SkillResponseDTO> createSkill(@RequestBody SkillRequestDTO request) {
+    public ResponseEntity<SkillResponseDTO> createSkill(@Valid @RequestBody SkillRequestDTO request) {
         SkillResponseDTO response = skillService.createSkill(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -46,7 +47,7 @@ public class SkillController {
     @PutMapping("/{id}")
     public ResponseEntity<SkillResponseDTO> updateSkill(
             @PathVariable Long id,
-            @RequestBody SkillRequestDTO request) {
+            @Valid @RequestBody SkillRequestDTO request) {
         SkillResponseDTO response = skillService.updateSkill(id, request);
         return ResponseEntity.ok(response);
     }
