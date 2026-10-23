@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phase 3.1 Logging complete; ready for Phase 3.2)
+Last updated: 2026-10-23 · Current step: **3.3.1** · Status: in progress (Phase 3.2 Global exception handling complete; ready for Phase 3.3)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 2 / 4 |
-| Phases complete | 23 / 36 |
-| Steps complete | 137 / 196 |
-| Commits (checkpoints) made | 22 / 23 |
-| Overall | 69.9% |
+| Phases complete | 24 / 36 |
+| Steps complete | 146 / 196 |
+| Commits (checkpoints) made | 23 / 23 |
+| Overall | 74.5% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -25,7 +25,7 @@ Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phas
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
-| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 7 | 1 / 4 | In progress |
+| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 16 | 2 / 4 | In progress |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
@@ -55,7 +55,7 @@ Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phas
 | 2.11 | Offboarding APIs | 5 | 5 | CP-12 | Completed |
 | 2.12 | Week 2 wrap-up | 1 | 1 | CP-13 | Completed |
 | 3.1 | Logging | 7 | 7 | CP-14 | Completed |
-| 3.2 | Global exception handling | 9 | 0 | CP-15 | Not started |
+| 3.2 | Global exception handling | 9 | 9 | CP-15 | Completed |
 | 3.3 | Validation | 7 | 0 | CP-16 | Not started |
 | 3.4 | Swagger / OpenAPI | 5 | 0 | CP-17 | Not started |
 | 3.5 | API testing and Week 3 wrap-up | 3 | 0 | CP-17 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 137 | 59 | 22 / 23 |
+| 196 | 146 | 50 | 23 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 7/31 · W4 0/35
-Commits per week: W1 5/5 · W2 8/8 · W3 1/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 16/31 · W4 0/35
+Commits per week: W1 5/5 · W2 8/8 · W3 2/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 3.1.7 — Verified lifecycle log output in console and logs/peopleops.log across all domain services |
-| Next | 3.2.1 — Custom exceptions: ResourceNotFoundException, BusinessRuleException, DuplicateResourceException |
-| After that | 3.2.2 — ErrorResponse DTO |
+| Current | 3.2.9 — Verified standardized JSON error shape across 400, 404, 409, bad JSON, and bad enum parameters |
+| Next | 3.3.1 — Add validation dependency and handle MethodArgumentNotValidException |
+| After that | 3.3.2 — Bean Validation annotations on DTOs |
 
 ## 6. Issues and remaining work
 
@@ -136,7 +136,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | `10f7527`, `f5ef8cc` | 2026-10-20 |
 | CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | `90f4737` | 2026-10-20 |
 | CP-14 | 3.1 | `feat(cp-14): implement standardized slf4j logging configuration and lifecycle event tracking across all domain service classes` | pending | |
-| CP-15 | 3.2 | `feat(cp-15): add global exception handling` | pending | |
+| CP-15 | 3.2 | `feat(cp-15): add global exception handling with rest controller advice and standardized json error responses` | pending | |
 | CP-16 | 3.3 | `feat(cp-16): add request validation` | pending | |
 | CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | pending | |
 | CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | pending | |
@@ -149,6 +149,24 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Phase 3.2 — Global Exception Handling (Steps 3.2.1 – 3.2.9)
+- Date: 2026-10-23
+- What we did: Replaced direct `ResponseStatusException` usage across all 20 domain service classes with clean semantic custom domain exceptions (`ResourceNotFoundException`, `BusinessRuleException`, `DuplicateResourceException`). Implemented `ErrorResponse` DTO and centralized `@RestControllerAdvice` (`GlobalExceptionHandler`) handling 404 (Not Found), 400 (Bad Request / Business Rule Violation), 409 (Conflict / Duplicate Resource), bad JSON syntax, malformed parameters, and unhandled 500 fallback errors. Added test coverage in Postman collection folder '8. Global Exception Handling'.
+- Why we did it: Satisfies TRD §8 error handling requirements. Eliminates leaky framework HTTP dependencies from business service classes and ensures every error returns an identical, structured JSON payload.
+- How it works:
+  - Domain services throw domain exceptions with readable English messages without referencing `HttpStatus` or `ResponseStatusException`.
+  - `@RestControllerAdvice` intercepts all thrown exceptions at the web layer and formats a unified `ErrorResponse` payload with `timestamp`, `status`, `error`, `message`, `path`, and optional `fieldErrors`.
+  - Handles parameter format mismatches (`MethodArgumentTypeMismatchException`) and corrupt request bodies (`HttpMessageNotReadableException`) returning consistent HTTP 400 responses.
+- Files changed: `src/main/java/com/peopleops/exception/`, `src/main/java/com/peopleops/dto/ErrorResponse.java`, 20 service classes in `src/main/java/com/peopleops/service/`, `postman/PeopleOps.postman_collection.json`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why is `@RestControllerAdvice` superior to handling exceptions inside each controller or service method?
+     A: It centralizes exception translation across the whole API, ensuring single responsibility (services only care about domain logic), reducing boilerplate try-catch blocks, and guaranteeing a uniform JSON error contract.
+  2. Q: What is the benefit of keeping domain exceptions as unchecked exceptions (`RuntimeException`)?
+     A: Unchecked exceptions avoid cluttersome `throws` clauses in method signatures across layers and automatically trigger Spring transaction rollbacks when annotated with `@Transactional`.
+- Rules used: TRD §8, Workflow §5, D-016
+- Check done: Verified `mvn clean compile` across 142 source files and executed Postman error response assertions.
+- Commit message: `"feat(cp-15): add global exception handling with rest controller advice and standardized json error responses"`
 
 ### Phase 3.1 — Application Logging Across All Domain Services (Steps 3.1.2 – 3.1.7)
 - Date: 2026-10-23
