@@ -8,6 +8,8 @@ import com.peopleops.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class EmployeeDocumentService {
+
+    private static final Logger log = LoggerFactory.getLogger(EmployeeDocumentService.class);
 
     private final EmployeeDocumentRepository employeeDocumentRepository;
     private final EmployeeRepository employeeRepository;
@@ -31,6 +35,7 @@ public class EmployeeDocumentService {
 
     public EmployeeDocumentResponseDTO createDocument(EmployeeDocumentRequestDTO request) {
         if (!employeeRepository.existsById(request.getEmployeeId())) {
+            log.warn("Create document rejected: employee id {} not found", request.getEmployeeId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
         }
 
@@ -39,6 +44,7 @@ public class EmployeeDocumentService {
         document.setVerified(false);
 
         EmployeeDocument saved = employeeDocumentRepository.save(document);
+        log.info("Uploaded document '{}' ({}) for employee id {} with doc id {}", saved.getFileName(), saved.getDocumentType(), saved.getEmployeeId(), saved.getId());
         return toResponseDTO(saved);
     }
 
@@ -65,6 +71,7 @@ public class EmployeeDocumentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
 
         if (!employeeRepository.existsById(request.getEmployeeId())) {
+            log.warn("Update document rejected: employee id {} not found", request.getEmployeeId());
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
         }
 
@@ -74,6 +81,7 @@ public class EmployeeDocumentService {
         document.setFileUrl(request.getFileUrl());
 
         EmployeeDocument updated = employeeDocumentRepository.save(document);
+        log.info("Updated document id {}", updated.getId());
         return toResponseDTO(updated);
     }
 
@@ -81,6 +89,7 @@ public class EmployeeDocumentService {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee document not found with id: " + id));
         employeeDocumentRepository.delete(document);
+        log.info("Deleted document id {}", id);
     }
 
     @Transactional
@@ -90,6 +99,7 @@ public class EmployeeDocumentService {
 
         document.setVerified(true);
         EmployeeDocument updated = employeeDocumentRepository.save(document);
+        log.info("Verified document id {} for employee id {}", updated.getId(), updated.getEmployeeId());
 
         employeeService.activateIfReady(document.getEmployeeId());
 

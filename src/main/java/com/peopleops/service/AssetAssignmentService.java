@@ -14,6 +14,8 @@ import com.peopleops.repository.EmployeeRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AssetAssignmentService {
+
+    private static final Logger log = LoggerFactory.getLogger(AssetAssignmentService.class);
 
     private final AssetAssignmentRepository assetAssignmentRepository;
     private final AssetRepository assetRepository;
@@ -44,10 +48,12 @@ public class AssetAssignmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
 
         if (employee.getStatus() != EmployeeStatus.ONBOARDING && employee.getStatus() != EmployeeStatus.ACTIVE) {
+            log.warn("Assign asset rejected: employee {} status is {}", employee.getId(), employee.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Assets can only be assigned to ONBOARDING or ACTIVE employees. Employee status: " + employee.getStatus());
         }
 
         if (asset.getStatus() != AssetStatus.AVAILABLE) {
+            log.warn("Assign asset rejected: asset {} status is {}", asset.getId(), asset.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only AVAILABLE assets can be assigned. Asset status: " + asset.getStatus());
         }
 
@@ -62,6 +68,7 @@ public class AssetAssignmentService {
         assetRepository.save(asset);
 
         AssetAssignment saved = assetAssignmentRepository.save(assignment);
+        log.info("Assigned asset id {} to employee id {} (assignment id {})", asset.getId(), employee.getId(), saved.getId());
         return toResponseDTO(saved);
     }
 
@@ -89,6 +96,7 @@ public class AssetAssignmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Asset assignment not found with id: " + id));
 
         if (assignment.getStatus() != AssignmentStatus.ASSIGNED) {
+            log.warn("Return asset rejected: assignment id {} status is {}", id, assignment.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ASSIGNED assets can be returned. Current status: " + assignment.getStatus());
         }
 
@@ -101,6 +109,7 @@ public class AssetAssignmentService {
         assetRepository.save(asset);
 
         AssetAssignment updated = assetAssignmentRepository.save(assignment);
+        log.info("Returned asset id {} from assignment id {}", asset.getId(), id);
         return toResponseDTO(updated);
     }
 

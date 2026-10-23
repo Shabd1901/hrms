@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phase 3.1 Logging in progress)
+Last updated: 2026-10-23 · Current step: **3.2.1** · Status: in progress (Phase 3.1 Logging complete; ready for Phase 3.2)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 2 / 4 |
-| Phases complete | 22 / 36 |
-| Steps complete | 131 / 196 |
-| Commits (checkpoints) made | 21 / 23 |
-| Overall | 66.8% |
+| Phases complete | 23 / 36 |
+| Steps complete | 137 / 196 |
+| Commits (checkpoints) made | 22 / 23 |
+| Overall | 69.9% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -25,7 +25,7 @@ Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phas
 |---|---|---|---|---|---|---|
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
-| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 1 | 0 / 4 | In progress |
+| 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 7 | 1 / 4 | In progress |
 | 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 0 | 0 / 6 | Not started |
 
 ## 3. Phases
@@ -54,7 +54,7 @@ Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phas
 | 2.10 | Documents and employee activation | 6 | 6 | CP-12 | Completed |
 | 2.11 | Offboarding APIs | 5 | 5 | CP-12 | Completed |
 | 2.12 | Week 2 wrap-up | 1 | 1 | CP-13 | Completed |
-| 3.1 | Logging | 7 | 1 | CP-14 | In progress |
+| 3.1 | Logging | 7 | 7 | CP-14 | Completed |
 | 3.2 | Global exception handling | 9 | 0 | CP-15 | Not started |
 | 3.3 | Validation | 7 | 0 | CP-16 | Not started |
 | 3.4 | Swagger / OpenAPI | 5 | 0 | CP-17 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-22 · Current step: **3.1.2** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 131 | 65 | 21 / 23 |
+| 196 | 137 | 59 | 22 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 1/31 · W4 0/35
-Commits per week: W1 5/5 · W2 8/8 · W3 0/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 7/31 · W4 0/35
+Commits per week: W1 5/5 · W2 8/8 · W3 1/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 3.1.1 — Configured application.properties logging settings, patterns, and logs/peopleops.log destination |
-| Next | 3.1.2 — Loggers in Department, Designation, Employee services |
-| After that | 3.1.3 — Loggers in Candidate, Interview, JobOpening, OnboardingTask services |
+| Current | 3.1.7 — Verified lifecycle log output in console and logs/peopleops.log across all domain services |
+| Next | 3.2.1 — Custom exceptions: ResourceNotFoundException, BusinessRuleException, DuplicateResourceException |
+| After that | 3.2.2 — ErrorResponse DTO |
 
 ## 6. Issues and remaining work
 
@@ -135,7 +135,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-11 | 2.8, 2.9 | `feat(cp-11): add training skill and asset apis` | `e0d43b4`, `d58f337`, `17baa90` | 2026-10-20 |
 | CP-12 | 2.10, 2.11 | `feat(cp-12): add documents activation and offboarding apis` | `10f7527`, `f5ef8cc` | 2026-10-20 |
 | CP-13 | 2.12 | `test(cp-13): complete week 2 api testing` | `90f4737` | 2026-10-20 |
-| CP-14 | 3.1 | `feat(cp-14): add logging` | pending | |
+| CP-14 | 3.1 | `feat(cp-14): implement standardized slf4j logging configuration and lifecycle event tracking across all domain service classes` | pending | |
 | CP-15 | 3.2 | `feat(cp-15): add global exception handling` | pending | |
 | CP-16 | 3.3 | `feat(cp-16): add request validation` | pending | |
 | CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger and complete week 3 testing` | pending | |
@@ -149,6 +149,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Phase 3.1 — Application Logging Across All Domain Services (Steps 3.1.2 – 3.1.7)
+- Date: 2026-10-23
+- What we did: Integrated SLF4J `Logger` instances across all 20 service classes (`DepartmentService`, `DesignationService`, `EmployeeService`, `CandidateService`, `InterviewService`, `JobOpeningService`, `OnboardingTaskService`, `AttendanceService`, `LeaveTypeService`, `LeaveBalanceService`, `LeaveRequestService`, `PayrollService`, `PerformanceReviewService`, `SkillService`, `TrainingProgramService`, `TrainingEnrollmentService`, `AssetService`, `AssetAssignmentService`, `EmployeeDocumentService`, `OffboardingService`). Configured `log.info` for state transitions and lifecycle modifications, and `log.warn` for rejected business rules. Verified output emission to both console and `logs/peopleops.log`.
+- Why we did it: Satisfies TRD §9 and establishes end-to-end operational visibility, auditability of business rule denials, and production-grade monitoring before introducing global exception handling in Phase 3.2.
+- How it works:
+  - `private static final Logger log = LoggerFactory.getLogger(XxxService.class);` provides thread-safe static logger instances per service class.
+  - Lifecycle state changes (e.g. employee onboarding, promotion, notice initiation, asset checkout/return, document verification) emit structured `INFO` messages.
+  - Validation rejections and conflict conditions emit `WARN` messages with contextual IDs prior to throwing HTTP exceptions.
+  - Logback redirects all application logging to `logs/peopleops.log` while continuing console streams.
+- Files changed: 20 Service classes in `src/main/java/com/peopleops/service/`, `src/main/resources/application.properties`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why should loggers be declared in service classes rather than REST controllers?
+     A: Service classes encapsulate the core business logic and state transitions; logging at the service tier captures all domain events regardless of whether invoked via REST, background jobs, or test suites.
+  2. Q: Why use SLF4J parameterized logging (`log.info("...", id)`) instead of string concatenation?
+     A: Parameterized logging defers string construction and formatting until after the logger level check passes, preventing unnecessary memory allocation and garbage collection overhead.
+- Rules used: TRD §9, D-016
+- Check done: Verified `mvn clean compile` across all 137 source files and inspected `logs/peopleops.log`.
+- Commit message: `"feat(cp-14): implement standardized slf4j logging configuration and lifecycle event tracking across all domain service classes"`
 
 ### Step 3.1.1 — Configure log settings in application.properties
 - Date: 2026-10-22

@@ -14,12 +14,16 @@ import com.peopleops.repository.TrainingProgramRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TrainingEnrollmentService {
+
+    private static final Logger log = LoggerFactory.getLogger(TrainingEnrollmentService.class);
 
     private final TrainingEnrollmentRepository trainingEnrollmentRepository;
     private final TrainingProgramRepository trainingProgramRepository;
@@ -39,6 +43,7 @@ public class TrainingEnrollmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
+            log.warn("Enrollment rejected: employee {} is in EXITED status", request.getEmployeeId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only working employees can be enrolled in training");
         }
 
@@ -46,16 +51,19 @@ public class TrainingEnrollmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + request.getTrainingProgramId()));
 
         if (program.getStatus() != TrainingStatus.PLANNED && program.getStatus() != TrainingStatus.ONGOING) {
+            log.warn("Enrollment rejected: program {} has status {}", request.getTrainingProgramId(), program.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Can only enroll into PLANNED or ONGOING training programs");
         }
 
         if (trainingEnrollmentRepository.existsByTrainingProgramIdAndEmployeeId(request.getTrainingProgramId(), request.getEmployeeId())) {
+            log.warn("Enrollment rejected: employee {} is already enrolled in program {}", request.getEmployeeId(), request.getTrainingProgramId());
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Employee is already enrolled in this training program");
         }
 
         TrainingEnrollment enrollment = toEntity(request);
         enrollment.setStatus(EnrollmentStatus.ENROLLED);
         TrainingEnrollment saved = trainingEnrollmentRepository.save(enrollment);
+        log.info("Enrolled employee {} in training program {} with enrollment id {}", saved.getEmployeeId(), saved.getTrainingProgramId(), saved.getId());
         return toResponseDTO(saved);
     }
 
@@ -81,6 +89,7 @@ public class TrainingEnrollmentService {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
         trainingEnrollmentRepository.delete(enrollment);
+        log.info("Deleted training enrollment with id {}", id);
     }
 
     public TrainingEnrollmentResponseDTO completeEnrollment(Long id) {
@@ -88,6 +97,7 @@ public class TrainingEnrollmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
 
         if (enrollment.getStatus() != EnrollmentStatus.ENROLLED) {
+            log.warn("Complete enrollment rejected: enrollment {} has status {}", id, enrollment.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ENROLLED enrollments can be completed");
         }
 
@@ -95,6 +105,7 @@ public class TrainingEnrollmentService {
         enrollment.setCompletionDate(LocalDate.now());
 
         TrainingEnrollment updated = trainingEnrollmentRepository.save(enrollment);
+        log.info("Completed training enrollment id {}", id);
         return toResponseDTO(updated);
     }
 
@@ -103,11 +114,13 @@ public class TrainingEnrollmentService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training enrollment not found with id: " + id));
 
         if (enrollment.getStatus() != EnrollmentStatus.ENROLLED) {
+            log.warn("Drop enrollment rejected: enrollment {} has status {}", id, enrollment.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only ENROLLED enrollments can be dropped");
         }
 
         enrollment.setStatus(EnrollmentStatus.DROPPED);
         TrainingEnrollment updated = trainingEnrollmentRepository.save(enrollment);
+        log.info("Dropped training enrollment id {}", id);
         return toResponseDTO(updated);
     }
 

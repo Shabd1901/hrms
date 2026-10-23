@@ -22,12 +22,16 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PayrollService {
+
+    private static final Logger log = LoggerFactory.getLogger(PayrollService.class);
 
     private final PayrollRepository payrollRepository;
     private final EmployeeRepository employeeRepository;
@@ -50,24 +54,32 @@ public class PayrollService {
 
     public PayrollResponseDTO generatePayroll(PayrollGenerateRequestDTO request) {
         if (request.getEmployeeId() == null) {
+            log.warn("Payroll generation failed: employeeId is null");
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee id is required");
         }
         if (request.getPayMonth() == null || request.getPayMonth() < 1 || request.getPayMonth() > 12) {
+            log.warn("Payroll generation failed: invalid pay month {}", request.getPayMonth());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay month (1-12) is required");
         }
         if (request.getPayYear() == null || request.getPayYear() < 2000) {
+            log.warn("Payroll generation failed: invalid pay year {}", request.getPayYear());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valid pay year is required");
         }
 
         Employee employee = employeeRepository.findById(request.getEmployeeId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId()));
+            .orElseThrow(() -> {
+                log.warn("Payroll generation failed: employee id {} not found", request.getEmployeeId());
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found with id: " + request.getEmployeeId());
+            });
 
         if (employee.getStatus() == EmployeeStatus.EXITED) {
+            log.warn("Payroll generation failed: employee id {} is EXITED", employee.getId());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot generate payroll for an exited employee");
         }
 
         if (payrollRepository.existsByEmployeeIdAndPayMonthAndPayYear(
                 request.getEmployeeId(), request.getPayMonth(), request.getPayYear())) {
+            log.warn("Payroll generation failed: duplicate payroll for employee id {} for {}/{}", request.getEmployeeId(), request.getPayMonth(), request.getPayYear());
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Payroll already exists for this employee for month " + request.getPayMonth() + "/" + request.getPayYear());
         }
 
@@ -132,6 +144,7 @@ public class PayrollService {
         payroll.setGeneratedOn(LocalDate.now());
 
         Payroll saved = payrollRepository.save(payroll);
+        log.info("Generated payroll id: {} for employee id: {} for period {}/{} with net salary: {}", saved.getId(), saved.getEmployeeId(), saved.getPayMonth(), saved.getPayYear(), saved.getNetSalary());
         return toResponseDTO(saved);
     }
 
@@ -149,27 +162,39 @@ public class PayrollService {
 
     public PayrollResponseDTO getPayrollById(Long id) {
         Payroll payroll = payrollRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Payroll lookup failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+            });
         return toResponseDTO(payroll);
     }
 
     public void deletePayroll(Long id) {
         Payroll payroll = payrollRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Payroll delete failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+            });
 
         if (payroll.getStatus() != PayrollStatus.GENERATED) {
+            log.warn("Payroll delete failed for id {}: status is {}", id, payroll.getStatus());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only GENERATED payroll records can be deleted");
         }
 
         payrollRepository.delete(payroll);
+        log.info("Deleted payroll id: {}", id);
     }
 
     public PayrollResponseDTO payPayroll(Long id) {
         Payroll payroll = payrollRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Payroll pay patch failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Payroll record not found with id: " + id);
+            });
 
         payroll.setStatus(PayrollStatus.PAID);
         Payroll updated = payrollRepository.save(payroll);
+        log.info("Marked payroll id: {} as PAID", id);
         return toResponseDTO(updated);
     }
 

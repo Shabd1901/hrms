@@ -7,12 +7,16 @@ import com.peopleops.enums.TrainingStatus;
 import com.peopleops.repository.TrainingProgramRepository;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class TrainingProgramService {
+
+    private static final Logger log = LoggerFactory.getLogger(TrainingProgramService.class);
 
     private final TrainingProgramRepository trainingProgramRepository;
 
@@ -22,12 +26,14 @@ public class TrainingProgramService {
 
     public TrainingProgramResponseDTO createTrainingProgram(TrainingProgramRequestDTO request) {
         if (request.getStartDate().isAfter(request.getEndDate())) {
+            log.warn("Training program creation failed: startDate {} is after endDate {}", request.getStartDate(), request.getEndDate());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDate must be on or before endDate");
         }
 
         TrainingProgram program = toEntity(request);
         program.setStatus(TrainingStatus.PLANNED);
         TrainingProgram saved = trainingProgramRepository.save(program);
+        log.info("Created training program with id: {} and title: '{}'", saved.getId(), saved.getTitle());
         return toResponseDTO(saved);
     }
 
@@ -45,15 +51,22 @@ public class TrainingProgramService {
 
     public TrainingProgramResponseDTO getTrainingProgramById(Long id) {
         TrainingProgram program = trainingProgramRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Training program lookup failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+            });
         return toResponseDTO(program);
     }
 
     public TrainingProgramResponseDTO updateTrainingProgram(Long id, TrainingProgramRequestDTO request) {
         TrainingProgram program = trainingProgramRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Training program update failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+            });
 
         if (request.getStartDate().isAfter(request.getEndDate())) {
+            log.warn("Training program update failed for id {}: startDate {} is after endDate {}", id, request.getStartDate(), request.getEndDate());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDate must be on or before endDate");
         }
 
@@ -64,21 +77,30 @@ public class TrainingProgramService {
         program.setEndDate(request.getEndDate());
 
         TrainingProgram updated = trainingProgramRepository.save(program);
+        log.info("Updated training program id: {}", updated.getId());
         return toResponseDTO(updated);
     }
 
     public void deleteTrainingProgram(Long id) {
         TrainingProgram program = trainingProgramRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Training program delete failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+            });
         trainingProgramRepository.delete(program);
+        log.info("Deleted training program id: {}", id);
     }
 
     public TrainingProgramResponseDTO updateStatus(Long id, TrainingStatus status) {
         TrainingProgram program = trainingProgramRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id));
+            .orElseThrow(() -> {
+                log.warn("Training program status update failed: id {} not found", id);
+                return new ResponseStatusException(HttpStatus.NOT_FOUND, "Training program not found with id: " + id);
+            });
 
         program.setStatus(status);
         TrainingProgram updated = trainingProgramRepository.save(program);
+        log.info("Updated training program id: {} status to {}", id, status);
         return toResponseDTO(updated);
     }
 
