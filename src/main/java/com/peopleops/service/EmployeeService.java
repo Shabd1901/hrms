@@ -339,7 +339,7 @@ public class EmployeeService {
 
         for (String[] taskData : defaultTasks) {
             OnboardingTask task = new OnboardingTask();
-            task.setEmployeeId(employee.getId());
+            task.setEmployee(employee);
             task.setTitle(taskData[0]);
             task.setDescription(taskData[1]);
             task.setDueDate(dueDate);

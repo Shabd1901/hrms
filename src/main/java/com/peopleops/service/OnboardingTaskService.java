@@ -2,6 +2,7 @@ package com.peopleops.service;
 
 import com.peopleops.dto.OnboardingTaskRequestDTO;
 import com.peopleops.dto.OnboardingTaskResponseDTO;
+import com.peopleops.entity.Employee;
 import com.peopleops.entity.OnboardingTask;
 import com.peopleops.enums.OnboardingTaskStatus;
 import com.peopleops.exception.ResourceNotFoundException;
@@ -34,15 +35,17 @@ public class OnboardingTaskService {
     }
 
     public OnboardingTaskResponseDTO createTask(OnboardingTaskRequestDTO request) {
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Onboarding task creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Onboarding task creation failed: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
         OnboardingTask task = toEntity(request);
+        task.setEmployee(employee);
         task.setStatus(OnboardingTaskStatus.PENDING);
         OnboardingTask saved = onboardingTaskRepository.save(task);
-        log.info("Created onboarding task id: {} for employee id: {}", saved.getId(), saved.getEmployeeId());
+        log.info("Created onboarding task id: {} for employee id: {}", saved.getId(), saved.getEmployee().getId());
         return toResponseDTO(saved);
     }
 
@@ -74,12 +77,13 @@ public class OnboardingTaskService {
                 return new ResourceNotFoundException("Onboarding task not found with id: " + id);
             });
 
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Onboarding task update failed for id {}: employee id {} not found", id, request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Onboarding task update failed for id {}: employee id {} not found", id, request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
-        task.setEmployeeId(request.getEmployeeId());
+        task.setEmployee(employee);
         task.setTitle(request.getTitle());
         task.setDescription(request.getDescription());
         task.setDueDate(request.getDueDate());
@@ -110,16 +114,19 @@ public class OnboardingTaskService {
         task.setStatus(OnboardingTaskStatus.DONE);
         task.setCompletedOn(LocalDate.now());
         OnboardingTask updated = onboardingTaskRepository.save(task);
-        log.info("Completed onboarding task id: {} for employee id: {}", id, task.getEmployeeId());
 
-        employeeService.activateIfReady(task.getEmployeeId());
+        Long employeeId = task.getEmployee() != null ? task.getEmployee().getId() : null;
+        log.info("Completed onboarding task id: {} for employee id: {}", id, employeeId);
+
+        if (employeeId != null) {
+            employeeService.activateIfReady(employeeId);
+        }
 
         return toResponseDTO(updated);
     }
 
     private OnboardingTask toEntity(OnboardingTaskRequestDTO dto) {
         OnboardingTask task = new OnboardingTask();
-        task.setEmployeeId(dto.getEmployeeId());
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setDueDate(dto.getDueDate());
@@ -129,7 +136,7 @@ public class OnboardingTaskService {
     private OnboardingTaskResponseDTO toResponseDTO(OnboardingTask entity) {
         return new OnboardingTaskResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getTitle(),
             entity.getDescription(),
             entity.getDueDate(),
