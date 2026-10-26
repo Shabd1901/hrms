@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-26 · Current step: **4.2.2** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
+Last updated: 2026-10-26 · Current step: **4.2.3** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-26 · Current step: **4.2.2** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 28 / 36 |
-| Steps complete | 169 / 196 |
+| Steps complete | 170 / 196 |
 | Commits (checkpoints) made | 25 / 23 |
-| Overall | 86.2% |
+| Overall | 86.7% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-26 · Current step: **4.2.2** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 8 | 0 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 9 | 0 / 6 | In progress |
 
 ## 3. Phases
 
@@ -73,18 +73,18 @@ Last updated: 2026-10-26 · Current step: **4.2.2** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 169 | 27 | 25 / 23 |
+| 196 | 170 | 26 | 25 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 8/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 9/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.2.2 — Mapped Candidate.jobOpening and JobOpening.candidates bidirectional relationship (R5) |
-| Next | 4.2.3 — Interview -> Candidate, interviewer many-to-one mapping (R6) |
-| After that | 4.2.4 — OnboardingTask.employee and Employee.onboardingTasks (R7) |
+| Current | 4.2.3 — Mapped Interview -> Candidate, interviewer many-to-one relationships (R6) |
+| Next | 4.2.4 — OnboardingTask.employee and Employee.onboardingTasks with cascade ALL and orphan removal (R7) |
+| After that | 4.2.5 — Test hire workflow and onboarding employee delete (CP-18) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,21 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.2.3 — Interview to Candidate and Interviewer Mappings (R6)
+- Date: 2026-10-26
+- What we did: Replaced scalar `candidateId` and `interviewerId` in `Interview` entity with `@ManyToOne(fetch = FetchType.LAZY)` relationships pointing to `Candidate` and `Employee` via `@JoinColumn(name = "candidate_id", nullable = false)` and `@JoinColumn(name = "interviewer_id", nullable = false)`. Updated `InterviewService` to link entities during interview scheduling, update, and result recording, while maintaining DTO contracts.
+- Why we did it: Satisfies implementation step 4.2.3 and ERD.md §6 relationship R6, enabling object-oriented interaction during interview rounds and automatic evaluation transitions.
+- How it works:
+  - `Interview` owns the foreign keys `candidate_id` and `interviewer_id`.
+  - When recording a passed interview (`InterviewResult.PASSED`), `interview.getCandidate()` directly accesses the linked candidate to advance their recruitment stage from `SHORTLISTED` to `INTERVIEWED`.
+  - Fetching is lazy, avoiding loading candidate details or employee records when listing interview schedules.
+- Files changed: `src/main/java/com/peopleops/entity/Interview.java`, `src/main/java/com/peopleops/service/InterviewService.java`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why is the relationship between `Interview` and `Employee` (interviewer) unidirectional rather than bidirectional?
+     A: An employee can interview many candidates across their tenure, but `Employee` rarely needs to load or manage all past interviews as an in-memory collection. Unidirectional `@ManyToOne` avoids memory bloat on the `Employee` entity while still allowing queries via `findByInterviewerId(Long interviewerId)`.
+  2. Q: What happens in PostgreSQL if an interviewer employee is deleted while having scheduled interviews?
+     A: The foreign key constraint `interviews.interviewer_id -> employees.id` prohibits the deletion (returns 409 Conflict / DataIntegrityViolationException), preserving historical audit integrity.
 
 ### Step 4.2.2 — Candidate and JobOpening Bidirectional Mapping (R5)
 - Date: 2026-10-26

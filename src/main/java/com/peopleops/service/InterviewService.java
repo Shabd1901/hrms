@@ -70,9 +70,11 @@ public class InterviewService {
         }
 
         Interview interview = toEntity(request);
+        interview.setCandidate(candidate);
+        interview.setInterviewer(interviewer);
         interview.setResult(InterviewResult.PENDING);
         Interview saved = interviewRepository.save(interview);
-        log.info("Scheduled interview round {} for candidate id: {} with interviewer id: {}", saved.getRoundNumber(), saved.getCandidateId(), saved.getInterviewerId());
+        log.info("Scheduled interview round {} for candidate id: {} with interviewer id: {}", saved.getRoundNumber(), saved.getCandidate().getId(), saved.getInterviewer().getId());
         return toResponseDTO(saved);
     }
 
@@ -104,10 +106,11 @@ public class InterviewService {
                 return new ResourceNotFoundException("Interview not found with id: " + id);
             });
 
-        if (!candidateRepository.existsById(request.getCandidateId())) {
-            log.warn("Interview update failed: candidate id {} not found", request.getCandidateId());
-            throw new ResourceNotFoundException("Candidate not found with id: " + request.getCandidateId());
-        }
+        Candidate candidate = candidateRepository.findById(request.getCandidateId())
+            .orElseThrow(() -> {
+                log.warn("Interview update failed: candidate id {} not found", request.getCandidateId());
+                return new ResourceNotFoundException("Candidate not found with id: " + request.getCandidateId());
+            });
 
         Employee interviewer = employeeRepository.findById(request.getInterviewerId())
             .orElseThrow(() -> {
@@ -120,8 +123,8 @@ public class InterviewService {
             throw new BusinessRuleException("Interviewer must be an active or working employee");
         }
 
-        interview.setCandidateId(request.getCandidateId());
-        interview.setInterviewerId(request.getInterviewerId());
+        interview.setCandidate(candidate);
+        interview.setInterviewer(interviewer);
         interview.setScheduledAt(request.getScheduledAt());
         interview.setRoundNumber(request.getRoundNumber());
         interview.setFeedback(request.getFeedback());
@@ -154,7 +157,7 @@ public class InterviewService {
         }
 
         if (result == InterviewResult.PASSED) {
-            Candidate candidate = candidateRepository.findById(interview.getCandidateId()).orElse(null);
+            Candidate candidate = interview.getCandidate();
             if (candidate != null && candidate.getStage() == CandidateStage.SHORTLISTED) {
                 candidate.setStage(CandidateStage.INTERVIEWED);
                 candidateRepository.save(candidate);
@@ -169,8 +172,6 @@ public class InterviewService {
 
     private Interview toEntity(InterviewRequestDTO dto) {
         Interview interview = new Interview();
-        interview.setCandidateId(dto.getCandidateId());
-        interview.setInterviewerId(dto.getInterviewerId());
         interview.setScheduledAt(dto.getScheduledAt());
         interview.setRoundNumber(dto.getRoundNumber());
         interview.setFeedback(dto.getFeedback());
@@ -180,8 +181,8 @@ public class InterviewService {
     private InterviewResponseDTO toResponseDTO(Interview entity) {
         return new InterviewResponseDTO(
             entity.getId(),
-            entity.getCandidateId(),
-            entity.getInterviewerId(),
+            entity.getCandidate() != null ? entity.getCandidate().getId() : null,
+            entity.getInterviewer() != null ? entity.getInterviewer().getId() : null,
             entity.getScheduledAt(),
             entity.getRoundNumber(),
             entity.getResult(),
