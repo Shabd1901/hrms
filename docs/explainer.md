@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-23 · Current step: **4.1.6** · Status: in progress (Phase 4.1 Employee Core Mappings complete; ready for Phase 4.2)
+Last updated: 2026-10-26 · Current step: **4.2.1** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-23 · Current step: **4.1.6** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 28 / 36 |
-| Steps complete | 167 / 196 |
+| Steps complete | 168 / 196 |
 | Commits (checkpoints) made | 25 / 23 |
-| Overall | 85.2% |
+| Overall | 85.7% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-23 · Current step: **4.1.6** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 6 | 0 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 7 | 0 / 6 | In progress |
 
 ## 3. Phases
 
@@ -73,18 +73,18 @@ Last updated: 2026-10-23 · Current step: **4.1.6** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 167 | 29 | 25 / 23 |
+| 196 | 168 | 28 | 25 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 6/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 7/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.1.6 — Verified PostgreSQL foreign keys and enriched employee response DTO (Phase 4.1 complete) |
-| Next | 4.2.1 — JobOpening -> Department, Designation many-to-one mapping (R4) |
-| After that | 4.2.2 — Candidate.jobOpening and JobOpening.candidates (R5) |
+| Current | 4.2.1 — Mapped JobOpening -> Department, Designation many-to-one relationships (R4) |
+| Next | 4.2.2 — Candidate.jobOpening and JobOpening.candidates bidirectional mapping (R5) |
+| After that | 4.2.3 — Interview -> Candidate, interviewer many-to-one (R6) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,21 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.2.1 — JobOpening to Department and Designation Many-to-One Mappings (R4)
+- Date: 2026-10-26
+- What we did: Replaced scalar foreign key columns `departmentId` and `designationId` in `JobOpening` entity with `@ManyToOne(fetch = FetchType.LAZY)` relationship annotations pointing to `Department` and `Designation` entities with `@JoinColumn(name = "department_id", nullable = false)` and `@JoinColumn(name = "designation_id", nullable = false)`. Updated `JobOpeningService` to fetch and link target entities, updated `EmployeeService.createFromCandidate` to reuse linked entities directly from the opening, and preserved DTO ID contracts.
+- Why we did it: Satisfies implementation step 4.2.1 and ERD.md §6 relationship R4, converting raw database IDs into rich entity references while avoiding unnecessary secondary database lookups during candidate hiring.
+- How it works:
+  - `JobOpening` owns the foreign keys `department_id` and `designation_id` in `job_openings`.
+  - Lazy fetching prevents eager Cartesian product queries when fetching job openings.
+  - In `EmployeeService.createFromCandidate`, `opening.getDepartment()` and `opening.getDesignation()` supply pre-loaded entity references directly to the newly instantiated employee without additional repository round-trips.
+- Files changed: `src/main/java/com/peopleops/entity/JobOpening.java`, `src/main/java/com/peopleops/service/JobOpeningService.java`, `src/main/java/com/peopleops/service/EmployeeService.java`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why are `nullable = false` attributes kept on `@JoinColumn` for `JobOpening` relationships?
+     A: In a company's hiring workflow, a job opening cannot exist in an orphaned state without a designated department and target designation title. Setting `nullable = false` on `@JoinColumn` enforces this both at Hibernate validation and PostgreSQL DDL constraint levels.
+  2. Q: How does Spring Data JPA handle repository queries like `findByDepartmentId` after changing the field to `department`?
+     A: Spring Data JPA's query parser understands property path expressions: when it encounters `findByDepartmentId`, it resolves it as `findByDepartment_Id`, matching the primary key property `id` of the related `Department` entity automatically.
 
 ### Step 4.1.6 — Phase 4.1 Employee Core Mappings Verification
 - Date: 2026-10-23

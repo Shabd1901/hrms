@@ -121,10 +121,8 @@ public class EmployeeService {
         long nextId = employeeRepository.findMaxId().orElse(0L) + 1;
         String employeeCode = String.format("EMP-%04d", nextId);
 
-        Department department = departmentRepository.findById(opening.getDepartmentId())
-            .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + opening.getDepartmentId()));
-        Designation designation = designationRepository.findById(opening.getDesignationId())
-            .orElseThrow(() -> new ResourceNotFoundException("Designation not found with id: " + opening.getDesignationId()));
+        Department department = opening.getDepartment();
+        Designation designation = opening.getDesignation();
 
         Employee employee = new Employee();
         employee.setEmployeeCode(employeeCode);

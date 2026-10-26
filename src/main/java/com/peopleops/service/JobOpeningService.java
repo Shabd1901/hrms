@@ -2,6 +2,8 @@ package com.peopleops.service;
 
 import com.peopleops.dto.JobOpeningRequestDTO;
 import com.peopleops.dto.JobOpeningResponseDTO;
+import com.peopleops.entity.Department;
+import com.peopleops.entity.Designation;
 import com.peopleops.entity.JobOpening;
 import com.peopleops.enums.JobOpeningStatus;
 import com.peopleops.exception.BusinessRuleException;
@@ -42,16 +44,20 @@ public class JobOpeningService {
             log.warn("Job opening creation failed: designationId is null");
             throw new BusinessRuleException("Designation id is required");
         }
-        if (!departmentRepository.existsById(request.getDepartmentId())) {
-            log.warn("Job opening creation failed: department id {} not found", request.getDepartmentId());
-            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
-        }
-        if (!designationRepository.existsById(request.getDesignationId())) {
-            log.warn("Job opening creation failed: designation id {} not found", request.getDesignationId());
-            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
-        }
+        Department department = departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> {
+                log.warn("Job opening creation failed: department id {} not found", request.getDepartmentId());
+                return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
+            });
+        Designation designation = designationRepository.findById(request.getDesignationId())
+            .orElseThrow(() -> {
+                log.warn("Job opening creation failed: designation id {} not found", request.getDesignationId());
+                return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
+            });
 
         JobOpening opening = toEntity(request);
+        opening.setDepartment(department);
+        opening.setDesignation(designation);
         opening.setStatus(JobOpeningStatus.OPEN);
         JobOpening saved = jobOpeningRepository.save(opening);
         log.info("Created job opening with id: {} and title: '{}'", saved.getId(), saved.getTitle());
@@ -86,18 +92,20 @@ public class JobOpeningService {
                 return new ResourceNotFoundException("Job opening not found with id: " + id);
             });
 
-        if (!departmentRepository.existsById(request.getDepartmentId())) {
-            log.warn("Job opening update failed for id {}: department id {} not found", id, request.getDepartmentId());
-            throw new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
-        }
-        if (!designationRepository.existsById(request.getDesignationId())) {
-            log.warn("Job opening update failed for id {}: designation id {} not found", id, request.getDesignationId());
-            throw new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
-        }
+        Department department = departmentRepository.findById(request.getDepartmentId())
+            .orElseThrow(() -> {
+                log.warn("Job opening update failed for id {}: department id {} not found", id, request.getDepartmentId());
+                return new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId());
+            });
+        Designation designation = designationRepository.findById(request.getDesignationId())
+            .orElseThrow(() -> {
+                log.warn("Job opening update failed for id {}: designation id {} not found", id, request.getDesignationId());
+                return new ResourceNotFoundException("Designation not found with id: " + request.getDesignationId());
+            });
 
         opening.setTitle(request.getTitle());
-        opening.setDepartmentId(request.getDepartmentId());
-        opening.setDesignationId(request.getDesignationId());
+        opening.setDepartment(department);
+        opening.setDesignation(designation);
         opening.setOpenPositions(request.getOpenPositions());
         opening.setPostedDate(request.getPostedDate());
 
@@ -131,8 +139,6 @@ public class JobOpeningService {
     private JobOpening toEntity(JobOpeningRequestDTO dto) {
         JobOpening opening = new JobOpening();
         opening.setTitle(dto.getTitle());
-        opening.setDepartmentId(dto.getDepartmentId());
-        opening.setDesignationId(dto.getDesignationId());
         opening.setOpenPositions(dto.getOpenPositions());
         opening.setPostedDate(dto.getPostedDate());
         return opening;
@@ -142,8 +148,8 @@ public class JobOpeningService {
         return new JobOpeningResponseDTO(
             entity.getId(),
             entity.getTitle(),
-            entity.getDepartmentId(),
-            entity.getDesignationId(),
+            entity.getDepartment() != null ? entity.getDepartment().getId() : null,
+            entity.getDesignation() != null ? entity.getDesignation().getId() : null,
             entity.getOpenPositions(),
             entity.getPostedDate(),
             entity.getStatus()
