@@ -87,9 +87,10 @@ public class AttendanceService {
         }
 
         Attendance attendance = toEntity(request);
+        attendance.setEmployee(employee);
         attendance.setStatus(finalStatus);
         Attendance saved = attendanceRepository.save(attendance);
-        log.info("Recorded attendance id: {} for employee id: {} on date: {} with status: {}", saved.getId(), saved.getEmployeeId(), saved.getAttendanceDate(), saved.getStatus());
+        log.info("Recorded attendance id: {} for employee id: {} on date: {} with status: {}", saved.getId(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getAttendanceDate(), saved.getStatus());
         return toResponseDTO(saved);
     }
 
@@ -128,17 +129,19 @@ public class AttendanceService {
                 return new ResourceNotFoundException("Attendance record not found with id: " + id);
             });
 
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Attendance update failed for id {}: employee id {} not found", id, request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Attendance update failed for id {}: employee id {} not found", id, request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
         if (request.getAttendanceDate().isAfter(LocalDate.now())) {
             log.warn("Attendance update failed for id {}: future date {}", id, request.getAttendanceDate());
             throw new BusinessRuleException("Attendance date cannot be in the future");
         }
 
-        if ((!attendance.getEmployeeId().equals(request.getEmployeeId()) || !attendance.getAttendanceDate().equals(request.getAttendanceDate()))
+        Long currentEmpId = attendance.getEmployee() != null ? attendance.getEmployee().getId() : null;
+        if ((!request.getEmployeeId().equals(currentEmpId) || !attendance.getAttendanceDate().equals(request.getAttendanceDate()))
                 && attendanceRepository.existsByEmployeeIdAndAttendanceDate(request.getEmployeeId(), request.getAttendanceDate())) {
             log.warn("Attendance update failed for id {}: duplicate record for employee id {} on {}", id, request.getEmployeeId(), request.getAttendanceDate());
             throw new DuplicateResourceException("Attendance already recorded for this date: " + request.getAttendanceDate());
@@ -163,7 +166,7 @@ public class AttendanceService {
             }
         }
 
-        attendance.setEmployeeId(request.getEmployeeId());
+        attendance.setEmployee(employee);
         attendance.setAttendanceDate(request.getAttendanceDate());
         attendance.setCheckIn(request.getCheckIn());
         attendance.setCheckOut(request.getCheckOut());
@@ -216,7 +219,6 @@ public class AttendanceService {
 
     private Attendance toEntity(AttendanceRequestDTO dto) {
         Attendance a = new Attendance();
-        a.setEmployeeId(dto.getEmployeeId());
         a.setAttendanceDate(dto.getAttendanceDate());
         a.setCheckIn(dto.getCheckIn());
         a.setCheckOut(dto.getCheckOut());
@@ -227,7 +229,7 @@ public class AttendanceService {
     private AttendanceResponseDTO toResponseDTO(Attendance entity) {
         return new AttendanceResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getAttendanceDate(),
             entity.getCheckIn(),
             entity.getCheckOut(),

@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 4.2 Recruitment and Onboarding Mappings completed; Checkpoint CP-18)
+Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 30 / 36 |
-| Steps complete | 172 / 196 |
+| Steps complete | 173 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 87.8% |
+| Overall | 88.3% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 11 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 12 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -61,7 +61,7 @@ Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
-| 4.3 | Attendance and leave mappings | 4 | 0 | CP-19 | Not started |
+| 4.3 | Attendance and leave mappings | 4 | 1 | CP-19 | In progress |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 172 | 24 | 26 / 23 |
+| 196 | 173 | 23 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 11/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 12/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.2.5 — Test hire workflow and onboarding employee delete (CP-18 completed) |
-| Next | 4.3.1 — Attendance -> Employee many-to-one mapping (R8) |
-| After that | 4.3.2 — LeaveRequest -> Employee many-to-one mapping (R9) |
+| Current | 4.3.1 — Attendance -> Employee many-to-one mapping (R8) |
+| Next | 4.3.2 — LeaveBalance -> Employee, LeaveType many-to-one mappings (R9) |
+| After that | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,20 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.3.1 — Map Attendance to Employee Many-to-One (R8)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` field in `Attendance` with `@ManyToOne(fetch = FetchType.LAZY)` and `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`. Maintained table-level unique constraint on `("employee_id", "attendance_date")`. Updated `AttendanceService` to resolve `Employee` from repository and map to/from DTOs. Updated `LeaveRequestService` to link `Employee` when auto-generating `ON_LEAVE` attendance records upon leave approval.
+- Why we did it: Satisfies implementation step 4.3.1 and ERD.md §6 relationship R8. Establishes relational integrity and enables JPA join queries for employee attendance history.
+- How it works:
+  - `Attendance` is the owning side of the many-to-one relationship with `Employee`.
+  - Lazy loading (`FetchType.LAZY`) prevents unintentional query overhead when fetching attendance logs.
+  - Spring Data JPA query derivation like `findByEmployeeIdAndAttendanceDate` seamlessly traverses `attendance.employee.id` without requiring custom JPQL.
+- Viva questions:
+  - *Q: Why does Attendance have a unique constraint on (employee_id, attendance_date)?*
+    *A: An employee can have at most one attendance record per calendar date. The unique constraint prevents duplicate check-in records at the database level.*
+  - *Q: Does Attendance cascade delete when an employee is deleted?*
+    *A: No. Per ERD.md §6, only R7 (OnboardingTask) cascades. Attendance records represent payroll-critical historical audits and must not be cascade deleted.*
 
 ### Step 4.2.5 — Verification: Hire Workflow and Onboarding Task Cascade Deletion (CP-18)
 - Date: 2026-10-26

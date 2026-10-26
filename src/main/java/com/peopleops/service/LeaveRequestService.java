@@ -243,10 +243,13 @@ public class LeaveRequestService {
             leaveBalanceRepository.save(balance);
         }
 
+        Employee employee = employeeRepository.findById(leaveRequest.getEmployeeId())
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + leaveRequest.getEmployeeId()));
+
         for (LocalDate date = leaveRequest.getFromDate(); !date.isAfter(leaveRequest.getToDate()); date = date.plusDays(1)) {
             if (!attendanceRepository.existsByEmployeeIdAndAttendanceDate(leaveRequest.getEmployeeId(), date)) {
                 Attendance attendance = new Attendance();
-                attendance.setEmployeeId(leaveRequest.getEmployeeId());
+                attendance.setEmployee(employee);
                 attendance.setAttendanceDate(date);
                 attendance.setStatus(AttendanceStatus.ON_LEAVE);
                 attendanceRepository.save(attendance);
