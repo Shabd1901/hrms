@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-26 · Current step: **4.2.1** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
+Last updated: 2026-10-26 · Current step: **4.2.2** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-26 · Current step: **4.2.1** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 28 / 36 |
-| Steps complete | 168 / 196 |
+| Steps complete | 169 / 196 |
 | Commits (checkpoints) made | 25 / 23 |
-| Overall | 85.7% |
+| Overall | 86.2% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-26 · Current step: **4.2.1** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 7 | 0 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 8 | 0 / 6 | In progress |
 
 ## 3. Phases
 
@@ -73,18 +73,18 @@ Last updated: 2026-10-26 · Current step: **4.2.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 168 | 28 | 25 / 23 |
+| 196 | 169 | 27 | 25 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 7/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 8/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.2.1 — Mapped JobOpening -> Department, Designation many-to-one relationships (R4) |
-| Next | 4.2.2 — Candidate.jobOpening and JobOpening.candidates bidirectional mapping (R5) |
-| After that | 4.2.3 — Interview -> Candidate, interviewer many-to-one (R6) |
+| Current | 4.2.2 — Mapped Candidate.jobOpening and JobOpening.candidates bidirectional relationship (R5) |
+| Next | 4.2.3 — Interview -> Candidate, interviewer many-to-one mapping (R6) |
+| After that | 4.2.4 — OnboardingTask.employee and Employee.onboardingTasks (R7) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,21 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.2.2 — Candidate and JobOpening Bidirectional Mapping (R5)
+- Date: 2026-10-26
+- What we did: Replaced scalar `jobOpeningId` in `Candidate` entity with `@ManyToOne(fetch = FetchType.LAZY)` with `@JoinColumn(name = "job_opening_id", nullable = false)`. Added `@OneToMany(mappedBy = "jobOpening") private List<Candidate> candidates` to `JobOpening` entity to establish bidirectional navigation. Updated `CandidateService` to link entities during application and hiring workflows while maintaining `CandidateResponseDTO` contracts.
+- Why we did it: Satisfies implementation step 4.2.2 and ERD.md §6 relationship R5, enabling bidirectional navigation between job openings and their applicant pools without introducing an intermediary join table.
+- How it works:
+  - `Candidate` is the owning side managing the `job_opening_id` column.
+  - `JobOpening.candidates` uses `mappedBy = "jobOpening"` to establish the inverse side without cascading deletes, preventing accidental deletion of candidates if an opening is removed.
+  - In `CandidateService.hireCandidate`, `candidate.getJobOpening()` provides the opening directly for quota decrement and status transition.
+- Files changed: `src/main/java/com/peopleops/entity/Candidate.java`, `src/main/java/com/peopleops/entity/JobOpening.java`, `src/main/java/com/peopleops/service/CandidateService.java`, `docs/explainer.md`
+- Viva questions:
+  1. Q: Why is `JobOpening.candidates` marked with `mappedBy` instead of `@JoinColumn`?
+     A: In a bidirectional one-to-many relationship, the many side (`Candidate`) holds the physical foreign key column (`job_opening_id`). Specifying `mappedBy = "jobOpening"` on the one side informs Hibernate that the relationship is already mapped by the `jobOpening` field in `Candidate`, thereby preventing Hibernate from generating a redundant join table.
+  2. Q: Why is cascade omitted on `JobOpening.candidates`?
+     A: Compliance with ERD.md §6: candidate records represent legal applicant audit history and must not be automatically deleted if a job opening record is manipulated.
 
 ### Step 4.2.1 — JobOpening to Department and Designation Many-to-One Mappings (R4)
 - Date: 2026-10-26

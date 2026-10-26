@@ -60,9 +60,10 @@ public class CandidateService {
         }
 
         Candidate candidate = toEntity(request);
+        candidate.setJobOpening(opening);
         candidate.setStage(CandidateStage.APPLIED);
         Candidate saved = candidateRepository.save(candidate);
-        log.info("Created candidate with id: {} for job opening id: {}", saved.getId(), saved.getJobOpeningId());
+        log.info("Created candidate with id: {} for job opening id: {}", saved.getId(), saved.getJobOpening().getId());
         return toResponseDTO(saved);
     }
 
@@ -94,18 +95,20 @@ public class CandidateService {
                 return new ResourceNotFoundException("Candidate not found with id: " + id);
             });
 
-        if (!jobOpeningRepository.existsById(request.getJobOpeningId())) {
-            log.warn("Candidate update failed for id {}: job opening id {} not found", id, request.getJobOpeningId());
-            throw new ResourceNotFoundException("Job opening not found with id: " + request.getJobOpeningId());
-        }
+        JobOpening opening = jobOpeningRepository.findById(request.getJobOpeningId())
+            .orElseThrow(() -> {
+                log.warn("Candidate update failed for id {}: job opening id {} not found", id, request.getJobOpeningId());
+                return new ResourceNotFoundException("Job opening not found with id: " + request.getJobOpeningId());
+            });
 
-        if ((!candidate.getJobOpeningId().equals(request.getJobOpeningId()) || !candidate.getEmail().equals(request.getEmail()))
+        Long currentOpeningId = candidate.getJobOpening() != null ? candidate.getJobOpening().getId() : null;
+        if ((!request.getJobOpeningId().equals(currentOpeningId) || !candidate.getEmail().equals(request.getEmail()))
                 && candidateRepository.existsByJobOpeningIdAndEmail(request.getJobOpeningId(), request.getEmail())) {
             log.warn("Candidate update failed for id {}: duplicate application with email '{}'", id, request.getEmail());
             throw new DuplicateResourceException("Candidate has already applied for this opening with email: " + request.getEmail());
         }
 
-        candidate.setJobOpeningId(request.getJobOpeningId());
+        candidate.setJobOpening(opening);
         candidate.setFirstName(request.getFirstName());
         candidate.setLastName(request.getLastName());
         candidate.setEmail(request.getEmail());
@@ -177,11 +180,11 @@ public class CandidateService {
             throw new BusinessRuleException("Candidate can only be hired when in OFFERED stage");
         }
 
-        JobOpening opening = jobOpeningRepository.findById(candidate.getJobOpeningId())
-            .orElseThrow(() -> {
-                log.warn("Candidate hire failed: opening id {} not found", candidate.getJobOpeningId());
-                return new ResourceNotFoundException("Job opening not found with id: " + candidate.getJobOpeningId());
-            });
+        JobOpening opening = candidate.getJobOpening();
+        if (opening == null) {
+            log.warn("Candidate hire failed: candidate id {} has no associated job opening", id);
+            throw new ResourceNotFoundException("Job opening not found for candidate id: " + id);
+        }
 
         if (opening.getStatus() != JobOpeningStatus.OPEN) {
             log.warn("Candidate hire failed: opening id {} is not OPEN ({})", opening.getId(), opening.getStatus());
@@ -205,7 +208,6 @@ public class CandidateService {
 
     private Candidate toEntity(CandidateRequestDTO dto) {
         Candidate candidate = new Candidate();
-        candidate.setJobOpeningId(dto.getJobOpeningId());
         candidate.setFirstName(dto.getFirstName());
         candidate.setLastName(dto.getLastName());
         candidate.setEmail(dto.getEmail());
@@ -218,7 +220,7 @@ public class CandidateService {
     private CandidateResponseDTO toResponseDTO(Candidate entity) {
         return new CandidateResponseDTO(
             entity.getId(),
-            entity.getJobOpeningId(),
+            entity.getJobOpening() != null ? entity.getJobOpening().getId() : null,
             entity.getFirstName(),
             entity.getLastName(),
             entity.getEmail(),
