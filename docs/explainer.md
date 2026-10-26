@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 4.3 Attendance and Leave Mappings completed)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 30 / 36 |
-| Steps complete | 175 / 196 |
+| Phases complete | 31 / 36 |
+| Steps complete | 176 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 89.3% |
+| Overall | 89.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 14 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 15 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -61,7 +61,7 @@ Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phas
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
-| 4.3 | Attendance and leave mappings | 4 | 3 | CP-19 | In progress |
+| 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 175 | 21 | 26 / 23 |
+| 196 | 176 | 20 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 14/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 15/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
-| Next | 4.3.4 — Test: leave request and approval flow (CP-19) |
-| After that | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
+| Current | 4.3.4 — Test: leave request and approval flow (Phase 4.3 completed) |
+| Next | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
+| After that | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.3.4 — Verification: Leave Request, Approval Workflow, and Foreign Keys
+- Date: 2026-10-27
+- What we did: Conducted integration verification of Phase 4.3 attendance and leave relationships:
+  1. Verified Attendance creation linked to Employee (R8).
+  2. Verified LeaveBalance linked to Employee and LeaveType (R9).
+  3. Submitted LeaveRequest for 2 days referencing Employee and LeaveType in `PENDING` status (R10).
+  4. Approved LeaveRequest with a distinct manager `decidedById`.
+  5. Verified LeaveRequest updated to `APPROVED` with `decidedById` attached, `LeaveBalance.usedDays` incremented by 2 days, and `Attendance` records auto-synchronized with `ON_LEAVE` status for each requested date.
+  6. Verified PostgreSQL foreign key constraints across `attendance_records(employee_id)`, `leave_balances(employee_id, leave_type_id)`, and `leave_requests(employee_id, leave_type_id, decided_by_id)`.
+- Why we did it: Satisfies implementation step 4.3.4. Confirms that relational mappings maintain transactional business rules and cross-entity synchronization across attendance and leave domains.
+- How it works:
+  - Spring Data JPA maps foreign keys with `FetchType.LAZY` to prevent eager query cascades.
+  - The `@Transactional` approval boundary atomically mutates `LeaveRequest`, updates `LeaveBalance`, and records `ON_LEAVE` attendance records.
+- Viva questions:
+  - *Q: How does the system ensure an employee cannot approve their own leave request?*
+    *A: `LeaveRequestService.approveLeaveRequest` checks `if (decidedById.equals(leaveRequest.getEmployee().getId()))` and throws a `BusinessRuleException` with status 400 Bad Request if the decider is the requester.*
+  - *Q: What foreign keys exist on the leave_requests table?*
+    *A: Three foreign keys: `employee_id -> employees(id)`, `leave_type_id -> leave_types(id)`, and `decided_by_id -> employees(id)` (nullable).*
 
 ### Step 4.3.3 — Map LeaveRequest to Employee, LeaveType, and Decider (R10)
 - Date: 2026-10-27
