@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-26 · Current step: **4.2.4** · Status: in progress (Phase 4.2 Recruitment and Onboarding Mappings in progress)
+Last updated: 2026-10-26 · Current step: **4.2.5** · Status: completed (Phase 4.2 Recruitment and Onboarding Mappings completed; Checkpoint CP-18)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-26 · Current step: **4.2.4** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 28 / 36 |
-| Steps complete | 171 / 196 |
-| Commits (checkpoints) made | 25 / 23 |
-| Overall | 87.2% |
+| Phases complete | 30 / 36 |
+| Steps complete | 172 / 196 |
+| Commits (checkpoints) made | 26 / 23 |
+| Overall | 87.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-26 · Current step: **4.2.4** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 10 | 0 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 11 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -60,7 +60,7 @@ Last updated: 2026-10-26 · Current step: **4.2.4** · Status: in progress (Phas
 | 3.4 | Swagger / OpenAPI | 5 | 5 | CP-17 | Completed |
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
-| 4.2 | Recruitment and onboarding mappings | 5 | 0 | CP-18 | Not started |
+| 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 0 | CP-19 | Not started |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-26 · Current step: **4.2.4** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 171 | 25 | 25 / 23 |
+| 196 | 172 | 24 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 10/35
-Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 0/6
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 11/35
+Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.2.4 — Mapped OnboardingTask.employee and Employee.onboardingTasks with cascade ALL and orphan removal (R7) |
-| Next | 4.2.5 — Test hire workflow and onboarding employee delete (CP-18) |
-| After that | 4.3.1 — Attendance -> Employee many-to-one mapping (R8) |
+| Current | 4.2.5 — Test hire workflow and onboarding employee delete (CP-18 completed) |
+| Next | 4.3.1 — Attendance -> Employee many-to-one mapping (R8) |
+| After that | 4.3.2 — LeaveRequest -> Employee many-to-one mapping (R9) |
 
 ## 6. Issues and remaining work
 
@@ -139,7 +139,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-15 | 3.2 | `feat(cp-15): add global exception handling with rest controller advice and standardized json error responses` | pending | |
 | CP-16 | 3.3 | `feat(cp-16): implement bean validation framework across all domain request dtos and verify field errors via postman` | current | 2026-10-23 |
 | CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger openapi documentation annotations and complete week three rest api regression and validation testing` | current | 2026-10-23 |
-| CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding` | pending | |
+| CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding entity relationships with cascading task deletion and end to end verification` | 8a71ec0 | 2026-10-26 |
 | CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | pending | |
 | CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | pending | |
 | CP-21 | 4.7 | `feat(cp-21): add many-to-many mappings` | pending | |
@@ -149,6 +149,27 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.2.5 — Verification: Hire Workflow and Onboarding Task Cascade Deletion (CP-18)
+- Date: 2026-10-26
+- What we did: Performed end-to-end integration verification of Phase 4.2 relationships:
+  1. Posted Job Opening referencing Department and Designation (R4).
+  2. Applied Candidate referencing Job Opening (R5).
+  3. Shortlisted candidate, scheduled Interview referencing Candidate and Interviewer (R6).
+  4. Marked interview PASSED, transitioned candidate to OFFERED, and invoked hire endpoint.
+  5. Verified Candidate reached HIRED stage, Job Opening open positions decremented from 2 to 1, and Employee was created with status ONBOARDING, linking department, designation, and manager.
+  6. Verified automatic generation of 5 default onboarding tasks assigned to the employee (R7).
+  7. Deleted the employee in ONBOARDING status and verified cascade deletion of all 5 associated onboarding tasks (R7 `cascade = CascadeType.ALL, orphanRemoval = true`).
+- Why we did it: Satisfies implementation step 4.2.5 and Checkpoint CP-18. Validates lifecycle cascades in PostgreSQL and Spring Data JPA without manual orphan cleanup.
+- How it works:
+  - Spring Boot executed Hibernate DDL and foreign keys were verified.
+  - When candidate hire executed, `Employee` was persisted and 5 `OnboardingTask` entities were created with their `employee` relationship set.
+  - Calling `DELETE /api/employees/{id}` successfully removed the employee and triggered cascade removal of the onboarding tasks.
+- Viva questions:
+  - *Q: What happens if an entity with `orphanRemoval = true` is deleted from its parent collection?*
+    *A: Hibernate automatically executes a SQL `DELETE` statement for the child row because the child entity has lost its parent reference and is deemed an orphan.*
+  - *Q: Why does only R7 use `CascadeType.ALL` and orphan removal among all HRMS relationships?*
+    *A: Onboarding tasks are strictly owned and lifecycle-bound to a specific employee. Job openings, departments, candidates, and interviews have independent domain lifecycles and historical/audit significance and must not be casually deleted by cascade.*
 
 ### Step 4.2.4 — OnboardingTask and Employee Mapping with Cascade & Orphan Removal (R7)
 - Date: 2026-10-26

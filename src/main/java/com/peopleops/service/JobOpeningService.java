@@ -11,6 +11,7 @@ import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.DepartmentRepository;
 import com.peopleops.repository.DesignationRepository;
 import com.peopleops.repository.JobOpeningRepository;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
@@ -140,7 +141,7 @@ public class JobOpeningService {
         JobOpening opening = new JobOpening();
         opening.setTitle(dto.getTitle());
         opening.setOpenPositions(dto.getOpenPositions());
-        opening.setPostedDate(dto.getPostedDate());
+        opening.setPostedDate(dto.getPostedDate() != null ? dto.getPostedDate() : LocalDate.now());
         return opening;
     }
 
