@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 30 / 36 |
-| Steps complete | 173 / 196 |
+| Steps complete | 174 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 88.3% |
+| Overall | 88.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 12 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 13 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -61,7 +61,7 @@ Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phas
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
-| 4.3 | Attendance and leave mappings | 4 | 1 | CP-19 | In progress |
+| 4.3 | Attendance and leave mappings | 4 | 2 | CP-19 | In progress |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.3.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 173 | 23 | 26 / 23 |
+| 196 | 174 | 22 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 12/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 13/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.3.1 — Attendance -> Employee many-to-one mapping (R8) |
-| Next | 4.3.2 — LeaveBalance -> Employee, LeaveType many-to-one mappings (R9) |
-| After that | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
+| Current | 4.3.2 — LeaveBalance -> Employee, LeaveType many-to-one mappings (R9) |
+| Next | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
+| After that | 4.3.4 — Test: leave request and approval flow (CP-19) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,17 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.3.2 — Map LeaveBalance to Employee and LeaveType Many-to-One (R9)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` and `leaveTypeId` fields in `LeaveBalance` with `@ManyToOne(fetch = FetchType.LAZY)` associations: `@JoinColumn(name = "employee_id", nullable = false) private Employee employee` and `@JoinColumn(name = "leave_type_id", nullable = false) private LeaveType leaveType`. Preserved compound unique constraint `(employee_id, leave_type_id, balance_year)`. Updated `LeaveBalanceService` to validate and set entity associations. Updated `EmployeeService` employee activation logic to attach managed entity references when auto-seeding yearly leave balances.
+- Why we did it: Satisfies implementation step 4.3.2 and ERD.md §6 relationship R9. Enforces relational integrity across annual leave quotas for employees while keeping lazy loading for efficient performance.
+- How it works:
+  - `LeaveBalance` is the owning side for both foreign keys (`employee_id` and `leave_type_id`).
+  - Spring Data JPA query derivation like `findByEmployeeIdAndLeaveTypeIdAndBalanceYear` automatically navigates entity paths `employee.id` and `leaveType.id`.
+- Viva questions:
+  - *Q: Why is LeaveBalance mapped with ManyToOne to both Employee and LeaveType?*
+    *A: An employee has many leave balances (one per leave type per year), and a leave type has many balances across all employees. LeaveBalance acts as the associative entity tracking allocation and consumption.*
 
 ### Step 4.3.1 — Map Attendance to Employee Many-to-One (R8)
 - Date: 2026-10-27

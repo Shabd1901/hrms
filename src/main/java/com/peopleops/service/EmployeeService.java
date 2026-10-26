@@ -313,8 +313,8 @@ public class EmployeeService {
         for (LeaveType leaveType : leaveTypes) {
             if (!leaveBalanceRepository.existsByEmployeeIdAndLeaveTypeIdAndBalanceYear(employeeId, leaveType.getId(), currentYear)) {
                 LeaveBalance balance = new LeaveBalance();
-                balance.setEmployeeId(employeeId);
-                balance.setLeaveTypeId(leaveType.getId());
+                balance.setEmployee(employee);
+                balance.setLeaveType(leaveType);
                 balance.setBalanceYear(currentYear);
                 balance.setTotalDays(leaveType.getAnnualQuota());
                 balance.setUsedDays(0);

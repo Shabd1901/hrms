@@ -2,7 +2,9 @@ package com.peopleops.service;
 
 import com.peopleops.dto.LeaveBalanceRequestDTO;
 import com.peopleops.dto.LeaveBalanceResponseDTO;
+import com.peopleops.entity.Employee;
 import com.peopleops.entity.LeaveBalance;
+import com.peopleops.entity.LeaveType;
 import com.peopleops.exception.DuplicateResourceException;
 import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeRepository;
@@ -33,14 +35,16 @@ public class LeaveBalanceService {
     }
 
     public LeaveBalanceResponseDTO createLeaveBalance(LeaveBalanceRequestDTO request) {
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Leave balance creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
-        if (!leaveTypeRepository.existsById(request.getLeaveTypeId())) {
-            log.warn("Leave balance creation failed: leave type id {} not found", request.getLeaveTypeId());
-            throw new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Leave balance creation failed: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
+        LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
+            .orElseThrow(() -> {
+                log.warn("Leave balance creation failed: leave type id {} not found", request.getLeaveTypeId());
+                return new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
+            });
 
         if (leaveBalanceRepository.existsByEmployeeIdAndLeaveTypeIdAndBalanceYear(
                 request.getEmployeeId(), request.getLeaveTypeId(), request.getBalanceYear())) {
@@ -49,11 +53,13 @@ public class LeaveBalanceService {
         }
 
         LeaveBalance balance = toEntity(request);
+        balance.setEmployee(employee);
+        balance.setLeaveType(leaveType);
         if (balance.getUsedDays() == null) {
             balance.setUsedDays(0);
         }
         LeaveBalance saved = leaveBalanceRepository.save(balance);
-        log.info("Created leave balance id: {} for employee id: {} and leave type id: {} for year: {}", saved.getId(), saved.getEmployeeId(), saved.getLeaveTypeId(), saved.getBalanceYear());
+        log.info("Created leave balance id: {} for employee id: {} and leave type id: {} for year: {}", saved.getId(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getLeaveType() != null ? saved.getLeaveType().getId() : null, saved.getBalanceYear());
         return toResponseDTO(saved);
     }
 
@@ -92,17 +98,19 @@ public class LeaveBalanceService {
                 return new ResourceNotFoundException("Leave balance not found with id: " + id);
             });
 
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Leave balance update failed: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
-        if (!leaveTypeRepository.existsById(request.getLeaveTypeId())) {
-            log.warn("Leave balance update failed: leave type id {} not found", request.getLeaveTypeId());
-            throw new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Leave balance update failed: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
+        LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
+            .orElseThrow(() -> {
+                log.warn("Leave balance update failed: leave type id {} not found", request.getLeaveTypeId());
+                return new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
+            });
 
-        balance.setEmployeeId(request.getEmployeeId());
-        balance.setLeaveTypeId(request.getLeaveTypeId());
+        balance.setEmployee(employee);
+        balance.setLeaveType(leaveType);
         balance.setBalanceYear(request.getBalanceYear());
         balance.setTotalDays(request.getTotalDays());
         balance.setUsedDays(request.getUsedDays());
@@ -124,8 +132,6 @@ public class LeaveBalanceService {
 
     private LeaveBalance toEntity(LeaveBalanceRequestDTO dto) {
         LeaveBalance lb = new LeaveBalance();
-        lb.setEmployeeId(dto.getEmployeeId());
-        lb.setLeaveTypeId(dto.getLeaveTypeId());
         lb.setBalanceYear(dto.getBalanceYear());
         lb.setTotalDays(dto.getTotalDays());
         lb.setUsedDays(dto.getUsedDays());
@@ -135,8 +141,8 @@ public class LeaveBalanceService {
     private LeaveBalanceResponseDTO toResponseDTO(LeaveBalance entity) {
         return new LeaveBalanceResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
-            entity.getLeaveTypeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
+            entity.getLeaveType() != null ? entity.getLeaveType().getId() : null,
             entity.getBalanceYear(),
             entity.getTotalDays(),
             entity.getUsedDays()
