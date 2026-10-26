@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.3.3** · Status: in progress (Phase 4.3 Attendance and Leave Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 30 / 36 |
-| Steps complete | 174 / 196 |
+| Steps complete | 175 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 88.8% |
+| Overall | 89.3% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 13 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 14 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -61,7 +61,7 @@ Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phas
 | 3.5 | API testing and Week 3 wrap-up | 3 | 3 | CP-17 | Completed |
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
-| 4.3 | Attendance and leave mappings | 4 | 2 | CP-19 | In progress |
+| 4.3 | Attendance and leave mappings | 4 | 3 | CP-19 | In progress |
 | 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.3.2** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 174 | 22 | 26 / 23 |
+| 196 | 175 | 21 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 13/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 14/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.3.2 — LeaveBalance -> Employee, LeaveType many-to-one mappings (R9) |
-| Next | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
-| After that | 4.3.4 — Test: leave request and approval flow (CP-19) |
+| Current | 4.3.3 — LeaveRequest -> Employee, LeaveType, decidedBy mappings (R10) |
+| Next | 4.3.4 — Test: leave request and approval flow (CP-19) |
+| After that | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,22 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.3.3 — Map LeaveRequest to Employee, LeaveType, and Decider (R10)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId`, `leaveTypeId`, and `decidedById` fields in `LeaveRequest` with `@ManyToOne(fetch = FetchType.LAZY)` associations:
+  - `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`
+  - `@JoinColumn(name = "leave_type_id", nullable = false) private LeaveType leaveType`
+  - `@JoinColumn(name = "decided_by_id", nullable = true) private Employee decidedBy`
+  Updated `LeaveRequestService` to link entity instances upon request submission, update, approval, and rejection. Updated `PayrollService` to navigate `leaveRequest.getLeaveType()` directly for unpaid leave deduction calculations.
+- Why we did it: Satisfies implementation step 4.3.3 and ERD.md §6 relationship R10. Enables relational integrity across leave transactions and auditing of approval/rejection decisions made by managers.
+- How it works:
+  - `LeaveRequest` is the owning entity with foreign keys `employee_id`, `leave_type_id`, and `decided_by_id`.
+  - The `decidedBy` relation is nullable because initial requests are in `PENDING` status without a designated decision-maker.
+  - Upon approval or rejection, the deciding employee entity is associated and persisted.
+- Viva questions:
+  - *Q: Why is decided_by_id nullable in LeaveRequest?*
+    *A: When an employee submits a leave request, its status is PENDING. It has not yet been approved or rejected by a manager or HR representative, so decided_by_id remains null until decision time.*
 
 ### Step 4.3.2 — Map LeaveBalance to Employee and LeaveType Many-to-One (R9)
 - Date: 2026-10-27

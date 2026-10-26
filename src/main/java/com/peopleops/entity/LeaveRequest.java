@@ -5,9 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -28,11 +31,13 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_id", nullable = false)
-    private Long employeeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
-    @Column(name = "leave_type_id", nullable = false)
-    private Long leaveTypeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "leave_type_id", nullable = false)
+    private LeaveType leaveType;
 
     @Column(name = "from_date", nullable = false)
     private LocalDate fromDate;
@@ -50,9 +55,10 @@ public class LeaveRequest {
     @Column(name = "status", nullable = false, length = 20)
     private LeaveRequestStatus status;
 
-    // Manager / HR employee ID who approved or rejected; null while PENDING
-    @Column(name = "decided_by_id")
-    private Long decidedById;
+    // Manager / HR employee who approved or rejected; null while PENDING
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "decided_by_id")
+    private Employee decidedBy;
 
     // Date when approval or rejection was decided; null while PENDING
     @Column(name = "decided_on")

@@ -107,11 +107,13 @@ public class LeaveRequestService {
         }
 
         LeaveRequest leaveRequest = toEntity(request);
+        leaveRequest.setEmployee(employee);
+        leaveRequest.setLeaveType(leaveType);
         leaveRequest.setDays(days);
         leaveRequest.setStatus(LeaveRequestStatus.PENDING);
 
         LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
-        log.info("Created leave request id: {} for employee id: {} for {} days from {} to {}", saved.getId(), saved.getEmployeeId(), saved.getDays(), saved.getFromDate(), saved.getToDate());
+        log.info("Created leave request id: {} for employee id: {} for {} days from {} to {}", saved.getId(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getDays(), saved.getFromDate(), saved.getToDate());
         return toResponseDTO(saved);
     }
 
@@ -167,8 +169,20 @@ public class LeaveRequestService {
 
         int days = (int) ChronoUnit.DAYS.between(request.getFromDate(), request.getToDate()) + 1;
 
-        leaveRequest.setEmployeeId(request.getEmployeeId());
-        leaveRequest.setLeaveTypeId(request.getLeaveTypeId());
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Leave request update failed: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
+
+        LeaveType leaveType = leaveTypeRepository.findById(request.getLeaveTypeId())
+            .orElseThrow(() -> {
+                log.warn("Leave request update failed: leave type id {} not found", request.getLeaveTypeId());
+                return new ResourceNotFoundException("Leave type not found with id: " + request.getLeaveTypeId());
+            });
+
+        leaveRequest.setEmployee(employee);
+        leaveRequest.setLeaveType(leaveType);
         leaveRequest.setFromDate(request.getFromDate());
         leaveRequest.setToDate(request.getToDate());
         leaveRequest.setDays(days);
@@ -208,7 +222,8 @@ public class LeaveRequestService {
             throw new BusinessRuleException("Only PENDING leave requests can be approved");
         }
 
-        if (decidedById.equals(leaveRequest.getEmployeeId())) {
+        Long empId = leaveRequest.getEmployee() != null ? leaveRequest.getEmployee().getId() : null;
+        if (empId != null && decidedById.equals(empId)) {
             log.warn("Leave request approval failed for id {}: decider cannot be requester", id);
             throw new BusinessRuleException("Decider cannot be the employee requesting the leave");
         }
@@ -224,16 +239,16 @@ public class LeaveRequestService {
             throw new BusinessRuleException("Decider must be an active or working employee");
         }
 
-        LeaveType leaveType = leaveTypeRepository.findById(leaveRequest.getLeaveTypeId())
-            .orElseThrow(() -> {
-                log.warn("Leave request approval failed for id {}: leave type id {} not found", id, leaveRequest.getLeaveTypeId());
-                return new ResourceNotFoundException("Leave type not found with id: " + leaveRequest.getLeaveTypeId());
-            });
+        LeaveType leaveType = leaveRequest.getLeaveType();
+        if (leaveType == null) {
+            log.warn("Leave request approval failed for id {}: leave type is null", id);
+            throw new ResourceNotFoundException("Leave type not found for request id: " + id);
+        }
 
         if (Boolean.TRUE.equals(leaveType.getPaid())) {
             LeaveBalance balance = leaveBalanceRepository
                 .findByEmployeeIdAndLeaveTypeIdAndBalanceYear(
-                    leaveRequest.getEmployeeId(), leaveRequest.getLeaveTypeId(), leaveRequest.getFromDate().getYear())
+                    empId, leaveType.getId(), leaveRequest.getFromDate().getYear())
                 .orElseThrow(() -> {
                     log.warn("Leave request approval failed for id {}: no balance found", id);
                     return new BusinessRuleException("No leave balance found to deduct approved leave");
@@ -243,11 +258,9 @@ public class LeaveRequestService {
             leaveBalanceRepository.save(balance);
         }
 
-        Employee employee = employeeRepository.findById(leaveRequest.getEmployeeId())
-            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + leaveRequest.getEmployeeId()));
-
+        Employee employee = leaveRequest.getEmployee();
         for (LocalDate date = leaveRequest.getFromDate(); !date.isAfter(leaveRequest.getToDate()); date = date.plusDays(1)) {
-            if (!attendanceRepository.existsByEmployeeIdAndAttendanceDate(leaveRequest.getEmployeeId(), date)) {
+            if (!attendanceRepository.existsByEmployeeIdAndAttendanceDate(empId, date)) {
                 Attendance attendance = new Attendance();
                 attendance.setEmployee(employee);
                 attendance.setAttendanceDate(date);
@@ -257,7 +270,7 @@ public class LeaveRequestService {
         }
 
         leaveRequest.setStatus(LeaveRequestStatus.APPROVED);
-        leaveRequest.setDecidedById(decidedById);
+        leaveRequest.setDecidedBy(decider);
         leaveRequest.setDecidedOn(LocalDate.now());
 
         LeaveRequest updated = leaveRequestRepository.save(leaveRequest);
@@ -277,7 +290,8 @@ public class LeaveRequestService {
             throw new BusinessRuleException("Only PENDING leave requests can be rejected");
         }
 
-        if (decidedById.equals(leaveRequest.getEmployeeId())) {
+        Long empId = leaveRequest.getEmployee() != null ? leaveRequest.getEmployee().getId() : null;
+        if (empId != null && decidedById.equals(empId)) {
             log.warn("Leave request rejection failed for id {}: decider cannot be requester", id);
             throw new BusinessRuleException("Decider cannot be the employee requesting the leave");
         }
@@ -294,7 +308,7 @@ public class LeaveRequestService {
         }
 
         leaveRequest.setStatus(LeaveRequestStatus.REJECTED);
-        leaveRequest.setDecidedById(decidedById);
+        leaveRequest.setDecidedBy(decider);
         leaveRequest.setDecidedOn(LocalDate.now());
 
         LeaveRequest updated = leaveRequestRepository.save(leaveRequest);
@@ -322,8 +336,6 @@ public class LeaveRequestService {
 
     private LeaveRequest toEntity(LeaveRequestRequestDTO dto) {
         LeaveRequest lr = new LeaveRequest();
-        lr.setEmployeeId(dto.getEmployeeId());
-        lr.setLeaveTypeId(dto.getLeaveTypeId());
         lr.setFromDate(dto.getFromDate());
         lr.setToDate(dto.getToDate());
         lr.setReason(dto.getReason());
@@ -333,14 +345,14 @@ public class LeaveRequestService {
     private LeaveRequestResponseDTO toResponseDTO(LeaveRequest entity) {
         return new LeaveRequestResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
-            entity.getLeaveTypeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
+            entity.getLeaveType() != null ? entity.getLeaveType().getId() : null,
             entity.getFromDate(),
             entity.getToDate(),
             entity.getDays(),
             entity.getReason(),
             entity.getStatus(),
-            entity.getDecidedById(),
+            entity.getDecidedBy() != null ? entity.getDecidedBy().getId() : null,
             entity.getDecidedOn()
         );
     }

@@ -109,7 +109,7 @@ public class PayrollService {
         double unpaidLeaveDays = 0.0;
         List<LeaveRequest> approvedLeaves = leaveRequestRepository.findByEmployeeIdAndStatus(request.getEmployeeId(), LeaveRequestStatus.APPROVED);
         for (LeaveRequest lr : approvedLeaves) {
-            LeaveType leaveType = leaveTypeRepository.findById(lr.getLeaveTypeId()).orElse(null);
+            LeaveType leaveType = lr.getLeaveType();
             if (leaveType != null && Boolean.FALSE.equals(leaveType.getPaid())) {
                 LocalDate leaveStart = lr.getFromDate().isBefore(start) ? start : lr.getFromDate();
                 LocalDate leaveEnd = lr.getToDate().isAfter(end) ? end : lr.getToDate();
