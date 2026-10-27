@@ -29,4 +29,5 @@ public class EmployeeResponseDTO {
     private String departmentName;
     private String designationTitle;
     private String managerName;
+    private Long candidateId;
 }

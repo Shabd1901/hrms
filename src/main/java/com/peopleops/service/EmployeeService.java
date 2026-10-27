@@ -135,6 +135,7 @@ public class EmployeeService {
         employee.setDepartment(department);
         employee.setDesignation(designation);
         employee.setManager(manager);
+        employee.setCandidate(candidate);
         employee.setStatus(EmployeeStatus.ONBOARDING);
 
         Employee saved = employeeRepository.save(employee);
@@ -383,7 +384,8 @@ public class EmployeeService {
             entity.getManager() != null ? entity.getManager().getId() : null,
             departmentName,
             designationTitle,
-            managerName
+            managerName,
+            entity.getCandidate() != null ? entity.getCandidate().getId() : null
         );
     }
 }

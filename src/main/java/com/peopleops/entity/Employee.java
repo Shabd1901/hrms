@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,6 +75,11 @@ public class Employee {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Employee manager;
+
+    // R17: Candidate -> Employee (1-1, nullable, unique foreign key on candidate_id)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_id", unique = true)
+    private Candidate candidate;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OnboardingTask> onboardingTasks = new ArrayList<>();

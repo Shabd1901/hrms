@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.6.1** · Status: completed (Step 4.6.1 Offboarding to Employee 1-1 mapping completed; next: Step 4.6.2)
+Last updated: 2026-10-27 · Current step: **4.6.2** · Status: completed (Step 4.6.2 Employee to Candidate 1-1 mapping completed; next: Step 4.6.3)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.6.1** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 33 / 36 |
-| Steps complete | 184 / 196 |
+| Steps complete | 185 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 93.9% |
+| Overall | 94.4% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,19 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.6.2 - Map Employee to Candidate One-to-One Set on Hire (R17)
+- Date: 2026-10-27
+- What we did: Added `@OneToOne(fetch = FetchType.LAZY)` with `@JoinColumn(name = "candidate_id", unique = true) private Candidate candidate` to `Employee` entity. Updated `EmployeeResponseDTO` to expose `candidateId`. Updated `EmployeeService.createFromCandidate` to assign `employee.setCandidate(candidate)` when converting an offered candidate to an employee record during the hiring workflow.
+- Why we did it: Satisfies implementation step 4.6.2 and ERD.md § 6 relationship R17. Retains provenance from recruitment to onboarding, linking the hired candidate record directly to the created employee profile with a database unique foreign key constraint.
+- How it works:
+  - `Employee` is the owning entity of the candidate reference with `candidate_id` nullable (since employees can also be created directly via HR admin endpoints) and unique (a candidate cannot be hired into multiple employee rows).
+  - When candidate reaches `OFFERED` stage and `POST /api/candidates/{id}/hire` is called, `EmployeeService.createFromCandidate` associates the managed `Candidate` entity with the newly created `Employee`.
+- Viva questions:
+  1. Q: Why is `candidate_id` on the `employees` table nullable rather than not-null?
+     A: Not all employees necessarily enter the system through the candidate recruitment lifecycle (some may be direct executive hires, transfers, or initial administrative seed records).
+  2. Q: Why is `candidate_id` marked `unique = true`?
+     A: A recruited candidate represents an individual who can only be converted into one employee profile; duplicate conversion of the same candidate is disallowed.
 
 ### Step 4.6.1 - Map Offboarding to Employee One-to-One (R16)
 - Date: 2026-10-27
