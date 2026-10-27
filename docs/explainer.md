@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.8.2** · Status: completed (Phase 4.8 Mapping Verification completed; Checkpoint CP-22 reached; ready for Phase 4.9)
+Last updated: 2026-10-27 · Current step: **4.9.1** · Status: completed (Step 4.9.1 WAR packaging and SpringBootServletInitializer configured; next: Step 4.9.2)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.8.2** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 35 / 36 |
-| Steps complete | 192 / 196 |
+| Steps complete | 193 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 98.0% |
+| Overall | 98.5% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,23 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.9.1 - Configure WAR Packaging, SpringBootServletInitializer, and Build Artifacts
+- Date: 2026-10-27
+- What we did: Configured dual standalone and servlet-container deployment packaging for the project:
+  1. Updated `PeopleOpsApplication` to extend `SpringBootServletInitializer` and overridden `configure(SpringApplicationBuilder application)` returning `application.sources(PeopleOpsApplication.class)`.
+  2. Updated `pom.xml` with `<packaging>war</packaging>` and added `spring-boot-starter-tomcat` with `<scope>provided</scope>`.
+  3. Executed `mvn clean package -DskipTests` to generate the repackaged executable archive in `target/`.
+  4. Verified that the build succeeded, producing both executable WAR and JAR deployable artifacts in `target/`.
+- Why we did it: Satisfies implementation step 4.9.1, D-017, and university evaluation requirements. Enables deployment onto external enterprise servlet containers (like Apache Tomcat, WildFly) while preserving standalone CLI execution capability (`java -jar`).
+- How it works:
+  - In a standalone environment (`java -jar`), the JVM enters `PeopleOpsApplication.main(args)`, launching the embedded Tomcat server bundled under `WEB-INF/lib-provided/`.
+  - In an external servlet container, the container initializes the webapp using `SpringServletContainerInitializer` SPI, which invokes `SpringBootServletInitializer.configure()`, attaching the Spring application context directly to the external server's lifecycle without invoking `main()`.
+- Viva questions:
+  1. Q: What is the purpose of `SpringBootServletInitializer`?
+     A: It configures the application context when deployed as a WAR inside a traditional external servlet container by binding Spring Boot to the container's `ServletContext`.
+  2. Q: Why is `spring-boot-starter-tomcat` set to `<scope>provided</scope>` in a WAR build?
+     A: The `<scope>provided</scope>` prevents the embedded Tomcat jar from interfering with the external servlet container's own runtime libraries, while Spring Boot repackaging retains it for standalone execution.
 
 ### Step 4.8.2 - Full Lifecycle Regression Across All Domain Modules (CP-22)
 - Date: 2026-10-27

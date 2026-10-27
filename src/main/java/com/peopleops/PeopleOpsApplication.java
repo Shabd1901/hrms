@@ -2,9 +2,16 @@ package com.peopleops;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class PeopleOpsApplication {
+public class PeopleOpsApplication extends SpringBootServletInitializer {
+
+    @Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        return application.sources(PeopleOpsApplication.class);
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(PeopleOpsApplication.class, args);
