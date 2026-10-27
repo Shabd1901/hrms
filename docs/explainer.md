@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phase 4.5 Training, Asset and Document Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.5.4** · Status: completed (Phase 4.5 Training, Asset and Document Mappings completed; Checkpoint CP-19)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 32 / 36 |
-| Steps complete | 182 / 196 |
-| Commits (checkpoints) made | 26 / 23 |
-| Overall | 92.8% |
+| Phases complete | 33 / 36 |
+| Steps complete | 183 / 196 |
+| Commits (checkpoints) made | 27 / 23 |
+| Overall | 93.4% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 21 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 22 | 2 / 6 | In progress |
 
 ## 3. Phases
 
@@ -63,7 +63,7 @@ Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phas
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
 | 4.4 | Payroll and performance mappings | 3 | 3 | CP-19 | Completed |
-| 4.5 | Training, asset and document mappings | 4 | 3 | CP-19 | In progress |
+| 4.5 | Training, asset and document mappings | 4 | 4 | CP-19 | Completed |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
 | 4.8 | Mapping verification | 2 | 0 | CP-22 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 182 | 14 | 26 / 23 |
+| 196 | 183 | 13 | 27 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 21/35
-Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 22/35
+Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 2/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.5.3 — EmployeeDocument -> Employee (R15) |
-| Next | 4.5.4 — Test: training enrollment, asset assignment, document upload and verification flow (CP-19) |
-| After that | 4.6.1 — Offboarding.employee one-to-one (R16) |
+| Current | 4.5.4 — Test training enrollment, asset assignment, document upload and verification flow (CP-19 completed) |
+| Next | 4.6.1 — Offboarding.employee one-to-one (R16) |
+| After that | 4.6.2 — Employee.candidate one-to-one, set on hire (R17) |
 
 ## 6. Issues and remaining work
 
@@ -140,7 +140,7 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 | CP-16 | 3.3 | `feat(cp-16): implement bean validation framework across all domain request dtos and verify field errors via postman` | current | 2026-10-23 |
 | CP-17 | 3.4, 3.5 | `feat(cp-17): add swagger openapi documentation annotations and complete week three rest api regression and validation testing` | current | 2026-10-23 |
 | CP-18 | 4.1, 4.2 | `feat(cp-18): map employee recruitment and onboarding entity relationships with cascading task deletion and end to end verification` | 8a71ec0 | 2026-10-26 |
-| CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents` | pending | |
+| CP-19 | 4.3, 4.4, 4.5 | `feat(cp-19): map attendance leave payroll training asset documents with foreign key relationships and lifecycle integration verification` | 7552e27 | 2026-10-27 |
 | CP-20 | 4.6 | `feat(cp-20): add one-to-one mappings` | pending | |
 | CP-21 | 4.7 | `feat(cp-21): add many-to-many mappings` | pending | |
 | CP-22 | 4.8 | `test(cp-22): verify all mappings` | pending | |
@@ -149,6 +149,23 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.5.4 — Verification: Training, Asset, Document Lifecycles and Foreign Keys (CP-19)
+- Date: 2026-10-27
+- What we did: Conducted integration verification of Phase 4.5 domain mappings across training, asset allocation, and employee documents:
+  1. Created corporate training program and enrolled employee (R13 `training_enrollments -> training_programs, employees`).
+  2. Completed training enrollment via `PATCH /api/training-enrollments/{id}/complete` and verified status `COMPLETED` with `completionDate`.
+  3. Created available asset and assigned hardware to employee (R14 `asset_assignments -> assets, employees`).
+  4. Verified asset state transition to `ASSIGNED` and returned asset via `PATCH /api/asset-assignments/{id}/return`, verifying status transition to `RETURNED` with asset status returning to `AVAILABLE`.
+  5. Uploaded compliance document (R15 `employee_documents -> employees`) and verified document via `PATCH /api/employee-documents/{id}/verify`.
+  6. Verified PostgreSQL foreign key constraints across `asset_assignments(asset_id, employee_id)`, `employee_documents(employee_id)`, and `training_enrollments(employee_id, training_program_id)`.
+- Why we did it: Satisfies implementation step 4.5.4 and Checkpoint CP-19. Validates operational workflows across corporate training, asset inventory, and compliance document storage with referential database integrity.
+- How it works:
+  - Spring Data JPA maps foreign keys with `FetchType.LAZY` across all many-to-one associations without cascading deletes.
+  - Hibernate generated foreign key constraints in PostgreSQL ensuring integrity across employee operations.
+- Viva questions:
+  - *Q: Why do asset assignments and training enrollments use compound unique constraints?*
+    *A: `training_enrollments` uses `(training_program_id, employee_id)` to prevent duplicate active registrations for the same course session. For assets, status checks guarantee an asset cannot be concurrently assigned to more than one employee.*
 
 ### Step 4.5.3 — Map EmployeeDocument to Employee Many-to-One (R15)
 - Date: 2026-10-27
