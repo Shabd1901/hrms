@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.9.1** · Status: completed (Step 4.9.1 WAR packaging and SpringBootServletInitializer configured; next: Step 4.9.2)
+Last updated: 2026-10-27 · Current step: **4.9.2** · Status: completed (Step 4.9.2 Packaged artifact verified via java -jar on port 8081 with Swagger and endpoints; next: Step 4.9.3)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.9.1** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 35 / 36 |
-| Steps complete | 193 / 196 |
+| Steps complete | 194 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 98.5% |
+| Overall | 99.0% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.9.2 - Verify Packaged Executable Artifact via CLI and Swagger UI
+- Date: 2026-10-27
+- What we did: Tested the standalone deployment readiness of the compiled archive:
+  1. Executed `java -jar target/peopleops-0.0.1-SNAPSHOT.war --server.port=8081` in a standalone JVM process.
+  2. Verified successful startup on port 8081 in 11.95 seconds.
+  3. Verified raw OpenAPI documentation at `GET http://localhost:8081/v3/api-docs` (HTTP 200, 66 paths).
+  4. Verified interactive Swagger UI at `GET http://localhost:8081/swagger-ui/index.html` (HTTP 200).
+  5. Verified live domain controller endpoint `GET http://localhost:8081/api/departments` returning persistent PostgreSQL records.
+  6. Cleanly terminated the background process.
+- Why we did it: Satisfies implementation step 4.9.2. Confirms that the built artifact is self-contained, executable outside Maven, and production-ready for deployment in both standalone and containerized environments.
+- How it works:
+  - Spring Boot's `WarLauncher` extracts nested archives and launches the embedded Tomcat instance without needing any installed web server on the host.
+  - The CLI argument `--server.port=8081` dynamically overrides the default application property `server.port=8080` without changing application configuration files.
+- Viva questions:
+  1. Q: How does Spring Boot allow command-line arguments like `--server.port=8081` to override `application.properties`?
+     A: Spring Boot's externalized configuration ordering places command-line arguments (`CommandLinePropertySource`) at high priority, overriding properties defined in `application.properties`.
+  2. Q: What is the benefit of testing the packaged archive on an alternate port?
+     A: It proves port configurability and ensures testing is performed in an isolated port space without port collision with any existing development instances.
 
 ### Step 4.9.1 - Configure WAR Packaging, SpringBootServletInitializer, and Build Artifacts
 - Date: 2026-10-27
