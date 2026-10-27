@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.9.2** · Status: completed (Step 4.9.2 Packaged artifact verified via java -jar on port 8081 with Swagger and endpoints; next: Step 4.9.3)
+Last updated: 2026-10-27 · Current step: **4.9.3** · Status: completed (Step 4.9.3 Comprehensive README.md finalized; next: Step 4.9.4)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.9.2** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 35 / 36 |
-| Steps complete | 194 / 196 |
+| Steps complete | 195 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 99.0% |
+| Overall | 99.5% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,25 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.9.3 - Finalize Comprehensive Production README Documentation
+- Date: 2026-10-27
+- What we did: Completely expanded `README.md` into an enterprise-grade documentation manual:
+  1. Detailed architectural principles (layered architecture, DTO encapsulation, manual mapping, explicit lazy loading, centralized exception handling).
+  2. Documented full technology stack with version details (Java 17, Spring Boot 3.2.5, PostgreSQL 15+, Hibernate 6, Springdoc OpenAPI 2.3.0).
+  3. Added comprehensive database setup commands and properties.
+  4. Provided clear execution guides for development (`mvn spring-boot:run`), standalone CLI deployment (`java -jar peopleops-0.0.1-SNAPSHOT.war`), and external Tomcat server deployment (`webapps/`).
+  5. Documented interactive Swagger UI and OpenAPI v3 JSON endpoints.
+  6. Documented all 20 domain modules, 66 REST endpoints, all 14 business rules (BR-01 through BR-14), and all 19 relational database mappings.
+  7. Formatted repository documentation links to PRD, TRD, ERD, implementation plan, and explainer.
+- Why we did it: Satisfies implementation step 4.9.3. Serves as the primary onboarding guide for developers, evaluators, and system administrators interacting with the repository.
+- How it works:
+  - Formatted in clean GitHub Flavored Markdown with tables, code blocks, and structured sections to allow easy navigation and quick developer orientation.
+- Viva questions:
+  1. Q: Why is detailed setup documentation essential for an enterprise backend repository?
+     A: It ensures reproducible builds across diverse environments (development, CI/CD pipelines, container images, production application servers) and reduces developer onboarding time.
+  2. Q: What information should a production README always surface first?
+     A: Architecture overview, prerequisites, quick-start build/run commands, and interactive API documentation links.
 
 ### Step 4.9.2 - Verify Packaged Executable Artifact via CLI and Swagger UI
 - Date: 2026-10-27
