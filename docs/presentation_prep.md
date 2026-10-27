@@ -1,6 +1,53 @@
 # PeopleOps HRMS — 15-Minute Viva & Presentation Master Cheat Sheet
 
-> **Goal**: Read this in 15 minutes before your presentation/viva. Plain English, no fluff, direct answers to faculty questions, exact commands, and step-by-step demo flow.
+> **Goal**: Read this in 10 minutes before your presentation/viva. Plain English, no fluff, direct answers to faculty questions, exact commands, and step-by-step demo flow.
+
+---
+
+## ⚡ The "Learn in 10 Minutes" Ultra-Quick Viva Survival Sheet (Read This First!)
+
+### 🎯 Your Golden Strategy:
+1. **Present WHAT YOU BUILT, NOT textbook definitions!**
+   - The faculty already knows what Java or an Entity is. They want to see **your project**: the 7 modules, the 20 entities, the 123 endpoints, and how leave approvals and hiring work.
+2. **Do NOT volunteer deep technical theory on the slides!**
+   - Keep your slides clean, warm, light, and focused on your project.
+   - Keep the technical answers in your pocket. When the invigilator asks a question during viva, drop the exact 1-sentence answers below. You will look completely in control.
+
+---
+
+### 🧠 The Top 10 Viva Questions & 1-Sentence Answers (Memorize These!):
+
+1. **"What is your project?"**
+   > *"I built PeopleOps, an enterprise HRMS backend REST API using Spring Boot 3 and PostgreSQL 15+. It manages the entire employee lifecycle across 7 modules, 20 relational entities, and 123 tested endpoints."*
+
+2. **"Why do you have 4 tiers (Controller, Service, Repository, Entity)?"**
+   > *"Controllers only handle incoming HTTP requests and validation. Services contain all the business calculations and workflows. Repositories talk to PostgreSQL. This keeps every class clean, separated, and easy to maintain."*
+
+3. **"Why use DTOs instead of returning Entities directly?"**
+   > *"Two reasons: Security (to prevent users from hacking internal fields like salary or roles) and preventing circular JSON crashes when two tables are linked to each other."*
+
+4. **"What does `@Transactional` do in your service methods?"**
+   > *"It guarantees 'All-or-Nothing'. For example, when hiring a candidate, the system updates the candidate, creates an employee, and spawns 5 onboarding tasks. If any step fails, `@Transactional` automatically rolls back the entire operation so the database never gets corrupted."*
+
+5. **"Why use `BigDecimal` for salaries instead of `double` or `float`?"**
+   > *"`double` has binary floating-point rounding errors (like 0.1 + 0.2 = 0.300000004). For money and payroll, `BigDecimal` guarantees 100% exact math down to two decimal places."*
+
+6. **"Why use PostgreSQL instead of MySQL?"**
+   > *"PostgreSQL offers stricter ACID compliance, superior handling of foreign key constraints, and handled our 19 complex relational mappings and composite unique keys flawlessly."*
+
+7. **"What is JAR vs WAR in your project?"**
+   > *"A JAR includes its own embedded Tomcat web server so you can run it anywhere with `java -jar`. A WAR is designed to be deployed into external enterprise servers like Apache Tomcat. Our project supports both via `SpringBootServletInitializer`."*
+
+8. **"How does logging work in your project?"**
+   > *"We use SLF4J with Logback. It logs live requests to the console and automatically writes persistent audit logs into `logs/peopleops.log`."*
+
+9. **"How do you handle errors across your 20 controllers?"**
+   > *"We use `@RestControllerAdvice` (`GlobalExceptionHandler`). If an ID doesn't exist, instead of the server crashing with an ugly 500 error, it catches it and sends back a clean 404 JSON error response."*
+
+10. **"Show me the live demo right now."**
+    > *Open browser to `http://localhost:8080/swagger-ui.html`, expand `department-controller`, click `POST /api/departments`, click Try It Out, send JSON, get `201 Created`. Then show the log in terminal 2 (`logs/peopleops.log`)."*
+
+---
 
 ---
 
