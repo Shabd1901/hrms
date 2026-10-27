@@ -63,13 +63,14 @@ public class OffboardingService {
         }
 
         Offboarding offboarding = toEntity(request);
+        offboarding.setEmployee(employee);
         offboarding.setStatus(OffboardingStatus.INITIATED);
 
         employee.setStatus(EmployeeStatus.ON_NOTICE);
         employeeRepository.save(employee);
 
         Offboarding saved = offboardingRepository.save(offboarding);
-        log.info("Initiated offboarding id {} for employee id {}", saved.getId(), saved.getEmployeeId());
+        log.info("Initiated offboarding id {} for employee id {}", saved.getId(), employee.getId());
         return toResponseDTO(saved);
     }
 
@@ -122,13 +123,14 @@ public class OffboardingService {
             throw new BusinessRuleException("Completed offboarding records cannot be deleted");
         }
 
-        Employee employee = employeeRepository.findById(offboarding.getEmployeeId())
-            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + offboarding.getEmployeeId()));
-        employee.setStatus(EmployeeStatus.ACTIVE);
-        employeeRepository.save(employee);
+        Employee employee = offboarding.getEmployee();
+        if (employee != null) {
+            employee.setStatus(EmployeeStatus.ACTIVE);
+            employeeRepository.save(employee);
+        }
 
         offboardingRepository.delete(offboarding);
-        log.info("Deleted offboarding id {} and reverted employee id {} to ACTIVE", id, employee.getId());
+        log.info("Deleted offboarding id {} and reverted employee id {} to ACTIVE", id, employee != null ? employee.getId() : null);
     }
 
     @Transactional
@@ -141,35 +143,36 @@ public class OffboardingService {
             throw new BusinessRuleException("Offboarding is already completed");
         }
 
-        boolean hasAssignedAssets = assetAssignmentRepository.existsByEmployeeIdAndStatus(offboarding.getEmployeeId(), AssignmentStatus.ASSIGNED);
+        Long empId = offboarding.getEmployee() != null ? offboarding.getEmployee().getId() : null;
+        boolean hasAssignedAssets = assetAssignmentRepository.existsByEmployeeIdAndStatus(empId, AssignmentStatus.ASSIGNED);
         if (hasAssignedAssets) {
-            log.warn("Complete offboarding rejected: employee id {} has unreturned assets", offboarding.getEmployeeId());
+            log.warn("Complete offboarding rejected: employee id {} has unreturned assets", empId);
             throw new BusinessRuleException("Cannot complete offboarding: employee still has assigned assets that must be returned");
         }
 
         int month = offboarding.getLastWorkingDate().getMonthValue();
         int year = offboarding.getLastWorkingDate().getYear();
-        boolean hasPayroll = payrollRepository.existsByEmployeeIdAndPayMonthAndPayYear(offboarding.getEmployeeId(), month, year);
+        boolean hasPayroll = payrollRepository.existsByEmployeeIdAndPayMonthAndPayYear(empId, month, year);
         if (!hasPayroll) {
-            log.warn("Complete offboarding rejected: final payroll for {}/{} not found for employee id {}", month, year, offboarding.getEmployeeId());
+            log.warn("Complete offboarding rejected: final payroll for {}/{} not found for employee id {}", month, year, empId);
             throw new BusinessRuleException("Cannot complete offboarding: final payroll for " + month + "/" + year + " has not been generated");
         }
 
         offboarding.setStatus(OffboardingStatus.COMPLETED);
         Offboarding updated = offboardingRepository.save(offboarding);
 
-        Employee employee = employeeRepository.findById(offboarding.getEmployeeId())
-            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + offboarding.getEmployeeId()));
-        employee.setStatus(EmployeeStatus.EXITED);
-        employeeRepository.save(employee);
+        Employee employee = offboarding.getEmployee();
+        if (employee != null) {
+            employee.setStatus(EmployeeStatus.EXITED);
+            employeeRepository.save(employee);
+        }
 
-        log.info("Completed offboarding id {} for employee id {}, employee status set to EXITED", updated.getId(), updated.getEmployeeId());
+        log.info("Completed offboarding id {} for employee id {}, employee status set to EXITED", updated.getId(), empId);
         return toResponseDTO(updated);
     }
 
     private Offboarding toEntity(OffboardingRequestDTO dto) {
         Offboarding ob = new Offboarding();
-        ob.setEmployeeId(dto.getEmployeeId());
         ob.setResignationDate(dto.getResignationDate());
         ob.setLastWorkingDate(dto.getLastWorkingDate());
         ob.setReason(dto.getReason());
@@ -180,7 +183,7 @@ public class OffboardingService {
     private OffboardingResponseDTO toResponseDTO(Offboarding entity) {
         return new OffboardingResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getResignationDate(),
             entity.getLastWorkingDate(),
             entity.getReason(),

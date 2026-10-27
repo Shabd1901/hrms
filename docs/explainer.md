@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.5.4** · Status: completed (Phase 4.5 Training, Asset and Document Mappings completed; Checkpoint CP-19)
+Last updated: 2026-10-27 · Current step: **4.6.1** · Status: completed (Step 4.6.1 Offboarding to Employee 1-1 mapping completed; next: Step 4.6.2)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.5.4** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 33 / 36 |
-| Steps complete | 183 / 196 |
+| Steps complete | 184 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 93.4% |
+| Overall | 93.9% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.5.4** · Status: completed (Phase 
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 22 | 2 / 6 | In progress |
+| 4 \| Mappings, mapping tests, JAR & WAR, final testing \| 9 \| 35 \| 23 \| 2 / 6 | In progress |
 
 ## 3. Phases
 
@@ -149,6 +149,20 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.6.1 - Map Offboarding to Employee One-to-One (R16)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` field in `Offboarding` entity with `@OneToOne(fetch = FetchType.LAZY)` and `@JoinColumn(name = "employee_id", nullable = false, unique = true) private Employee employee`. Updated `OffboardingService` to link the managed `Employee` entity during offboarding initiation, lifecycle completion, and deletion, while maintaining clean DTO responses exposing `employeeId`.
+- Why we did it: Satisfies implementation step 4.6.1 and ERD.md § 6 relationship R16. Enforces database-level one-to-one relationship ensuring that each offboarding record strictly points to exactly one employee, and an employee can have at most one offboarding record via the unique constraint.
+- How it works:
+  - `@OneToOne(fetch = FetchType.LAZY)` defines the association where `Offboarding` is the owning side holding the `employee_id` foreign key.
+  - `@JoinColumn(name = "employee_id", nullable = false, unique = true)` adds a unique foreign key constraint in PostgreSQL.
+  - Spring Data JPA derived queries such as `findByEmployeeId` and `existsByEmployeeId` automatically query across `offboarding.employee.id`.
+- Viva questions:
+  1. Q: Why is `employee_id` in `offboardings` marked `unique = true` in `@JoinColumn`?
+     A: Marking `employee_id` unique enforces the One-to-One relationship at the database level, preventing multiple offboarding records from being created for the same employee.
+  2. Q: Which entity is the owning side of the Offboarding-Employee relationship and why?
+     A: `Offboarding` is the owning side because its table `offboardings` contains the `employee_id` foreign key column.
 
 ### Step 4.5.4 — Verification: Training, Asset, Document Lifecycles and Foreign Keys (CP-19)
 - Date: 2026-10-27

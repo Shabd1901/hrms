@@ -5,9 +5,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -31,8 +34,10 @@ public class Offboarding {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "employee_id", nullable = false)
-    private Long employeeId;
+    // R16: Offboarding -> Employee (1-1, unique foreign key on employee_id)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id", nullable = false, unique = true)
+    private Employee employee;
 
     @Column(name = "resignation_date", nullable = false)
     private LocalDate resignationDate;
