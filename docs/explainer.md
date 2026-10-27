@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.8.1** · Status: completed (Step 4.8.1 Foreign Keys and Parent Deletion Conflict Check completed; next: Step 4.8.2)
+Last updated: 2026-10-27 · Current step: **4.8.2** · Status: completed (Phase 4.8 Mapping Verification completed; Checkpoint CP-22 reached; ready for Phase 4.9)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.8.1** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 35 / 36 |
-| Steps complete | 191 / 196 |
+| Steps complete | 192 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 97.4% |
+| Overall | 98.0% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,35 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.8.2 - Full Lifecycle Regression Across All Domain Modules (CP-22)
+- Date: 2026-10-27
+- What we did: Conducted complete end-to-end regression across all 20 relational database tables and REST controllers:
+  1. Polled and verified HTTP 200 responses across all 20 primary domain controller GET endpoints with zero regressions.
+  2. Executed complete employee lifecycle integration test from initial recruitment through offboarding:
+     - Department & designation creation
+     - Recruiter job opening definition
+     - Candidate application & technical interview scheduling/scoring
+     - Candidate stage progression to OFFERED
+     - Candidate hiring into Employee profile with `candidate_id` one-to-one foreign key link (R17)
+     - Onboarding checklist generation, task completion, and identity document upload/verification transitioning employee to ACTIVE (R7, R15)
+     - Attendance check-in and check-out tracking (R8)
+     - Annual leave balance tracking and manager leave request approval with automatic balance deduction (R9, R10)
+     - Monthly gross/net payroll calculation and payment state transition (R11)
+     - Performance review submission by active reviewer (R12)
+     - Competency skill registration, corporate training program definition, curriculum skill linkage, employee enrollment, and automated skill acquisition upon course graduation (R13, R18, R19, BR-09)
+     - Hardware asset assignment and return clearance (R14)
+     - Employee resignation initiation, notice period tracking, asset return validation, final payroll verification, and exit clearance completing offboarding to EXITED status (R16)
+  3. Inspected PostgreSQL database and confirmed positive row counts and referential integrity across all 20 domain tables and both join tables (`employee_skills`, `training_program_skills`).
+- Why we did it: Satisfies implementation step 4.8.2 and Checkpoint CP-22. Proves system-wide cohesion, relational mapping consistency, and business logic execution across the entire PeopleOps application suite.
+- How it works:
+  - Validates that all JPA mappings (`@ManyToOne`, `@OneToMany`, `@OneToOne`, `@ManyToMany`) operate in harmony without circular loops, lazy loading initialization exceptions, or cascade integrity leaks.
+  - Confirms compliance with all business rules (BR-01 through BR-14) under automated transactional load.
+- Viva questions:
+  1. Q: How does the PeopleOps architecture guarantee database integrity across the complete employee lifecycle?
+     A: Referential integrity is enforced at multiple layers: application business rule validation in services (`@Transactional`), explicit DTO mapping boundaries, Hibernate JPA mapping annotations (`@JoinColumn`, `@JoinTable`), and PostgreSQL database-level foreign key and unique constraints.
+  2. Q: Why was cascade deletion restricted solely to onboarding tasks (R7)?
+     A: Cascade delete is dangerous in enterprise HRMS systems where child records (payrolls, attendance, reviews, compliance documents) represent permanent legal and financial audit trails; only ephemeral onboarding tasks belong exclusively to a candidate's preliminary profile.
 
 ### Step 4.8.1 - Verify PostgreSQL Foreign Key Constraints, Join Tables, and Deletion Protection
 - Date: 2026-10-27
