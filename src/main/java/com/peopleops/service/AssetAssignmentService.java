@@ -58,8 +58,8 @@ public class AssetAssignmentService {
         }
 
         AssetAssignment assignment = new AssetAssignment();
-        assignment.setAssetId(request.getAssetId());
-        assignment.setEmployeeId(request.getEmployeeId());
+        assignment.setAsset(asset);
+        assignment.setEmployee(employee);
         assignment.setAssignedDate(request.getAssignedDate() != null ? request.getAssignedDate() : LocalDate.now());
         assignment.setStatus(AssignmentStatus.ASSIGNED);
         assignment.setReturnedDate(null);
@@ -103,8 +103,11 @@ public class AssetAssignmentService {
         assignment.setStatus(AssignmentStatus.RETURNED);
         assignment.setReturnedDate(LocalDate.now());
 
-        Asset asset = assetRepository.findById(assignment.getAssetId())
-            .orElseThrow(() -> new ResourceNotFoundException("Asset not found with id: " + assignment.getAssetId()));
+        Asset asset = assignment.getAsset();
+        if (asset == null) {
+            log.warn("Return asset rejected: asset not found on assignment {}", id);
+            throw new ResourceNotFoundException("Asset not found on assignment id: " + id);
+        }
         asset.setStatus(AssetStatus.AVAILABLE);
         assetRepository.save(asset);
 
@@ -116,8 +119,8 @@ public class AssetAssignmentService {
     private AssetAssignmentResponseDTO toResponseDTO(AssetAssignment entity) {
         return new AssetAssignmentResponseDTO(
             entity.getId(),
-            entity.getAssetId(),
-            entity.getEmployeeId(),
+            entity.getAsset() != null ? entity.getAsset().getId() : null,
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getAssignedDate(),
             entity.getReturnedDate(),
             entity.getStatus()
