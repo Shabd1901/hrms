@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.7.2** · Status: completed (Step 4.7.2 TrainingProgram to Skill many-to-many completed; next: Step 4.7.3)
+Last updated: 2026-10-27 · Current step: **4.7.3** · Status: completed (Step 4.7.3 Auto-add skills on training completion completed; next: Step 4.7.4)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.7.2** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 34 / 36 |
-| Steps complete | 188 / 196 |
+| Steps complete | 189 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 95.9% |
+| Overall | 96.4% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,19 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.7.3 - Automatically Award Training Program Skills on Enrollment Completion (BR-09)
+- Date: 2026-10-27
+- What we did: Updated `TrainingEnrollmentService.completeEnrollment` to automatically award all skills associated with the completed `TrainingProgram` to the enrolled `Employee` upon status transition to `COMPLETED`. When `PATCH /api/training-enrollments/{id}/complete` executes within `@Transactional`, `employee.getSkills().addAll(program.getSkills())` is triggered and persisted.
+- Why we did it: Satisfies implementation step 4.7.3 and business rule BR-09. Automates competency acquisition when staff successfully graduate from corporate training courses, linking employee capability growth to professional training curricula.
+- How it works:
+  - Inside the transactional enrollment completion method, the service reads the program's `skills` collection.
+  - Adding the skills to the employee's `skills` set automatically writes new rows to `employee_skills` in PostgreSQL, honoring set deduplication.
+- Viva questions:
+  1. Q: How does JPA handle duplicate skills when adding a program's skills to an employee?
+     A: Because `employee.getSkills()` is defined as a `Set<Skill>`, Java and Hibernate inherently ignore duplicate skill additions, ensuring the database join table avoids primary key conflicts.
+  2. Q: Why must `completeEnrollment` be annotated with `@Transactional`?
+     A: Updating the enrollment status, setting the completion date, and adding skills to the employee must execute atomically so that all changes either commit together or roll back on error.
 
 ### Step 4.7.2 - Map TrainingProgram to Skill Many-to-Many and Program Skill Endpoints (R19)
 - Date: 2026-10-27

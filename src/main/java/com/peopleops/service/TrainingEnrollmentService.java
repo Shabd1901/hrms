@@ -20,6 +20,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TrainingEnrollmentService {
@@ -95,6 +96,7 @@ public class TrainingEnrollmentService {
         log.info("Deleted training enrollment with id {}", id);
     }
 
+    @Transactional
     public TrainingEnrollmentResponseDTO completeEnrollment(Long id) {
         TrainingEnrollment enrollment = trainingEnrollmentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Training enrollment not found with id: " + id));
@@ -106,6 +108,18 @@ public class TrainingEnrollmentService {
 
         enrollment.setStatus(EnrollmentStatus.COMPLETED);
         enrollment.setCompletionDate(LocalDate.now());
+
+        // BR-09: Completing an enrollment adds the program's skills to the employee
+        if (enrollment.getTrainingProgram() != null && enrollment.getEmployee() != null) {
+            TrainingProgram program = enrollment.getTrainingProgram();
+            Employee employee = enrollment.getEmployee();
+            if (program.getSkills() != null && !program.getSkills().isEmpty()) {
+                employee.getSkills().addAll(program.getSkills());
+                employeeRepository.save(employee);
+                log.info("Awarded {} skill(s) from program '{}' to employee id {}",
+                    program.getSkills().size(), program.getTitle(), employee.getId());
+            }
+        }
 
         TrainingEnrollment updated = trainingEnrollmentRepository.save(enrollment);
         log.info("Completed training enrollment id {}", id);
