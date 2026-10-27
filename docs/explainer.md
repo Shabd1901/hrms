@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.7.3** · Status: completed (Step 4.7.3 Auto-add skills on training completion completed; next: Step 4.7.4)
+Last updated: 2026-10-27 · Current step: **4.7.4** · Status: completed (Phase 4.7 Many-to-Many Mappings completed; Checkpoint CP-21)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-27 · Current step: **4.7.3** · Status: completed (Step 4
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 34 / 36 |
-| Steps complete | 189 / 196 |
+| Phases complete | 35 / 36 |
+| Steps complete | 190 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 96.4% |
+| Overall | 96.9% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,26 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.7.4 - Verification: Skill Assignment and Auto-Award Lifecycle (CP-21)
+- Date: 2026-10-27
+- What we did: Conducted integration verification of Phase 4.7 Many-to-Many domain mappings:
+  1. Created skills in competency catalog (`POST /api/skills`).
+  2. Assigned skill directly to an active employee via `POST /api/employees/{id}/skills/{skillId}` and verified retrieval via `GET /api/employees/{id}/skills` (R18).
+  3. Created corporate training program and assigned competencies to the curriculum via `POST /api/training-programs/{id}/skills/{skillId}` and verified syllabus retrieval via `GET /api/training-programs/{id}/skills` (R19).
+  4. Enrolled employee in the course and executed completion workflow via `PATCH /api/training-enrollments/{id}/complete`.
+  5. Verified BR-09 automated skill award: confirmed the employee's acquired skills now include all course competencies alongside previous skills.
+  6. Verified skill removal via `DELETE /api/employees/{id}/skills/{skillId}`.
+  7. Inspected PostgreSQL database and confirmed records in join tables `employee_skills` and `training_program_skills`.
+- Why we did it: Satisfies implementation step 4.7.4 and Checkpoint CP-21. Validates end-to-end talent development, curriculum definition, and automated competency acquisition in the database.
+- How it works:
+  - Spring Data JPA manages many-to-many associations through the join tables `employee_skills` and `training_program_skills` without requiring explicit join table entities.
+  - Adding entities to mapped sets inside `@Transactional` methods issues automatic `INSERT` statements to the join tables upon transaction commit.
+- Viva questions:
+  1. Q: Why was a dedicated entity class not required for `employee_skills` or `training_program_skills`?
+     A: When a join table contains only the two foreign keys and no additional payload attributes (like timestamp or rating), JPA's `@ManyToMany` with `@JoinTable` handles table mapping directly.
+  2. Q: What happens to join table rows if an employee or training program is deleted?
+     A: Hibernate manages join table integrity or foreign key constraints ensure join table rows referencing the deleted entity are appropriately handled.
 
 ### Step 4.7.3 - Automatically Award Training Program Skills on Enrollment Completion (BR-09)
 - Date: 2026-10-27
