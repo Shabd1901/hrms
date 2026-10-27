@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phase 4.4 Payroll and Performance Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 4.4 Payroll and Performance Mappings completed)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phas
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 31 / 36 |
-| Steps complete | 178 / 196 |
+| Phases complete | 32 / 36 |
+| Steps complete | 179 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 90.8% |
+| Overall | 91.3% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 17 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 18 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -62,7 +62,7 @@ Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phas
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
-| 4.4 | Payroll and performance mappings | 3 | 2 | CP-19 | In progress |
+| 4.4 | Payroll and performance mappings | 3 | 3 | CP-19 | Completed |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 178 | 18 | 26 / 23 |
+| 196 | 179 | 17 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 17/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 18/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
-| Next | 4.4.3 — Test: payroll generation and performance review submission flow (CP-19) |
-| After that | 4.5.1 — TrainingEnrollment -> TrainingProgram, Employee (R13) |
+| Current | 4.4.3 — Test: payroll generation and performance review submission flow (Phase 4.4 completed) |
+| Next | 4.5.1 — TrainingEnrollment -> TrainingProgram, Employee (R13) |
+| After that | 4.5.2 — AssetAssignment -> Asset, Employee (R14) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,22 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.4.3 — Verification: Payroll Generation, Performance Review Flow, and Foreign Keys
+- Date: 2026-10-27
+- What we did: Conducted integration verification of Phase 4.4 payroll and performance appraisal relationships:
+  1. Generated monthly payroll via `POST /api/payrolls/generate` referencing Employee (R11) and verified statutory salary calculations (gross, LOP deduction, PF deduction, net salary).
+  2. Transitioned payroll status from `GENERATED` to `PAID` via `PATCH /api/payrolls/{id}/pay`.
+  3. Created `PerformanceReview` draft linking employee and manager reviewer (R12), validating business rules against self-reviews.
+  4. Submitted performance review via `PATCH /api/performance-reviews/{id}/submit` and verified `SUBMITTED` status transition.
+  5. Verified PostgreSQL foreign key constraints across `payrolls(employee_id)` and `performance_reviews(employee_id, reviewer_id)`.
+- Why we did it: Satisfies implementation step 4.4.3. Verifies that compensation records and employee appraisals correctly maintain relational references to the employees table in PostgreSQL without compromising transactional consistency.
+- How it works:
+  - Spring Data JPA maps foreign keys with `FetchType.LAZY` to avoid eager cascade joins.
+  - Hibernate generated explicit foreign key constraints in PostgreSQL, ensuring database-level referential integrity.
+- Viva questions:
+  - *Q: What validations are applied during PerformanceReview creation regarding employee relationships?*
+    *A: `PerformanceReviewService` verifies that the employee exists, the reviewer exists and is not EXITED, and that the reviewer is not the same person as the employee (`!reviewerId.equals(employeeId)`).*
 
 ### Step 4.4.2 — Map PerformanceReview to Employee and Reviewer Many-to-One (R12)
 - Date: 2026-10-27
