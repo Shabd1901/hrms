@@ -16,7 +16,7 @@ Last updated: 2026-10-27 · Current step: **4.9.4** · Status: completed (All 4 
 | Steps complete | 196 / 196 |
 | Commits (checkpoints) made | 23 / 23 |
 | Overall | 100.0% |
-| Complexity benchmark | PENDING (must be filled before step 1.5.1) |
+| Complexity benchmark | COMPLETED |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
 ## 2. Weeks
