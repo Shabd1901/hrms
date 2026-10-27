@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.6.2** · Status: completed (Step 4.6.2 Employee to Candidate 1-1 mapping completed; next: Step 4.6.3)
+Last updated: 2026-10-27 · Current step: **4.6.3** · Status: completed (Phase 4.6 One-to-One Mappings completed; Checkpoint CP-20)
 
 ---
 
@@ -12,10 +12,10 @@ Last updated: 2026-10-27 · Current step: **4.6.2** · Status: completed (Step 4
 |---|---|
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
-| Phases complete | 33 / 36 |
-| Steps complete | 185 / 196 |
+| Phases complete | 34 / 36 |
+| Steps complete | 186 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 94.4% |
+| Overall | 94.9% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,27 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.6.3 - Verification: Offboarding and Candidate Hire Linkage (CP-20)
+- Date: 2026-10-27
+- What we did: Conducted integration verification of Phase 4.6 One-to-One domain mappings:
+  1. Hired offered candidate via `POST /api/candidates/{id}/hire` and verified newly created employee profile holds `candidateId` foreign key (R17 `employees -> candidates`).
+  2. Transitioned hired employee from ONBOARDING to ACTIVE by completing default onboarding checklist tasks and uploading verified ID_PROOF document.
+  3. Initiated offboarding via `POST /api/offboardings` and verified employee status transitioned to ON_NOTICE and `offboardings.employee_id` references the employee (R16 `offboardings -> employees`).
+  4. Verified uniqueness constraint: attempting duplicate offboarding initiation for the same employee correctly triggered rejection.
+  5. Verified PostgreSQL foreign key constraints: `offboardings(employee_id)` referencing `employees(id)` with unique constraint, and `employees(candidate_id)` referencing `candidates(id)` with unique constraint.
+- Why we did it: Satisfies implementation step 4.6.3 and Checkpoint CP-20. Validates end-to-end recruitment-to-exit lifecycle continuity and database referential integrity for one-to-one relationships.
+- How it works:
+  - Hibernate generated table alterations in PostgreSQL:
+    - `alter table employees add constraint UK_... unique (candidate_id)`
+    - `alter table employees add constraint FK_... foreign key (candidate_id) references candidates`
+    - `alter table offboardings add constraint FK_... foreign key (employee_id) references employees`
+  - Uniqueness guarantees exactly one offboarding workflow per employee and exactly one employee generated per recruited candidate.
+- Viva questions:
+  1. Q: How does JPA enforce a One-to-One mapping using `@JoinColumn`?
+     A: By applying `@JoinColumn(unique = true)` on the owning entity side, JPA generates both a foreign key constraint and a unique constraint in PostgreSQL.
+  2. Q: What happens if an offboarding record is deleted before completion?
+     A: `OffboardingService.deleteOffboarding` resets the associated employee's status back from `ON_NOTICE` to `ACTIVE` and removes the offboarding record.
 
 ### Step 4.6.2 - Map Employee to Candidate One-to-One Set on Hire (R17)
 - Date: 2026-10-27
