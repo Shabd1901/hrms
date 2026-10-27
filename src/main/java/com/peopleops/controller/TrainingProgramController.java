@@ -1,6 +1,8 @@
 package com.peopleops.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.dto.TrainingProgramRequestDTO;
 import com.peopleops.dto.TrainingProgramResponseDTO;
 import com.peopleops.enums.TrainingStatus;
@@ -71,5 +73,28 @@ public class TrainingProgramController {
             @RequestParam TrainingStatus value) {
         TrainingProgramResponseDTO response = trainingProgramService.updateStatus(id, value);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get skills associated with training program")
+    @GetMapping("/{id}/skills")
+    public ResponseEntity<List<SkillResponseDTO>> getProgramSkills(@PathVariable Long id) {
+        return ResponseEntity.ok(trainingProgramService.getProgramSkills(id));
+    }
+
+    @Operation(summary = "Add skill to training program")
+    @PostMapping("/{id}/skills/{skillId}")
+    public ResponseEntity<List<SkillResponseDTO>> addSkillToProgram(
+            @PathVariable Long id,
+            @PathVariable Long skillId) {
+        return ResponseEntity.ok(trainingProgramService.addSkillToProgram(id, skillId));
+    }
+
+    @Operation(summary = "Remove skill from training program")
+    @DeleteMapping("/{id}/skills/{skillId}")
+    public ResponseEntity<Void> removeSkillFromProgram(
+            @PathVariable Long id,
+            @PathVariable Long skillId) {
+        trainingProgramService.removeSkillFromProgram(id, skillId);
+        return ResponseEntity.noContent().build();
     }
 }

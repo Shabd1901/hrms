@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.7.1** · Status: completed (Step 4.7.1 Employee to Skill many-to-many completed; next: Step 4.7.2)
+Last updated: 2026-10-27 · Current step: **4.7.2** · Status: completed (Step 4.7.2 TrainingProgram to Skill many-to-many completed; next: Step 4.7.3)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.7.1** · Status: completed (Step 4
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 34 / 36 |
-| Steps complete | 187 / 196 |
+| Steps complete | 188 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 95.4% |
+| Overall | 95.9% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,22 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.7.2 - Map TrainingProgram to Skill Many-to-Many and Program Skill Endpoints (R19)
+- Date: 2026-10-27
+- What we did: Added `@ManyToMany(fetch = FetchType.LAZY)` with `@JoinTable(name = "training_program_skills", joinColumns = @JoinColumn(name = "training_program_id"), inverseJoinColumns = @JoinColumn(name = "skill_id")) private Set<Skill> skills = new HashSet<>()` to `TrainingProgram` entity. Implemented `getProgramSkills`, `addSkillToProgram`, and `removeSkillFromProgram` in `TrainingProgramService`, exposing REST endpoints:
+  - `GET /api/training-programs/{id}/skills`
+  - `POST /api/training-programs/{id}/skills/{skillId}`
+  - `DELETE /api/training-programs/{id}/skills/{skillId}`
+- Why we did it: Satisfies implementation step 4.7.2 and ERD.md § 6 relationship R19. Defines the curricular syllabus of competencies taught by each training course and establishes join table `training_program_skills` in PostgreSQL.
+- How it works:
+  - `@JoinTable` maintains the mapping between courses and competencies.
+  - Adding or removing skills from a training program modifies the corresponding rows in `training_program_skills`.
+- Viva questions:
+  1. Q: What table schema is generated for the TrainingProgram-Skill relationship?
+     A: Hibernate creates table `training_program_skills` containing composite primary/foreign keys `training_program_id` and `skill_id`.
+  2. Q: Why are `training_program_skills` and `employee_skills` separate join tables?
+     A: They represent completely different domain concepts: `training_program_skills` defines curriculum syllabus (what the course teaches), while `employee_skills` defines professional qualifications (what the employee knows).
 
 ### Step 4.7.1 - Map Employee to Skill Many-to-Many and Skill Endpoints (R18)
 - Date: 2026-10-27
