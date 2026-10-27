@@ -62,9 +62,11 @@ public class TrainingEnrollmentService {
         }
 
         TrainingEnrollment enrollment = toEntity(request);
+        enrollment.setTrainingProgram(program);
+        enrollment.setEmployee(employee);
         enrollment.setStatus(EnrollmentStatus.ENROLLED);
         TrainingEnrollment saved = trainingEnrollmentRepository.save(enrollment);
-        log.info("Enrolled employee {} in training program {} with enrollment id {}", saved.getEmployeeId(), saved.getTrainingProgramId(), saved.getId());
+        log.info("Enrolled employee {} in training program {} with enrollment id {}", saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getTrainingProgram() != null ? saved.getTrainingProgram().getId() : null, saved.getId());
         return toResponseDTO(saved);
     }
 
@@ -126,17 +128,14 @@ public class TrainingEnrollmentService {
     }
 
     private TrainingEnrollment toEntity(TrainingEnrollmentRequestDTO dto) {
-        TrainingEnrollment te = new TrainingEnrollment();
-        te.setTrainingProgramId(dto.getTrainingProgramId());
-        te.setEmployeeId(dto.getEmployeeId());
-        return te;
+        return new TrainingEnrollment();
     }
 
     private TrainingEnrollmentResponseDTO toResponseDTO(TrainingEnrollment entity) {
         return new TrainingEnrollmentResponseDTO(
             entity.getId(),
-            entity.getTrainingProgramId(),
-            entity.getEmployeeId(),
+            entity.getTrainingProgram() != null ? entity.getTrainingProgram().getId() : null,
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getStatus(),
             entity.getCompletionDate()
         );

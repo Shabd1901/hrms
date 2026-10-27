@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 4.4 Payroll and Performance Mappings completed)
+Last updated: 2026-10-27 · Current step: **4.5.1** · Status: in progress (Phase 4.5 Training, Asset and Document Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 32 / 36 |
-| Steps complete | 179 / 196 |
+| Steps complete | 180 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 91.3% |
+| Overall | 91.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 18 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 19 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -63,7 +63,7 @@ Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
 | 4.4 | Payroll and performance mappings | 3 | 3 | CP-19 | Completed |
-| 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
+| 4.5 | Training, asset and document mappings | 4 | 1 | CP-19 | In progress |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
 | 4.8 | Mapping verification | 2 | 0 | CP-22 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.4.3** · Status: completed (Phase 
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 179 | 17 | 26 / 23 |
+| 196 | 180 | 16 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 18/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 19/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.4.3 — Test: payroll generation and performance review submission flow (Phase 4.4 completed) |
-| Next | 4.5.1 — TrainingEnrollment -> TrainingProgram, Employee (R13) |
-| After that | 4.5.2 — AssetAssignment -> Asset, Employee (R14) |
+| Current | 4.5.1 — TrainingEnrollment -> TrainingProgram, Employee (R13) |
+| Next | 4.5.2 — AssetAssignment -> Asset, Employee (R14) |
+| After that | 4.5.3 — EmployeeDocument -> Employee (R15) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,21 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.5.1 — Map TrainingEnrollment to TrainingProgram and Employee (R13)
+- Date: 2026-10-27
+- What we did: Replaced scalar `trainingProgramId` and `employeeId` fields in `TrainingEnrollment` entity with `@ManyToOne(fetch = FetchType.LAZY)` associations:
+  - `@JoinColumn(name = "training_program_id", nullable = false) private TrainingProgram trainingProgram`
+  - `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`
+  Maintained compound unique constraint on `("training_program_id", "employee_id")`. Updated `TrainingEnrollmentService` to resolve and attach both `TrainingProgram` and `Employee` managed entities and map DTOs seamlessly.
+- Why we did it: Satisfies implementation step 4.5.1 and ERD.md §6 relationship R13. Enforces relational integrity on corporate training enrollments and prevents orphaned enrollments.
+- How it works:
+  - `TrainingEnrollment` is the owning side linking an employee with an ongoing or planned training program.
+  - Lazy loading (`FetchType.LAZY`) avoids unnecessary cascading queries when checking enrollments.
+  - Spring Data JPA derived queries such as `findByEmployeeId` and `existsByTrainingProgramIdAndEmployeeId` automatically navigate `employee.id` and `trainingProgram.id`.
+- Viva questions:
+  - *Q: Why does TrainingEnrollment have a unique constraint on (training_program_id, employee_id)?*
+    *A: An employee can only be enrolled once in any specific training program session to prevent duplicate attendance and duplicate skill completions.*
 
 ### Step 4.4.3 — Verification: Payroll Generation, Performance Review Flow, and Foreign Keys
 - Date: 2026-10-27
