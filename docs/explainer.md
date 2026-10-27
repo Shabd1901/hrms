@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.5.2** · Status: in progress (Phase 4.5 Training, Asset and Document Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.5.3** · Status: in progress (Phase 4.5 Training, Asset and Document Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.5.2** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 32 / 36 |
-| Steps complete | 181 / 196 |
+| Steps complete | 182 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 92.3% |
+| Overall | 92.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.5.2** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 20 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 21 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -63,7 +63,7 @@ Last updated: 2026-10-27 · Current step: **4.5.2** · Status: in progress (Phas
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
 | 4.4 | Payroll and performance mappings | 3 | 3 | CP-19 | Completed |
-| 4.5 | Training, asset and document mappings | 4 | 2 | CP-19 | In progress |
+| 4.5 | Training, asset and document mappings | 4 | 3 | CP-19 | In progress |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
 | 4.8 | Mapping verification | 2 | 0 | CP-22 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.5.2** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 181 | 15 | 26 / 23 |
+| 196 | 182 | 14 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 20/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 21/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.5.2 — AssetAssignment -> Asset, Employee (R14) |
-| Next | 4.5.3 — EmployeeDocument -> Employee (R15) |
-| After that | 4.5.4 — Test (CP-19) |
+| Current | 4.5.3 — EmployeeDocument -> Employee (R15) |
+| Next | 4.5.4 — Test: training enrollment, asset assignment, document upload and verification flow (CP-19) |
+| After that | 4.6.1 — Offboarding.employee one-to-one (R16) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,17 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.5.3 — Map EmployeeDocument to Employee Many-to-One (R15)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` field in `EmployeeDocument` entity with `@ManyToOne(fetch = FetchType.LAZY)` and `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`. Updated `EmployeeDocumentService` to resolve and attach managed `Employee` entities during document upload, update, and verification, maintaining seamless triggering of `employeeService.activateIfReady`.
+- Why we did it: Satisfies implementation step 4.5.3 and ERD.md §6 relationship R15. Enforces relational integrity on compliance documents and records foreign key dependencies to employees in PostgreSQL.
+- How it works:
+  - `EmployeeDocument` owns the `employee_id` foreign key.
+  - Spring Data JPA repository finders like `findByEmployeeId` and `deleteByEmployeeId` automatically navigate `employee.id`.
+- Viva questions:
+  - *Q: How does document verification interact with the employee lifecycle?*
+    *A: When an ID_PROOF document is verified (`PATCH /api/employee-documents/{id}/verify`), `EmployeeDocumentService` invokes `employeeService.activateIfReady(employeeId)`, which checks if all onboarding checklist criteria are met and transitions the employee status from ONBOARDING to ACTIVE.*
 
 ### Step 4.5.2 — Map AssetAssignment to Asset and Employee Many-to-One (R14)
 - Date: 2026-10-27

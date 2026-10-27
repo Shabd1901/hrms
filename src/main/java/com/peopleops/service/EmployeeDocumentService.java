@@ -2,6 +2,7 @@ package com.peopleops.service;
 
 import com.peopleops.dto.EmployeeDocumentRequestDTO;
 import com.peopleops.dto.EmployeeDocumentResponseDTO;
+import com.peopleops.entity.Employee;
 import com.peopleops.entity.EmployeeDocument;
 import com.peopleops.exception.ResourceNotFoundException;
 import com.peopleops.repository.EmployeeDocumentRepository;
@@ -33,17 +34,19 @@ public class EmployeeDocumentService {
     }
 
     public EmployeeDocumentResponseDTO createDocument(EmployeeDocumentRequestDTO request) {
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Create document rejected: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Create document rejected: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
         EmployeeDocument document = toEntity(request);
+        document.setEmployee(employee);
         document.setUploadedOn(LocalDate.now());
         document.setVerified(false);
 
         EmployeeDocument saved = employeeDocumentRepository.save(document);
-        log.info("Uploaded document '{}' ({}) for employee id {} with doc id {}", saved.getFileName(), saved.getDocumentType(), saved.getEmployeeId(), saved.getId());
+        log.info("Uploaded document '{}' ({}) for employee id {} with doc id {}", saved.getFileName(), saved.getDocumentType(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getId());
         return toResponseDTO(saved);
     }
 
@@ -69,12 +72,13 @@ public class EmployeeDocumentService {
         EmployeeDocument document = employeeDocumentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Employee document not found with id: " + id));
 
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Update document rejected: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Update document rejected: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
-        document.setEmployeeId(request.getEmployeeId());
+        document.setEmployee(employee);
         document.setDocumentType(request.getDocumentType());
         document.setFileName(request.getFileName());
         document.setFileUrl(request.getFileUrl());
@@ -98,16 +102,18 @@ public class EmployeeDocumentService {
 
         document.setVerified(true);
         EmployeeDocument updated = employeeDocumentRepository.save(document);
-        log.info("Verified document id {} for employee id {}", updated.getId(), updated.getEmployeeId());
+        Long empId = updated.getEmployee() != null ? updated.getEmployee().getId() : null;
+        log.info("Verified document id {} for employee id {}", updated.getId(), empId);
 
-        employeeService.activateIfReady(document.getEmployeeId());
+        if (empId != null) {
+            employeeService.activateIfReady(empId);
+        }
 
         return toResponseDTO(updated);
     }
 
     private EmployeeDocument toEntity(EmployeeDocumentRequestDTO dto) {
         EmployeeDocument doc = new EmployeeDocument();
-        doc.setEmployeeId(dto.getEmployeeId());
         doc.setDocumentType(dto.getDocumentType());
         doc.setFileName(dto.getFileName());
         doc.setFileUrl(dto.getFileUrl());
@@ -117,7 +123,7 @@ public class EmployeeDocumentService {
     private EmployeeDocumentResponseDTO toResponseDTO(EmployeeDocument entity) {
         return new EmployeeDocumentResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getDocumentType(),
             entity.getFileName(),
             entity.getFileUrl(),
