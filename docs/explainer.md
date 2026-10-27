@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phase 4.4 Payroll and Performance Mappings in progress)
+Last updated: 2026-10-27 · Current step: **4.4.2** · Status: in progress (Phase 4.4 Payroll and Performance Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phas
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 31 / 36 |
-| Steps complete | 177 / 196 |
+| Steps complete | 178 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 90.3% |
+| Overall | 90.8% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phas
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 16 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 17 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -62,7 +62,7 @@ Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phas
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
-| 4.4 | Payroll and performance mappings | 3 | 1 | CP-19 | In progress |
+| 4.4 | Payroll and performance mappings | 3 | 2 | CP-19 | In progress |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phas
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 177 | 19 | 26 / 23 |
+| 196 | 178 | 18 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 16/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 17/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
-| Next | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
-| After that | 4.4.3 — Test: payroll generation and performance review submission flow (CP-19) |
+| Current | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
+| Next | 4.4.3 — Test: payroll generation and performance review submission flow (CP-19) |
+| After that | 4.5.1 — TrainingEnrollment -> TrainingProgram, Employee (R13) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,20 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.4.2 — Map PerformanceReview to Employee and Reviewer Many-to-One (R12)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` and `reviewerId` fields in `PerformanceReview` entity with `@ManyToOne(fetch = FetchType.LAZY)` associations:
+  - `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`
+  - `@JoinColumn(name = "reviewer_id", nullable = false) private Employee reviewer`
+  Maintained table-level unique constraint on `("employee_id", "review_period")`. Updated `PerformanceReviewService` to resolve and attach both employee and reviewer managed entities, validating business rules (active status, no self-review) and mapping between DTOs and entities.
+- Why we did it: Satisfies implementation step 4.4.2 and ERD.md §6 relationship R12. Enforces relational data integrity on appraisal records and prevents orphaned evaluation feedback.
+- How it works:
+  - Both relationships point to the `employees` table, creating two foreign keys from `performance_reviews`: `employee_id` and `reviewer_id`.
+  - Hibernate lazy fetching ensures loading appraisal reviews does not trigger full employee tree cascades.
+- Viva questions:
+  - *Q: Why does performance_reviews have two separate ManyToOne relationships to the same employees table?*
+    *A: An appraisal requires two distinct employee roles: the employee being evaluated (`employee_id`) and the manager/evaluator conducting the review (`reviewer_id`). Both are stored in the employees table, so two foreign key columns reference the same target table with different semantic meanings.*
 
 ### Step 4.4.1 — Map Payroll to Employee Many-to-One (R11)
 - Date: 2026-10-27

@@ -41,10 +41,11 @@ public class PerformanceReviewService {
             log.warn("Performance review creation failed: reviewerId is null");
             throw new BusinessRuleException("Reviewer id is required");
         }
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Performance review creation failed: employee id {} not found", request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Performance review creation failed: employee id {} not found", request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
         Employee reviewer = employeeRepository.findById(request.getReviewerId())
             .orElseThrow(() -> {
@@ -73,9 +74,11 @@ public class PerformanceReviewService {
         }
 
         PerformanceReview review = toEntity(request);
+        review.setEmployee(employee);
+        review.setReviewer(reviewer);
         review.setStatus(ReviewStatus.DRAFT);
         PerformanceReview saved = performanceReviewRepository.save(review);
-        log.info("Created performance review draft id: {} for employee id: {} for period '{}'", saved.getId(), saved.getEmployeeId(), saved.getReviewPeriod());
+        log.info("Created performance review draft id: {} for employee id: {} for period '{}'", saved.getId(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getReviewPeriod());
         return toResponseDTO(saved);
     }
 
@@ -112,10 +115,11 @@ public class PerformanceReviewService {
             throw new BusinessRuleException("A SUBMITTED review cannot be edited");
         }
 
-        if (!employeeRepository.existsById(request.getEmployeeId())) {
-            log.warn("Performance review update failed for id {}: employee id {} not found", id, request.getEmployeeId());
-            throw new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
-        }
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+            .orElseThrow(() -> {
+                log.warn("Performance review update failed for id {}: employee id {} not found", id, request.getEmployeeId());
+                return new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId());
+            });
 
         Employee reviewer = employeeRepository.findById(request.getReviewerId())
             .orElseThrow(() -> {
@@ -138,14 +142,15 @@ public class PerformanceReviewService {
             throw new BusinessRuleException("Rating must be between 1 and 5");
         }
 
-        if ((!review.getEmployeeId().equals(request.getEmployeeId()) || !review.getReviewPeriod().equals(request.getReviewPeriod()))
+        Long currentEmpId = review.getEmployee() != null ? review.getEmployee().getId() : null;
+        if ((!request.getEmployeeId().equals(currentEmpId) || !review.getReviewPeriod().equals(request.getReviewPeriod()))
                 && performanceReviewRepository.existsByEmployeeIdAndReviewPeriod(request.getEmployeeId(), request.getReviewPeriod())) {
             log.warn("Performance review update failed for id {}: duplicate review for period '{}'", id, request.getReviewPeriod());
             throw new DuplicateResourceException("Review already exists for this employee and period: " + request.getReviewPeriod());
         }
 
-        review.setEmployeeId(request.getEmployeeId());
-        review.setReviewerId(request.getReviewerId());
+        review.setEmployee(employee);
+        review.setReviewer(reviewer);
         review.setReviewPeriod(request.getReviewPeriod());
         review.setRating(request.getRating());
         review.setComments(request.getComments());
@@ -187,8 +192,6 @@ public class PerformanceReviewService {
 
     private PerformanceReview toEntity(PerformanceReviewRequestDTO dto) {
         PerformanceReview pr = new PerformanceReview();
-        pr.setEmployeeId(dto.getEmployeeId());
-        pr.setReviewerId(dto.getReviewerId());
         pr.setReviewPeriod(dto.getReviewPeriod());
         pr.setRating(dto.getRating());
         pr.setComments(dto.getComments());
@@ -199,8 +202,8 @@ public class PerformanceReviewService {
     private PerformanceReviewResponseDTO toResponseDTO(PerformanceReview entity) {
         return new PerformanceReviewResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
-            entity.getReviewerId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
+            entity.getReviewer() != null ? entity.getReviewer().getId() : null,
             entity.getReviewPeriod(),
             entity.getRating(),
             entity.getComments(),
