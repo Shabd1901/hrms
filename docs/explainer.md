@@ -1651,3 +1651,297 @@ Newest entry first. Copy the template for every step.
 | Phase 2.12 | 2026-10-20 | PASS (100%) | Verified full employee lifecycle Postman collection (7 modular folders, all CRUD endpoints) |
 | Phase 3.1 | 2026-10-23 | PASS | Verified Logback file destination (`logs/peopleops.log`), logging patterns, and SLF4J service event emission |
 | Phase 3.2 | 2026-10-23 | PASS | Verified standardized JSON error responses across 404, 400, 409, malformed JSON, and bad query enums via Postman collection folder '8. Global Exception Handling' |
+
+
+## 11. Complete Start-Over, Presentation Runbook & Teaching Guide
+
+This guide is designed for clean-slate resets, full live demonstrations, pgAdmin exploration, and faculty viva presentations.
+
+---
+
+### 11.1 Clean Slate & Database Reset (PostgreSQL / pgAdmin 4)
+
+Before re-running demonstrations or testing from scratch, clear out previous test data and reset the database.
+
+#### Option A: Using pgAdmin 4 Query Tool
+1. Open **pgAdmin 4** and connect to your local PostgreSQL server.
+2. In the left browser tree, expand **Databases**, right-click the default **`postgres`** database, and select **Query Tool**.
+   *(Note: Do not run these drop commands while connected to `peopleops_db` itself, or PostgreSQL will refuse because the database is currently open).*
+3. Paste and run the following SQL script (Press **F5** or click the **Play** button):
+
+```sql
+-- 1. Terminate any active background connections to peopleops_db
+SELECT pg_terminate_backend(pid) 
+FROM pg_stat_activity 
+WHERE datname = 'peopleops_db' AND pid <> pg_backend_pid();
+
+-- 2. Drop the existing database
+DROP DATABASE IF EXISTS peopleops_db;
+
+-- 3. Re-create a fresh, clean database
+CREATE DATABASE peopleops_db
+    WITH 
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+
+COMMENT ON DATABASE peopleops_db IS 'Human Resource Management System (PeopleOps) Database';
+```
+
+4. Verify creation: Right-click **Databases** in the left tree and select **Refresh**. You will see `peopleops_db` fresh with 0 tables.
+
+#### Option B: Using psql Command Line Terminal
+If using Windows PowerShell or Command Prompt:
+```powershell
+# Connect to postgres maintenance database
+psql -U postgres -d postgres
+
+# Inside psql terminal, run:
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'peopleops_db' AND pid <> pg_backend_pid();
+DROP DATABASE IF EXISTS peopleops_db;
+CREATE DATABASE peopleops_db;
+\q
+```
+
+---
+
+### 11.2 Resetting Application State & Log Files
+
+1. **Clear old log files**:
+   In PowerShell at the project root (`c:\Users\praja\HomeSchool\PROJECT\hrms`):
+   ```powershell
+   Remove-Item -Path "logs\*" -Recurse -Force -ErrorAction SilentlyContinue
+   ```
+2. **Clean Maven build artifacts**:
+   ```powershell
+   mvn clean
+   ```
+
+---
+
+### 11.3 Launching the Application & Verifying Auto-DDL
+
+1. **Launch the Spring Boot server**:
+   ```powershell
+   mvn spring-boot:run
+   ```
+   *(Or press Run / Debug on `PeopleOpsApplication.java` inside IntelliJ IDEA / Eclipse / VS Code).*
+
+2. **What happens under the hood (Key Viva Points to Observe in Terminal)**:
+   - **HikariCP Connection Pool**: HikariPool connects to `jdbc:postgresql://localhost:5432/peopleops_db` using credentials from `application.properties`.
+   - **Hibernate Schema Generation (`ddl-auto=update`)**: Because the database is completely empty, Hibernate reads all 20 `@Entity` classes and issues SQL `CREATE TABLE` and `ALTER TABLE ... ADD CONSTRAINT` statements automatically.
+   - **Embedded Tomcat**: Starts on port `8080`.
+   - **Console Confirmation**: Look for:
+     ```text
+     INFO ... com.peopleops.PeopleOpsApplication - Started PeopleOpsApplication in X.XXX seconds
+     ```
+
+3. **Verify Interactive Swagger UI in Browser**:
+   Open:
+   `http://localhost:8080/swagger-ui/index.html`
+   - You should see all 13 controller tags (`Organization`, `Employees`, `Recruitment`, `Onboarding`, etc.) fully documented and interactive.
+
+---
+
+### 11.4 pgAdmin 4 Inspection & Verification
+
+Once the application has started, switch back to pgAdmin 4 to inspect the generated schema:
+1. In pgAdmin, expand:
+   `Servers -> PostgreSQL 15+ -> Databases -> peopleops_db -> Schemas -> public -> Tables`
+2. **Observe the 20 Core Relational Tables + 2 Join Tables**:
+   - `departments`, `designations`, `employees`, `candidates`, `job_openings`, `interviews`
+   - `onboarding_tasks`, `employee_documents`, `attendance`, `leave_types`, `leave_requests`, `leave_balances`
+   - `payrolls`, `performance_reviews`, `skills`, `training_programs`, `training_enrollments`
+   - `assets`, `asset_assignments`, `offboardings`
+   - **Join Tables**: `employee_skills` (N:M relationship between employees and skills), `training_program_skills` (N:M between training programs and skills).
+3. **Inspect Foreign Key Constraints**:
+   - Expand `employees -> Constraints`: Observe `fk_department_id`, `fk_designation_id`, `fk_manager_id`, and `candidate_id` unique constraint (1:1 mapping).
+4. **Quick Data Query**:
+   Right-click `employees` -> **View/Edit Data** -> **First 100 Rows** (currently empty, ready for Postman!).
+
+---
+
+### 11.5 Complete Postman Demonstration Flow (Step-by-Step in Exact Order)
+
+Open **Postman**, import the collection from `hrms/postman/PeopleOps.postman_collection.json`.
+Make sure the collection variable `baseUrl` is set to `http://localhost:8080`.
+
+Execute the requests in the exact folder sequence below. Every step builds upon the previous entity IDs:
+
+#### Folder 1: Organization
+1. **`[POST] Create Department`**
+   - URL: `{{baseUrl}}/api/departments`
+   - Body: `{"departmentCode": "ENG", "departmentName": "Engineering"}`
+   - Result: HTTP `201 Created`, ID: `1`.
+2. **`[GET] Get All Departments`**
+   - URL: `{{baseUrl}}/api/departments`
+   - Result: HTTP `200 OK`, returns list containing Engineering.
+3. **`[POST] Create Designation`**
+   - URL: `{{baseUrl}}/api/designations`
+   - Body: `{"designationCode": "SE", "designationTitle": "Software Engineer", "departmentId": 1}`
+   - Result: HTTP `201 Created`, ID: `1`.
+4. **`[GET] Get All Designations`**
+   - URL: `{{baseUrl}}/api/designations`
+   - Result: HTTP `200 OK`.
+
+#### Folder 2: Recruitment & Automated Hire Workflow
+1. **`[POST] Create Job Opening`**
+   - URL: `{{baseUrl}}/api/job-openings`
+   - Creates open position for Software Engineer (ID: `1`).
+2. **`[POST] Apply Candidate`**
+   - URL: `{{baseUrl}}/api/candidates`
+   - Creates candidate *Alice Smith* in stage `APPLIED` (ID: `1`).
+3. **`[PATCH] Shortlist Candidate`**
+   - URL: `{{baseUrl}}/api/candidates/1/stage?value=SCREENING`
+   - Moves Alice to `SCREENING`.
+4. **`[POST] Schedule Interview`**
+   - URL: `{{baseUrl}}/api/interviews`
+   - Schedules technical round (ID: `1`).
+5. **`[PATCH] Pass Interview`**
+   - URL: `{{baseUrl}}/api/interviews/1/result?value=PASSED&feedback=Excellent%20core%20Java%20and%20Spring`
+   - Records passing feedback.
+6. **`[PATCH] Offer Candidate`**
+   - URL: `{{baseUrl}}/api/candidates/1/stage?value=OFFERED`
+   - Extends job offer.
+7. **`[POST] Hire Candidate (Auto Onboarding)`** *(Crucial Showcase for Faculty!)*
+   - URL: `{{baseUrl}}/api/candidates/1/hire`
+   - Body:
+     ```json
+     {
+       "joiningDate": "2026-11-01",
+       "monthlySalary": 85000.00
+     }
+     ```
+   - **What happens automatically via `@Transactional`**:
+     1. Creates Employee `EMP-2026-0001` (ID: `1`) with status `ACTIVE`.
+     2. Sets Candidate status to `HIRED` and links candidate ID (1:1 mapping).
+     3. Automatically generates **5 standard onboarding tasks** (Workstation setup, ID badge, IT accounts, etc.).
+     4. Generates an initial Leave Balance (18 annual days).
+   - Result: HTTP `200 OK` with full EmployeeResponseDTO.
+
+#### Folder 3: Onboarding & Activation
+1. **`[GET] Get Onboarding Tasks by Employee`**
+   - URL: `{{baseUrl}}/api/onboarding-tasks?employeeId=1`
+   - Result: HTTP `200 OK`, shows all 5 tasks in `PENDING` state.
+2. **`[PATCH] Complete Onboarding Task 1`**
+   - URL: `{{baseUrl}}/api/onboarding-tasks/1/complete`
+   - Result: HTTP `200 OK`, task status changes to `COMPLETED`.
+3. **`[POST] Upload ID Proof Document`**
+   - URL: `{{baseUrl}}/api/employee-documents`
+   - Submits passport/Aadhar document for Employee 1 (ID: `1`).
+4. **`[PATCH] Verify ID Proof Document`**
+   - URL: `{{baseUrl}}/api/employee-documents/1/verify`
+   - Status updated to `VERIFIED`.
+
+#### Folder 4: Attendance & Leaves
+1. **`[POST] Check-In Attendance`**
+   - URL: `{{baseUrl}}/api/attendance`
+   - Records clock-in at `09:00:00` for today.
+2. **`[PATCH] Check-Out Attendance`**
+   - URL: `{{baseUrl}}/api/attendance/1/check-out?time=18:00:00`
+   - Automatically computes 9.0 working hours and sets status to `PRESENT`.
+3. **`[POST] Create Leave Type`**
+   - URL: `{{baseUrl}}/api/leave-types`
+   - Creates `Casual Leave (CL)` with 12 days yearly allocation.
+4. **`[POST] Apply Leave Request`**
+   - URL: `{{baseUrl}}/api/leave-requests`
+   - Submits 2-day leave request for Employee 1.
+5. **`[PATCH] Approve Leave Request`**
+   - URL: `{{baseUrl}}/api/leave-requests/1/approve?decidedById=1`
+   - Status changed to `APPROVED` and automatically deducts 2 days from Employee 1 leave balance.
+
+#### Folder 5: Payroll & Performance
+1. **`[POST] Generate Monthly Payroll`**
+   - URL: `{{baseUrl}}/api/payrolls/generate`
+   - Generates salary slip for Month 11, Year 2026. Computes Gross Salary (`85000.00`), Deductions, and Net Salary (`80750.00`) in status `DRAFT`.
+2. **`[PATCH] Pay Payroll`**
+   - URL: `{{baseUrl}}/api/payrolls/1/pay`
+   - Marks payment processed, changes status to `PAID`.
+3. **`[POST] Create Performance Review Draft`**
+   - URL: `{{baseUrl}}/api/performance-reviews`
+   - Drafts Q4 review with ratings.
+4. **`[PATCH] Submit Performance Review`**
+   - URL: `{{baseUrl}}/api/performance-reviews/1/submit`
+   - Submits review to `SUBMITTED`.
+
+#### Folder 6: Training & Assets
+1. **`[POST] Create Skill`**
+   - URL: `{{baseUrl}}/api/skills`
+   - Creates skill `Java 17 & Spring Boot`.
+2. **`[POST] Create Training Program`**
+   - URL: `{{baseUrl}}/api/training-programs`
+   - Creates course `Advanced Microservices Architecture`.
+3. **`[POST] Enroll Employee in Training`**
+   - URL: `{{baseUrl}}/api/training-enrollments`
+   - Enrolls Employee 1 in training.
+4. **`[PATCH] Complete Training Enrollment`**
+   - URL: `{{baseUrl}}/api/training-enrollments/1/complete`
+   - Sets status to `COMPLETED` and auto-awards the skill to Employee 1!
+5. **`[POST] Create Asset`**
+   - URL: `{{baseUrl}}/api/assets`
+   - Creates hardware asset `MacBook Pro 16` (`AST-MBP-001`).
+6. **`[POST] Assign Asset to Employee`**
+   - URL: `{{baseUrl}}/api/asset-assignments`
+   - Assigns MacBook to Employee 1.
+7. **`[PATCH] Return Asset from Employee`**
+   - URL: `{{baseUrl}}/api/asset-assignments/1/return`
+   - Records asset return during clearance.
+
+#### Folder 7: Offboarding & Clearance
+1. **`[POST] Initiate Offboarding`**
+   - URL: `{{baseUrl}}/api/offboardings`
+   - Initiates exit process for employee.
+2. **`[GET] Get Offboarding Status`**
+   - URL: `{{baseUrl}}/api/offboardings/1`
+3. **`[PATCH] Complete Offboarding Clearance`**
+   - URL: `{{baseUrl}}/api/offboardings/1/complete`
+   - Verifies all assets are returned, sets Employee status to `TERMINATED`.
+
+#### Folder 8: Global Exception Handling Tests (Viva Defense Demo!)
+Demonstrates that the server never crashes with raw 500 stack traces, but cleanly intercepts exceptions with `@RestControllerAdvice`:
+1. **404 Not Found**: `GET {{baseUrl}}/api/departments/99999` -> Returns `404 Not Found` with message `Department not found with id: 99999`.
+2. **409 Conflict**: `POST {{baseUrl}}/api/departments` with code `ENG` -> Returns `409 Conflict` (`Department code already exists: ENG`).
+3. **400 Bad Request (Business Rule Violation)**: `POST {{baseUrl}}/api/attendance` with a future date -> Returns `400 Bad Request` (`Attendance date cannot be in the future`).
+4. **400 Bad Request (Bad Enum Value)**: `GET {{baseUrl}}/api/employees?status=INVALID_STATUS` -> Intercepts type mismatch gracefully.
+5. **400 Bad Request (Malformed JSON)**: Send malformed JSON syntax with broken braces -> Intercepted cleanly by `handleMalformedRequestException`.
+
+#### Folder 9: Bean Validation Tests (Jakarta Validation)
+Demonstrates `@Valid`, `@NotBlank`, `@Email`, and `@Positive`:
+1. Blank department code/name -> Returns field errors map `{departmentCode: "must not be blank"}`.
+2. Invalid employee email and negative salary -> Returns multiple field errors in single JSON payload.
+
+---
+
+### 11.6 Architectural Comparison: Sample `student` vs Main `hrms` (PeopleOps)
+
+| Dimension | Sample Project (`student`) | PeopleOps Main Project (`hrms`) | Architectural Reason / Best Practice |
+|---|---|---|---|
+| **Layering** | 2-Tier: `Controller -> Repository` (no service layer) | 4-Tier: `Controller -> Service -> Repository -> DB` | Controller only handles HTTP routing. Service encapsulates transaction boundaries (`@Transactional`) and multi-step business logic. |
+| **Data Transfer** | Exposes raw `@Entity` directly in requests & responses | Dedicated `DTO` layer (RequestDTO & ResponseDTO) | **Security & decoupling**: Raw entities expose DB internals and cause lazy-loading/serialization recursion. DTOs control exact input/output contracts. |
+| **Response Wrapping (`ResponseBean`)** | Manual `ResponseBean` wrapper (`errorCode`, `errorDesc`, `data`) | Standard HTTP Status Codes (`200`, `201`, `204`) + Typed DTOs, with `ErrorResponse` for errors | Standard REST architecture leverages native HTTP verbs and status codes rather than packing errors into a custom `200 OK` wrapper. |
+| **Exception Handling** | Local `try-catch` blocks inside individual controller methods | Centralized `@RestControllerAdvice` (`GlobalExceptionHandler`) | Decouples exception handling from business logic, ensuring uniform error formats without boilerplate `try-catch` in every endpoint. |
+| **Packaging** | Standard JAR | Configured for both WAR (`SpringBootServletInitializer`) and standalone executable JAR | Allows deployment to external corporate Tomcat servers as well as cloud containers. |
+| **Documentation** | Basic / None | Full OpenAPI 3.0 + Swagger UI (`OpenApiConfig`) | Interactive visual testing and contract sharing for frontend and QA teams. |
+
+---
+
+### 11.7 Viva Presentation Talking Points (Cheat Sheet)
+
+1. **Why do we have a Service layer instead of calling Repositories directly from Controllers?**
+   - *Answer:* Separation of concerns. Controllers handle HTTP request parsing, status codes, and routing. Services contain business rules (e.g. validating dates, calculating hours) and manage transactions (`@Transactional`), ensuring that complex multi-table workflows (like hiring a candidate and auto-generating tasks) either commit together or roll back completely if any step fails.
+
+2. **Why do we use DTOs instead of passing Entities to the API?**
+   - *Answer:* 
+     1. Prevents exposing internal database schema or sensitive fields (like password hashes or internal IDs).
+     2. Avoids Infinite Recursion / Jackson serialization issues with bidirectional JPA relationships (`@ManyToOne` / `@OneToMany`).
+     3. Allows request validation annotations (`@NotBlank`, `@Email`, `@Min`) without polluting database entity mappings.
+
+3. **How does `@RestControllerAdvice` work?**
+   - *Answer:* It uses Spring AOP (Aspect Oriented Programming) to intercept exceptions thrown by any `@RestController` across the application. Instead of writing try-catch in every controller method, exceptions bubble up to `GlobalExceptionHandler`, which translates them into structured `ErrorResponse` JSON with appropriate HTTP status codes (400, 404, 409, 500).
+
+4. **How are relationships modeled in PeopleOps?**
+   - *Answer:*
+     - **1:1**: Candidate to Employee (`@OneToOne` with unique `candidate_id` foreign key).
+     - **1:N / N:1**: Department to Employees (`@OneToMany` in Department, `@ManyToOne` in Employee).
+     - **N:M**: Employee to Skills (`@ManyToMany` with intermediate join table `employee_skills`).
