@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.7.4** · Status: completed (Phase 4.7 Many-to-Many Mappings completed; Checkpoint CP-21)
+Last updated: 2026-10-27 · Current step: **4.8.1** · Status: completed (Step 4.8.1 Foreign Keys and Parent Deletion Conflict Check completed; next: Step 4.8.2)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.7.4** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 35 / 36 |
-| Steps complete | 190 / 196 |
+| Steps complete | 191 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 96.9% |
+| Overall | 97.4% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,23 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.8.1 - Verify PostgreSQL Foreign Key Constraints, Join Tables, and Deletion Protection
+- Date: 2026-10-27
+- What we did: Performed comprehensive verification of database referential constraints across PostgreSQL and Spring Boot REST APIs:
+  1. Inspected `information_schema.table_constraints` and confirmed all 29 foreign key constraints across the 20 application tables match ERD.md § 6 specifications exactly.
+  2. Confirmed existence and integrity of both join tables: `employee_skills` and `training_program_skills`.
+  3. Tested parent deletion protection: attempting to delete an active parent record (`DELETE /api/leave-types/{id}`) when child records exist (`leave_balances`) triggers `DataIntegrityViolationException`, properly intercepted by `GlobalExceptionHandler` to return HTTP 409 Conflict with standard JSON schema.
+- Why we did it: Satisfies implementation step 4.8.1. Guarantees referential integrity across the entire relational database schema and proves that foreign keys protect child data from accidental orphaned state.
+- How it works:
+  - PostgreSQL enforces referential integrity: deleting a referenced row without cascade causes a foreign key constraint violation (SQL state 23503).
+  - Spring Data JPA maps this into a Spring `DataIntegrityViolationException`.
+  - `GlobalExceptionHandler` intercepts the exception and formats a clean 409 Conflict response without leaking SQL internals.
+- Viva questions:
+  1. Q: Why does deleting a parent with existing foreign key children return 409 Conflict rather than 500 Internal Server Error?
+     A: Deleting a referenced parent violates database integrity constraints, which signifies a client request conflict with the current state of the database resource (RFC 9110 HTTP 409).
+  2. Q: What is the SQL state code for a foreign key violation in PostgreSQL?
+     A: PostgreSQL uses standard ANSI SQL state `23503` (`foreign_key_violation`).
 
 ### Step 4.7.4 - Verification: Skill Assignment and Auto-Award Lifecycle (CP-21)
 - Date: 2026-10-27
