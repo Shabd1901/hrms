@@ -132,7 +132,7 @@ public class PayrollService {
         BigDecimal netSalary = gross.subtract(lopDeduction).subtract(pfDeduction).setScale(2, RoundingMode.HALF_UP);
 
         Payroll payroll = new Payroll();
-        payroll.setEmployeeId(request.getEmployeeId());
+        payroll.setEmployee(employee);
         payroll.setPayMonth(request.getPayMonth());
         payroll.setPayYear(request.getPayYear());
         payroll.setWorkingDays(workingDays);
@@ -145,7 +145,7 @@ public class PayrollService {
         payroll.setGeneratedOn(LocalDate.now());
 
         Payroll saved = payrollRepository.save(payroll);
-        log.info("Generated payroll id: {} for employee id: {} for period {}/{} with net salary: {}", saved.getId(), saved.getEmployeeId(), saved.getPayMonth(), saved.getPayYear(), saved.getNetSalary());
+        log.info("Generated payroll id: {} for employee id: {} for period {}/{} with net salary: {}", saved.getId(), saved.getEmployee() != null ? saved.getEmployee().getId() : null, saved.getPayMonth(), saved.getPayYear(), saved.getNetSalary());
         return toResponseDTO(saved);
     }
 
@@ -202,7 +202,7 @@ public class PayrollService {
     private PayrollResponseDTO toResponseDTO(Payroll entity) {
         return new PayrollResponseDTO(
             entity.getId(),
-            entity.getEmployeeId(),
+            entity.getEmployee() != null ? entity.getEmployee().getId() : null,
             entity.getPayMonth(),
             entity.getPayYear(),
             entity.getWorkingDays(),

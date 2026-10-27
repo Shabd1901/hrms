@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 4.3 Attendance and Leave Mappings completed)
+Last updated: 2026-10-27 · Current step: **4.4.1** · Status: in progress (Phase 4.4 Payroll and Performance Mappings in progress)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 31 / 36 |
-| Steps complete | 176 / 196 |
+| Steps complete | 177 / 196 |
 | Commits (checkpoints) made | 26 / 23 |
-| Overall | 89.8% |
+| Overall | 90.3% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 
 | 1 | Requirements, ERD, database, setup, entities | 10 | 40 | 40 | 5 / 5 | Completed |
 | 2 | REST APIs | 12 | 90 | 90 | 8 / 8 | Completed |
 | 3 | Logging, exceptions, validation, Swagger, API testing | 5 | 31 | 31 | 4 / 4 | Completed |
-| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 15 | 1 / 6 | In progress |
+| 4 | Mappings, mapping tests, JAR & WAR, final testing | 9 | 35 | 16 | 1 / 6 | In progress |
 
 ## 3. Phases
 
@@ -62,7 +62,7 @@ Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 
 | 4.1 | Employee core mappings | 6 | 6 | CP-18 | Completed |
 | 4.2 | Recruitment and onboarding mappings | 5 | 5 | CP-18 | Completed |
 | 4.3 | Attendance and leave mappings | 4 | 4 | CP-19 | Completed |
-| 4.4 | Payroll and performance mappings | 3 | 0 | CP-19 | Not started |
+| 4.4 | Payroll and performance mappings | 3 | 1 | CP-19 | In progress |
 | 4.5 | Training, asset and document mappings | 4 | 0 | CP-19 | Not started |
 | 4.6 | One-to-One mappings | 3 | 0 | CP-20 | Not started |
 | 4.7 | Many-to-Many mappings | 4 | 0 | CP-21 | Not started |
@@ -73,18 +73,18 @@ Last updated: 2026-10-27 · Current step: **4.3.4** · Status: completed (Phase 
 
 | Total steps | Completed | Remaining | Commits made |
 |---|---|---|---|
-| 196 | 176 | 20 | 26 / 23 |
+| 196 | 177 | 19 | 26 / 23 |
 
-Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 15/35
+Steps per week: W1 40/40 · W2 90/90 · W3 31/31 · W4 16/35
 Commits per week: W1 5/5 · W2 8/8 · W3 4/4 · W4 1/6
 
 ## 5. Current and next steps
 
 | | Step |
 |---|---|
-| Current | 4.3.4 — Test: leave request and approval flow (Phase 4.3 completed) |
-| Next | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
-| After that | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
+| Current | 4.4.1 — Payroll -> Employee many-to-one mapping (R11) |
+| Next | 4.4.2 — PerformanceReview -> Employee, reviewer mappings (R12) |
+| After that | 4.4.3 — Test: payroll generation and performance review submission flow (CP-19) |
 
 ## 6. Issues and remaining work
 
@@ -149,6 +149,18 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.4.1 — Map Payroll to Employee Many-to-One (R11)
+- Date: 2026-10-27
+- What we did: Replaced scalar `employeeId` field in `Payroll` entity with `@ManyToOne(fetch = FetchType.LAZY)` and `@JoinColumn(name = "employee_id", nullable = false) private Employee employee`. Maintained table-level unique constraint on `("employee_id", "pay_month", "pay_year")`. Updated `PayrollService.generatePayroll` to associate the managed `Employee` entity and mapped the entity relationship to/from DTOs.
+- Why we did it: Satisfies implementation step 4.4.1 and ERD.md §6 relationship R11. Establishes relational integrity and enables JPA navigation between payroll disbursements and employee records while avoiding eager fetching overhead.
+- How it works:
+  - `Payroll` owns the `employee_id` foreign key.
+  - Using `FetchType.LAZY` ensures that querying payroll batches does not automatically issue unnecessary join queries against the `employees` table unless explicitly accessed.
+  - Spring Data JPA derived query methods such as `findByEmployeeId` and `existsByEmployeeIdAndPayMonthAndPayYear` automatically traverse the `employee.id` path.
+- Viva questions:
+  - *Q: Why is unique constraint ("employee_id", "pay_month", "pay_year") enforced on payrolls?*
+    *A: An employee can have at most one payroll record generated per month and year. This database constraint prevents duplicate salary payments or recalculations for the same billing cycle.*
 
 ### Step 4.3.4 — Verification: Leave Request, Approval Workflow, and Foreign Keys
 - Date: 2026-10-27
