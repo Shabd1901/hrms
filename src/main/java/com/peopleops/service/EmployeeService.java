@@ -3,6 +3,7 @@ package com.peopleops.service;
 import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
 import com.peopleops.dto.HireRequestDTO;
+import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.entity.Candidate;
 import com.peopleops.entity.Department;
 import com.peopleops.entity.Designation;
@@ -11,6 +12,7 @@ import com.peopleops.entity.JobOpening;
 import com.peopleops.entity.LeaveBalance;
 import com.peopleops.entity.LeaveType;
 import com.peopleops.entity.OnboardingTask;
+import com.peopleops.entity.Skill;
 import com.peopleops.enums.DocumentType;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.enums.OnboardingTaskStatus;
@@ -24,6 +26,7 @@ import com.peopleops.repository.EmployeeRepository;
 import com.peopleops.repository.LeaveBalanceRepository;
 import com.peopleops.repository.LeaveTypeRepository;
 import com.peopleops.repository.OnboardingTaskRepository;
+import com.peopleops.repository.SkillRepository;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +47,7 @@ public class EmployeeService {
     private final EmployeeDocumentRepository employeeDocumentRepository;
     private final LeaveTypeRepository leaveTypeRepository;
     private final LeaveBalanceRepository leaveBalanceRepository;
+    private final SkillRepository skillRepository;
 
     public EmployeeService(
             EmployeeRepository employeeRepository,
@@ -52,7 +56,8 @@ public class EmployeeService {
             OnboardingTaskRepository onboardingTaskRepository,
             EmployeeDocumentRepository employeeDocumentRepository,
             LeaveTypeRepository leaveTypeRepository,
-            LeaveBalanceRepository leaveBalanceRepository) {
+            LeaveBalanceRepository leaveBalanceRepository,
+            SkillRepository skillRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.designationRepository = designationRepository;
@@ -60,6 +65,7 @@ public class EmployeeService {
         this.employeeDocumentRepository = employeeDocumentRepository;
         this.leaveTypeRepository = leaveTypeRepository;
         this.leaveBalanceRepository = leaveBalanceRepository;
+        this.skillRepository = skillRepository;
     }
 
     @Transactional
@@ -347,6 +353,65 @@ public class EmployeeService {
             task.setStatus(OnboardingTaskStatus.PENDING);
             onboardingTaskRepository.save(task);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<SkillResponseDTO> getEmployeeSkills(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> {
+                log.warn("Get employee skills failed: employee id {} not found", employeeId);
+                return new ResourceNotFoundException("Employee not found with id: " + employeeId);
+            });
+
+        List<SkillResponseDTO> list = new ArrayList<>();
+        for (Skill s : employee.getSkills()) {
+            list.add(new SkillResponseDTO(s.getId(), s.getName(), s.getCategory()));
+        }
+        return list;
+    }
+
+    @Transactional
+    public List<SkillResponseDTO> addSkillToEmployee(Long employeeId, Long skillId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> {
+                log.warn("Add skill failed: employee id {} not found", employeeId);
+                return new ResourceNotFoundException("Employee not found with id: " + employeeId);
+            });
+
+        Skill skill = skillRepository.findById(skillId)
+            .orElseThrow(() -> {
+                log.warn("Add skill failed: skill id {} not found", skillId);
+                return new ResourceNotFoundException("Skill not found with id: " + skillId);
+            });
+
+        employee.getSkills().add(skill);
+        employeeRepository.save(employee);
+        log.info("Assigned skill id {} ('{}') to employee id {}", skillId, skill.getName(), employeeId);
+
+        List<SkillResponseDTO> list = new ArrayList<>();
+        for (Skill s : employee.getSkills()) {
+            list.add(new SkillResponseDTO(s.getId(), s.getName(), s.getCategory()));
+        }
+        return list;
+    }
+
+    @Transactional
+    public void removeSkillFromEmployee(Long employeeId, Long skillId) {
+        Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> {
+                log.warn("Remove skill failed: employee id {} not found", employeeId);
+                return new ResourceNotFoundException("Employee not found with id: " + employeeId);
+            });
+
+        Skill skill = skillRepository.findById(skillId)
+            .orElseThrow(() -> {
+                log.warn("Remove skill failed: skill id {} not found", skillId);
+                return new ResourceNotFoundException("Skill not found with id: " + skillId);
+            });
+
+        employee.getSkills().remove(skill);
+        employeeRepository.save(employee);
+        log.info("Removed skill id {} from employee id {}", skillId, employeeId);
     }
 
     private Employee toEntity(EmployeeRequestDTO dto) {

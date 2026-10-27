@@ -2,7 +2,7 @@
 
 Personal scratch document. Updated by the AI after **every** step (rules: `workflow.md` §9). Written so each decision can be explained out loud.
 
-Last updated: 2026-10-27 · Current step: **4.6.3** · Status: completed (Phase 4.6 One-to-One Mappings completed; Checkpoint CP-20)
+Last updated: 2026-10-27 · Current step: **4.7.1** · Status: completed (Step 4.7.1 Employee to Skill many-to-many completed; next: Step 4.7.2)
 
 ---
 
@@ -13,9 +13,9 @@ Last updated: 2026-10-27 · Current step: **4.6.3** · Status: completed (Phase 
 | Semester | 1 (Backend) |
 | Weeks complete | 3 / 4 |
 | Phases complete | 34 / 36 |
-| Steps complete | 186 / 196 |
+| Steps complete | 187 / 196 |
 | Commits (checkpoints) made | 27 / 23 |
-| Overall | 94.9% |
+| Overall | 95.4% |
 | Complexity benchmark | PENDING (must be filled before step 1.5.1) |
 | Java / Spring Boot / PostgreSQL versions | Java 24 (Target Java 17) / Spring Boot 3.2.5 / PostgreSQL 15+ |
 
@@ -149,6 +149,22 @@ Commit only at a checkpoint. Fill the hash and date when you commit.
 ## 9. Change log (Learning & Teaching Record)
 
 Newest entry first. Copy the template for every step.
+
+### Step 4.7.1 - Map Employee to Skill Many-to-Many and Skill Endpoints (R18)
+- Date: 2026-10-27
+- What we did: Added `@ManyToMany(fetch = FetchType.LAZY)` with `@JoinTable(name = "employee_skills", joinColumns = @JoinColumn(name = "employee_id"), inverseJoinColumns = @JoinColumn(name = "skill_id")) private Set<Skill> skills = new HashSet<>()` to `Employee` entity. Implemented `getEmployeeSkills`, `addSkillToEmployee`, and `removeSkillFromEmployee` in `EmployeeService`, exposing REST endpoints:
+  - `GET /api/employees/{id}/skills`
+  - `POST /api/employees/{id}/skills/{skillId}`
+  - `DELETE /api/employees/{id}/skills/{skillId}`
+- Why we did it: Satisfies implementation step 4.7.1 and ERD.md § 6 relationship R18. Establishes relational many-to-many persistence between employees and skills via a dedicated join table `employee_skills`, enabling direct skill acquisition, tracking, and removal.
+- How it works:
+  - `@JoinTable` specifies the intermediary table `employee_skills` with foreign keys referencing `employees(id)` and `skills(id)`.
+  - Managing the `skills` collection on `Employee` synchronizes the join table rows automatically upon save within the transaction.
+- Viva questions:
+  1. Q: Why is `Set<Skill>` preferred over `List<Skill>` for `@ManyToMany` relationships?
+     A: A `Set` prevents duplicate associations between the same employee and skill at the Java level and avoids Hibernate generating full-table deletion-reinsertion queries for join tables.
+  2. Q: Why does the `@ManyToMany` annotation specify `fetch = FetchType.LAZY`?
+     A: Defaulting to lazy fetching prevents loading all skills for every employee during simple CRUD operations, reducing memory usage and database load.
 
 ### Step 4.6.3 - Verification: Offboarding and Candidate Hire Linkage (CP-20)
 - Date: 2026-10-27

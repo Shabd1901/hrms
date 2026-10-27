@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.peopleops.dto.EmployeeRequestDTO;
 import com.peopleops.dto.EmployeeResponseDTO;
+import com.peopleops.dto.SkillResponseDTO;
 import com.peopleops.enums.EmployeeStatus;
 import com.peopleops.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -82,5 +83,28 @@ public class EmployeeController {
             @RequestParam Long designationId) {
         EmployeeResponseDTO response = employeeService.promoteEmployee(id, designationId);
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Get skills possessed by employee")
+    @GetMapping("/{id}/skills")
+    public ResponseEntity<List<SkillResponseDTO>> getEmployeeSkills(@PathVariable Long id) {
+        return ResponseEntity.ok(employeeService.getEmployeeSkills(id));
+    }
+
+    @Operation(summary = "Assign skill to employee")
+    @PostMapping("/{id}/skills/{skillId}")
+    public ResponseEntity<List<SkillResponseDTO>> addSkillToEmployee(
+            @PathVariable Long id,
+            @PathVariable Long skillId) {
+        return ResponseEntity.ok(employeeService.addSkillToEmployee(id, skillId));
+    }
+
+    @Operation(summary = "Remove skill from employee")
+    @DeleteMapping("/{id}/skills/{skillId}")
+    public ResponseEntity<Void> removeSkillFromEmployee(
+            @PathVariable Long id,
+            @PathVariable Long skillId) {
+        employeeService.removeSkillFromEmployee(id, skillId);
+        return ResponseEntity.noContent().build();
     }
 }
