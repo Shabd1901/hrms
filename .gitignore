@@ -17,3 +17,8 @@ logs/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Internal prep & prompt docs
+docs/IDE_starter_prompt.md
+docs/ppt_content_script.md
+docs/presentation_prep.md
